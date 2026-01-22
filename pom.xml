@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>de.wwu.scdh.seed.xc</groupId>
+    <artifactId>seed-xc</artifactId>
+    <version>${revision}${changelist}</version>
+
+    <name>SEED XC</name>
+    <description>SEED XC is a Compiler for XSLT and XQuery based on Saxon</description>
+    <url>https://github.com/scdh/seed-xc</url>
+
+    <packaging>pom</packaging>
+
+    <modules>
+	<module>api</module>
+	<module>service</module>
+    </modules>
+
+    <developers>
+	<developer>
+	    <name>Christian Lück</name>
+	    <organization>SCDH, University of Münster</organization>
+	</developer>
+    </developers>
+
+    <organization>
+	<name>Service Center of Digital Humanities, ULB, University of Münster</name>
+	<url>https://www.uni-muenster.de/SCDH/</url>
+    </organization>
+
+    <licenses>
+	<license>
+	    <name>MIT License</name>
+	    <url>https://opensource.org/licenses/mit-license.php</url>
+	</license>
+    </licenses>
+
+    <scm>
+	<connection>scm:git:https://github.com/scdh/seed-xc.git</connection>
+	<developerConnection>scm:git:https://github.com/scdh/seed-xc.git</developerConnection>
+	<url>scm:git:https://github.com/scdh/seed-xc.git</url>
+	<tag>HEAD</tag>
+    </scm>
+
+    <properties>
+
+
+	<!-- for the gitlab maven registry -->
+	<distribution.url>${env.CI_API_V4_URL}/projects/${env.CI_PROJECT_ID}/packages/maven</distribution.url>
+
+	<compiler-plugin.version>3.14.1</compiler-plugin.version>
+	<maven.compiler.release>21</maven.compiler.release>
+	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+	<failsafe.useModulePath>false</failsafe.useModulePath>
+
+	<quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
+	<quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
+	<quarkus.platform.version>3.30.7</quarkus.platform.version>
+	<skipITs>true</skipITs>
+	<surefire-plugin.version>3.5.4</surefire-plugin.version>
+
+	<!-- service specific -->
+	<saxon.version>12.5</saxon.version>
+	<xmlresolver.version>4.5.1</xmlresolver.version>
+	<slf4j.version>2.0.6</slf4j.version>
+
+	<quarkus.native.native-image-xmx>8192m</quarkus.native.native-image-xmx>
+	<!-- enable docker layers with additional dependencies,
+             cf. https://quarkus.io/guides/container-image#multi-module-projects-and-layering
+        -->
+	<quarkus.bootstrap.workspace-discovery>true</quarkus.bootstrap.workspace-discovery>
+    </properties>
+
+
+    <dependencyManagement>
+	<dependencies>
+
+	    <dependency>
+		<groupId>${quarkus.platform.group-id}</groupId>
+		<artifactId>${quarkus.platform.artifact-id}</artifactId>
+		<version>${quarkus.platform.version}</version>
+		<type>pom</type>
+		<scope>import</scope>
+	    </dependency>
+
+	</dependencies>
+    </dependencyManagement>
+
+    <repositories>
+	<repository>
+	    <id>gitlab-maven</id>
+	    <url>${distribution.url}</url>
+	</repository>
+    </repositories>
+    <!-- get the build artifacts into the gitlab maven package registry -->
+    <distributionManagement>
+	<repository>
+	    <id>gitlab-maven</id>
+	    <url>${distribution.url}</url>
+	</repository>
+	<snapshotRepository>
+	    <id>gitlab-maven</id>
+	    <url>${distribution.url}</url>
+	</snapshotRepository>
+    </distributionManagement>
+
+    <build>
+	<plugins>
+
+	    <!-- This gives us the target quarkus:dev -->
+	    <plugin>
+		<groupId>${quarkus.platform.group-id}</groupId>
+		<artifactId>quarkus-maven-plugin</artifactId>
+		<version>${quarkus.platform.version}</version>
+		<!-- By not providing goals build etc. we exclude maven
+	             modules from being evaluated as quarkus services. The
+	             service module has to have this plugin, too. Helper
+		     libraries do not. -->
+	    </plugin>
+
+	    <plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-compiler-plugin</artifactId>
+		<version>${compiler-plugin.version}</version>
+		<configuration>
+		    <compilerArgs>
+			<arg>-parameters</arg>
+		    </compilerArgs>
+		    <!-- <annotationProcessorPaths> -->
+		    <!-- 	  <path> -->
+		    <!--       <groupId>org.projectlombok</groupId> -->
+		    <!--       <artifactId>lombok</artifactId> -->
+		    <!--       <version>${dependency.version.lombok}</version> -->
+		    <!-- 	  </path> -->
+		    <!-- 	  <path> -->
+		    <!--       <groupId>org.mapstruct</groupId> -->
+		    <!--       <artifactId>mapstruct-processor</artifactId> -->
+		    <!--       <version>${dependency.version.mapstruct}</version> -->
+		    <!-- 	  </path> -->
+		    <!-- </annotationProcessorPaths> -->
+		</configuration>
+	    </plugin>
+	    <plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-surefire-plugin</artifactId>
+		<version>${surefire-plugin.version}</version>
+		<configuration>
+		    <systemPropertyVariables>
+			<java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+			<maven.home>${maven.home}</maven.home>
+		    </systemPropertyVariables>
+		</configuration>
+	    </plugin>
+
+	    <plugin>
+		<groupId>org.codehaus.mojo</groupId>
+		<artifactId>flatten-maven-plugin</artifactId>
+		<version>1.5.0</version>
+		<configuration>
+		</configuration>
+		<executions>
+		    <!-- enable flattening -->
+		    <execution>
+			<id>flatten</id>
+			<phase>process-resources</phase>
+			<goals>
+			    <goal>flatten</goal>
+			</goals>
+		    </execution>
+		    <!-- ensure proper cleanup -->
+		    <execution>
+			<id>flatten.clean</id>
+			<phase>clean</phase>
+			<goals>
+			    <goal>clean</goal>
+			</goals>
+		    </execution>
+		</executions>
+	    </plugin>
+
+	</plugins>
+    </build>
+
+</project>
