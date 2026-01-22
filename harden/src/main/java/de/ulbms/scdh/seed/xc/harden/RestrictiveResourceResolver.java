@@ -12,6 +12,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.lib.Feature;
 
+import de.ulbms.scdh.seed.xc.harden.DenyingResourceResolver;
 
 /**
  * A resource resolver that chains together the FileURIResolver and

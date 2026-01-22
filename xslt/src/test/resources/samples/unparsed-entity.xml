@@ -1,0 +1,7 @@
+<!DOCTYPE test [
+<!NOTATION plaintext SYSTEM "text/plain">
+<!ENTITY passwd SYSTEM "secret.txt" NDATA plaintext>
+<!ELEMENT test (#PCDATA)>
+<!ATTLIST test source ENTITY #REQUIRED>
+]>
+<test source="passwd"/>
