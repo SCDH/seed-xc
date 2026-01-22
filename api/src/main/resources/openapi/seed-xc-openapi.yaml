@@ -96,8 +96,207 @@ components:
         text/plain:
           schema:
             type: string
-
-            
+  schemas:
+    parser:
+      description: How to parse the main input.
+      type: object
+      properties:
+        class:
+          description: Java name of the parser.
+          type: string
+        xinclude:
+          description: Whether or to parse the source xinclude-aware.
+          type: boolean
+    serializer:
+      description: How to serialize the output.
+      type: object
+      properties:
+        class:
+          description: Java name of the serializer.
+          type: string
+        method:
+          description: Serialization method, e.g. `xml`, `text`, `json`.
+          type: string
+        indent:
+          description: Whether or not the output is to be indented.
+          type: boolean
+    config:
+      description: Configuration for the transformation request.
+      type: object
+      properties:
+        parser:
+          $ref: '#/components/schemas/parser'
+        serializer:
+          $ref: '#/components/schemas/serializer'
+    runtimeParameters:
+      description: How the transformation is to be called, with a set of global parameters and optionally the initial callable (template or function) and the parameters for it.
+      type: object
+      properties:
+        globalParameters:
+          description: Global parameters passed to the transformation (stylesheet parameters).
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/parameterValue'
+        initialCall:
+          description: The resource to call initially for the transformation.
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              name:
+                description: QName of the initial resource to call.
+                type: string
+              type:
+                description: The type of the initially called resource, e.g. a template or a function.
+                type: string
+                enum:
+                  - function
+                  - template
+              parameters:
+                description: Parameters to be passed to the initially called resource.
+                type: object
+                additionalProperties:
+                  $ref: '#/components/schemas/parameterValue'
+              tunnelParameters:
+                description: QNames of the parameters that are tunnel parameters
+                type: array
+                items:
+                  type: string
+            required:
+              - name
+              - type
+    source:
+      description: URL of the XML source document to transform
+      type: string
+    transformationIDs:
+      type: array
+      items:
+        type: string
+    transformationId:
+      description: ID of the transformation
+      type: string
+    parameterValue:
+      description: A parameter value
+      type: string
+    transformationInfo:
+      description: Information about the transformation resource and its runtime parameters
+      type: object
+      properties:
+        ident:
+          description: Identifier of the transformation.
+          type: string
+        class:
+          description: The Java class of the transformation. This is evaluated by the service to create the transformation.
+          type: string
+        description:
+          description: A human readable description of the transformation.
+          type: string
+        requiresSource:
+          description: Whether or not the transformation requires a source document.
+          type: boolean
+        location:
+          description: URL where the transformation resource is located.
+          type: string
+        mediaType:
+          description: Mime-type of the transformed document.
+          type: string
+        libraries:
+          description: Library packages included by the transformation resource (by xsl:use-package). They must be provided in compilation order!
+          type: array
+          items:
+            type: object
+            properties:
+              location:
+                description: URL where the package is located.
+                type: string
+              asName:
+                description: A package name used instead of the one in the source code.
+                type: string
+              asVersion:
+                description: A package version used instead of the one in the source code.
+                type: string
+            required:
+              - location
+        parameterDescriptors:
+          description: Descriptors of global parameters of the transformation.
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/parameterDescriptor'
+        initialCallables:
+          description: Initial templates or functions with description
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              type:
+                description: The type of callable
+                type: string
+                enum:
+                  - template
+                  - function
+              description:
+                description: Human readable description of what the transformation does on starting when this is called.
+                type: string
+              parameters:
+                description: Descriptors of parameters.
+                type: object
+                additionalProperties:
+                  $ref: '#/components/schemas/parameterDescriptor'
+        parser:
+            $ref: '#/components/schemas/parser'
+        serializer:
+            $ref: '#/components/schemas/serializer'
+      required:
+        - class
+        - description
+        - location
+        - requiresSource
+    parameterDescriptor:
+      description: A description of the transformation parameter.
+      type: object
+      properties:
+        description:
+          description: A human readable description of the parameter.
+          type: string
+        type:
+          description: The data type of parameter values. Uses xs:*.
+          type: string
+        default:
+          description: Default value of this parameter.
+          type: string
+        required:
+          description: Whether or not the parameter is required.
+          type: boolean
+      required:
+        - description
+        - required
+    transformationMap:
+      description: A mapping of transformation IDs to transformation information. This is used to configure the service.
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/transformationInfo'
+    xsltParameterDetails:
+      description: "A description of parameters produced by the compiler. See [Saxon API](https://www.saxonica.com/documentation10/index.html#!javadoc/net.sf.saxon.s9api/XsltExecutable/ParameterDetails@getDeclaredItemType)"
+      type: object
+      additionalProperties:
+        type: object
+        properties:
+          occurrenceIndicator:
+            description: The declared cardinality of the parameter
+            type: string
+          itemType:
+            description: The declared type of the parameter
+            type: string
+          underlyingDeclaredType:
+            description: The underlying declared type
+            type: string
+          isRequired:
+            description: Whether the parameter is required (mandatory) or optional
+            type: boolean
+    error:
+      description: The error message.
+      type: string
+      format: binary
             
     
   
