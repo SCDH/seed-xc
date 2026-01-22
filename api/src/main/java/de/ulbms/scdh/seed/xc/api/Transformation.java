@@ -41,6 +41,21 @@ public interface Transformation {
     XsltParameterDetails getTransformationParameters();
 
     /**
+     * Returns a representation of the compiled stylesheet, in XML
+     * form, suitable for distribution and reloading.
+     */
+    byte[] export() throws UnsupportedOperationException;
+
+    /**
+     * Returns a representation of the compiled stylesheet for a
+     * particular target environment, in XML form, suitable for
+     * distribution and reloading.
+     * @param target the target environment (for example "EE" or "JS")
+     * @see net.sf.saxon.s9api.XsltExecutable@export
+     */
+    byte[] export(String target) throws UnsupportedOperationException;
+
+    /*
      * Transform the document given as {@param source}. Its String can be
      * set in order to get XML base property right. <code>null</code>
      * can be supplied as {@param systemId} but this means, that the

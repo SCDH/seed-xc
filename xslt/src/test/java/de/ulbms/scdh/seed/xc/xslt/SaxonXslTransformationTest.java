@@ -533,4 +533,17 @@ public class SaxonXslTransformationTest {
 	assertTrue(outputToString(output).startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?><html xmlns=\"http://www.w3.org/1999/xhtml\">"));
     }
 
+
+    @Test
+    public void testExportId() throws ConfigurationException {
+	transformation.setup(ID_CONFIG_REL);
+	assertThrows(UnsupportedOperationException.class, () -> transformation.export());
+    }
+
+    @Test
+    public void testExportIdForJS() throws ConfigurationException {
+	transformation.setup(ID_CONFIG_REL);
+	assertThrows(UnsupportedOperationException.class, () -> transformation.export("JS"));
+    }
+
 }

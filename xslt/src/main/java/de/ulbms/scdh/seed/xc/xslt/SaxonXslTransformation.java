@@ -222,6 +222,34 @@ public class SaxonXslTransformation implements Transformation {
      * {@inheritDoc}
      */
     @Override
+    public byte[] export() throws UnsupportedOperationException {
+	ByteArrayOutputStream output = new ByteArrayOutputStream();
+	try {
+	    this.executable.export(output);
+	    return output.toByteArray();
+	} catch (SaxonApiException e) {
+	    throw new UnsupportedOperationException(e);
+	}
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public byte[] export(String target) throws UnsupportedOperationException {
+	ByteArrayOutputStream output = new ByteArrayOutputStream();
+	try {
+	    this.executable.export(output, target);
+	    return output.toByteArray();
+	} catch (SaxonApiException e) {
+	    throw new UnsupportedOperationException(e);
+	}
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public byte[] transform(RuntimeParameters parameters, Config config, String systemId, InputStream sourceStream)
 	throws TransformationPreparationException, TransformationException {
 
