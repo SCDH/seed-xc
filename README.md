@@ -5,13 +5,6 @@
 
 ## Getting Started
 
-The following maven command is required in the first place and after
-each call of the `clean` target. It will download thefor the service.
-
-```shell
-./mvnw -Popenapi generate-sources
-```
-
 Build:
 
 ```shell
