@@ -65,6 +65,7 @@
 
 	<!-- service specific -->
 	<saxon.version>12.5</saxon.version>
+	<saxon.artifactId>Saxon-HE</saxon.artifactId>
 	<xmlresolver.version>4.5.1</xmlresolver.version>
 	<slf4j.version>2.0.6</slf4j.version>
 
