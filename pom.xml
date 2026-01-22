@@ -93,18 +93,18 @@
 
     <repositories>
 	<repository>
-	    <id>gitlab-maven</id>
+	    <id>seed-xc-maven</id>
 	    <url>${distribution.url}</url>
 	</repository>
     </repositories>
     <!-- get the build artifacts into the gitlab maven package registry -->
     <distributionManagement>
 	<repository>
-	    <id>gitlab-maven</id>
+	    <id>seed-xc-maven</id>
 	    <url>${distribution.url}</url>
 	</repository>
 	<snapshotRepository>
-	    <id>gitlab-maven</id>
+	    <id>seed-xc-maven</id>
 	    <url>${distribution.url}</url>
 	</snapshotRepository>
     </distributionManagement>
