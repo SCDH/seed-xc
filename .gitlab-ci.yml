@@ -1,0 +1,35 @@
+variables:
+  JAVA_DOCKER_IMAGE: "harbor.uni-muenster.de/proxy-docker/eclipse-temurin:21-alpine"
+  MAVEN_OPTS: >-
+    -Dhttps.protocols=TLSv1.2
+    -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
+    -Dorg.slf4j.simpleLogger.showDateTime=true
+    -Djava.awt.headless=true
+  MAVEN_CLI_OPTS: >-
+    --batch-mode
+    --errors
+    --fail-at-end
+    --show-version
+    --no-transfer-progress
+    -DinstallAtEnd=true
+    -DdeployAtEnd=true
+
+
+.release_rules_tag:
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^\d+.\d+.\d+/ # describe how your version tags look like!
+
+
+cache:
+  paths:
+    - $CI_PROJECT_DIR/.m2/repository
+
+stages:
+  - test
+
+
+verify:
+  stage: test
+  image: $JAVA_DOCKER_IMAGE
+  script:
+    - ./mvnw $MAVEN_CLI_OPTS -Popenapi clean verify
