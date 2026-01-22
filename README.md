@@ -1,10 +1,12 @@
-# SEED XC - XSLT/XQuery Compiler Service
+# SEED XC - XSLT/XQuery Compilation Service
+
+[OpenAPI specification](api/src/main/resources/openapi/seed-xc-openapi.yaml)
+
 
 ## Getting Started
 
 The following maven command is required in the first place and after
-each call of the `clean` target. It will download the [OpenAPI
-specification](/SCDH/apis/seed-xc-api) for the service.
+each call of the `clean` target. It will download thefor the service.
 
 ```shell
 ./mvnw -Popenapi generate-sources

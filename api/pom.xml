@@ -14,7 +14,7 @@
 
     <properties>
         <seed-xc-specs.version>0.0.1-rc2</seed-xc-specs.version>
-	<openapi-specs.dir>${project.build.directory}/generated-resources/openapi</openapi-specs.dir>
+	<openapi-specs.dir>${project.basedir}/src/main/resources/openapi</openapi-specs.dir>
 	<openapitools.version>7.18.0</openapitools.version>
     </properties>
     
@@ -159,41 +159,4 @@
 	</plugins>
     </build>
 
-    <profiles>
-	<profile>
-	    <id>openapi</id>
-	    <!--
-		The download-maven-plugin has some weired interference with quarkus-maven-plugin.
-		So we put it in this extra profile that needs to be run first.
-	    -->
-	    <build>
-		<plugins>
-
-		    <!-- download OpenAPI specs -->
-		    <plugin>
-			<groupId>io.github.download-maven-plugin</groupId>
-			<artifactId>download-maven-plugin</artifactId>
-			<version>2.0.0</version>
-			<executions>
-			    <execution>
-				<id>download-facade-openapi-specs</id>
-				<!-- this has to precede the OA generation which is in generate-sources -->
-				<phase>initialize</phase>
-				<goals>
-				    <goal>wget</goal>
-				</goals>
-				<configuration>
-				    <url>https://zivgitlab.uni-muenster.de/api/v4/projects/10748/packages/generic/scdh-apis/${seed-xc-specs.version}/seed-xc-openapi.yaml</url>
-				    <unpack>false</unpack>
-				    <outputDirectory>${openapi-specs.dir}</outputDirectory>
-				</configuration>
-			    </execution>
-			</executions>
-		    </plugin>
-
-		</plugins>
-	    </build>
-	</profile>
-    </profiles>
-    
 </project>
