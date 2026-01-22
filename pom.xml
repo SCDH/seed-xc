@@ -15,6 +15,7 @@
 
     <modules>
 	<module>api</module>
+	<module>harden</module>
 	<module>service</module>
     </modules>
 
