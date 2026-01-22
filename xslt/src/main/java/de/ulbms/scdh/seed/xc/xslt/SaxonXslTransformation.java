@@ -44,6 +44,9 @@ import net.sf.saxon.type.StringConverter;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.type.BuiltInType;
+import net.sf.saxon.type.SchemaType;
+import net.sf.saxon.type.BuiltInAtomicType;
 
 import org.apache.xerces.parsers.SAXParser;
 
@@ -61,6 +64,7 @@ import de.ulbms.scdh.seed.xc.api.Transformation;
 import de.ulbms.scdh.seed.xc.api.ConfigurationException;
 import de.ulbms.scdh.seed.xc.api.TransformationException;
 import de.ulbms.scdh.seed.xc.api.TransformationPreparationException;
+import de.ulbms.scdh.seed.xc.api.TypedParameter;
 
 import de.ulbms.scdh.seed.xc.harden.RestrictiveResourceResolver;
 import de.ulbms.scdh.seed.xc.harden.RestrictiveFileOnlyResolver;
@@ -131,6 +135,34 @@ public class SaxonXslTransformation implements Transformation {
 	    LOG.debug("Compiling '{}' ...", stylesheet.getSystemId());
 	    XsltCompiler compiler = processor.newXsltCompiler();
 	    compiler.setResourceResolver(xsltResourceResolver);
+	    // set compile time parameters
+	    if (transformationInfo.getCompileTimeParameters() != null) {
+		ConversionRules conversionRules = processor.getUnderlyingConfiguration().getConversionRules();
+		StringConverter stringToStringConverter = new StringConverter.StringToString();
+		for (TypedParameter compileTimeParam : transformationInfo.getCompileTimeParameters()) {
+		    LOG.debug("setting compile time parameter {}={}", compileTimeParam.getName(), compileTimeParam.getValue());
+		    if (compileTimeParam.getType() == null) {
+			// assume xs:string type
+			this.setAtomicParameter(compiler, compileTimeParam, stringToStringConverter);
+		    } else {
+			SchemaType schemaType = BuiltInType.getSchemaTypeByLocalName(compileTimeParam.getType());
+			if (schemaType == null) {
+			    // try xs:string type
+			    this.setAtomicParameter(compiler, compileTimeParam, stringToStringConverter);
+			} else if (schemaType.isAtomicType()) {
+			    BuiltInAtomicType atomicType = (BuiltInAtomicType) schemaType;
+			    StringConverter converter = atomicType.getStringConverter(conversionRules);
+			    if (converter == null) {
+				LOG.error("failed to get converter for compile time parameter {} of type {}", compileTimeParam.getName(), compileTimeParam.getType());
+			    } else {
+				this.setAtomicParameter(compiler, compileTimeParam, converter);
+			    }
+			} else {
+			    // TODO: convert BuildinListType
+			}
+		    }
+		}
+	    }
 	    // compile and import packages first
 	    if (transformationInfo.getLibraries() != null) {
 		for(TransformationInfoLibrariesInner library : transformationInfo.getLibraries()) {
@@ -170,6 +202,17 @@ public class SaxonXslTransformation implements Transformation {
 	LOG.debug("Done setting up SaxonXslTransformation with identifier '{}'.",
 		  transformationInfo.getIdent());
     }
+
+    private void setAtomicParameter(XsltCompiler compiler, TypedParameter parameter, StringConverter converter) {
+	try {
+	    AtomicValue atomicValue = converter.convertString(StringView.of(parameter.getValue())).asAtomic();
+	    XdmAtomicValue value = XdmAtomicValue.makeAtomicValue(atomicValue);
+	    compiler.setParameter(QName.fromClarkName(parameter.getName()), value);
+	} catch (ValidationException e) {
+	    LOG.error("failed to convert compile time parameter {}: {}", parameter.getName(), e.getMessage());
+	}
+    }
+
 
     /**
      * {@inheritDoc}

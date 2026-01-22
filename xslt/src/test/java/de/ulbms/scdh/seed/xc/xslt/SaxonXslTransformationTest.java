@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Disabled;
@@ -27,6 +28,7 @@ import de.ulbms.scdh.seed.xc.api.RuntimeParameters;
 import de.ulbms.scdh.seed.xc.api.XsltParameterDetails;
 import de.ulbms.scdh.seed.xc.api.Config;
 import de.ulbms.scdh.seed.xc.api.Parser;
+import de.ulbms.scdh.seed.xc.api.TypedParameter;
 import de.ulbms.scdh.seed.xc.harden.DenyingResourceResolver;
 import de.ulbms.scdh.seed.xc.harden.FileURIResolver;
 import de.ulbms.scdh.seed.xc.harden.RestrictiveFileOnlyResolver;
@@ -48,6 +50,8 @@ public class SaxonXslTransformationTest {
     private static final String IMPORTING_ILLEGAL_XSL = Paths.get("xsl", "importing-illegal.xsl").toFile().toString();
 
     private static final String PARAM_INTEGER_XSL = Paths.get("xsl", "param-integer.xsl").toFile().toString();
+
+    private static final String PARAM_INTEGER_STATIC_XSL = Paths.get("xsl", "param-integer-static.xsl").toFile().toString();
 
     private static final String UNPARSED_TEXT_XSL = Paths.get("xsl", "unparsed-text.xsl").toFile().toString();
 
@@ -163,6 +167,19 @@ public class SaxonXslTransformationTest {
 	// globalParams.put("times", "3");
 	params.putGlobalParametersItem("times", "3");
 	PARAM_INTEGER_PARAMS = params;
+    }
+
+    public static final TransformationInfo PARAM_INTEGER_STATIC_CONFIG;
+    static {
+	TransformationInfo info = new TransformationInfo();
+	info.setPropertyClass(SaxonXslTransformation.TRANSFORMATION_TYPE);
+	info.setRequiresSource(false);
+	info.setLocation(PARAM_INTEGER_STATIC_XSL);
+	TypedParameter p1 = new TypedParameter("times", "3");
+	p1.setType("integer");
+	List<TypedParameter> ctimeParams = List.of(p1);;
+	info.setCompileTimeParameters(ctimeParams);
+	PARAM_INTEGER_STATIC_CONFIG = info;
     }
 
     public static final RuntimeParameters PARAM_URI_PARAMS;
@@ -339,6 +356,16 @@ public class SaxonXslTransformationTest {
 	transformation.setup(PARAM_INTEGER_CONFIG);
 	assertThrows(TransformationException.class, () -> transformation.transform(PARAM_INTEGER_PARAMS, null, null));
     }
+
+    @Test
+    public void testTransformParamIntegerStaticTransform()
+	throws IOException, ConfigurationException, TransformationPreparationException, TransformationException {
+	transformation.setup(PARAM_INTEGER_STATIC_CONFIG);
+	FileInputStream helloStream = new FileInputStream(helloXml);
+	output = transformation.transform(null, null, helloXml.toString(), null);
+	assertEquals(TIMES_3, outputToString(output));
+    }
+
 
     // With this test we make sure, that unparsed entities are not
     // expanded automatically by the XSLT processor or the underlying

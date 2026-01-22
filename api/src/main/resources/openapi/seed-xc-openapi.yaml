@@ -178,6 +178,22 @@ components:
     parameterValue:
       description: A parameter value
       type: string
+    typedParameter:
+      description: A parameter value
+      type: object
+      required:
+        - name
+        - value
+      properties:
+        name:
+          type: string
+          description: The parameter name.
+        value:
+          type: string
+          description: The parameter value.
+        type:
+          type: string
+          description: The local name of the parameter type. Write 'integer' instead of 'xs:integer'!
     transformationInfo:
       description: Information about the transformation resource and its runtime parameters
       type: object
@@ -200,6 +216,11 @@ components:
         mediaType:
           description: Mime-type of the transformed document.
           type: string
+        compileTimeParameters:
+          description: Static parameters passed at compile time.
+          type: array
+          items:
+            $ref: '#/components/schemas/typedParameter'
         libraries:
           description: Library packages included by the transformation resource (by xsl:use-package). They must be provided in compilation order!
           type: array
