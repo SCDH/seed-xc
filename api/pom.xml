@@ -74,8 +74,8 @@
 			    <configOptions>
 				<library>quarkus</library>
 				<useJakartaEe>true</useJakartaEe>
-				<apiPackage>de.ulbms.scdh.dts.service.facade.api</apiPackage>
-				<modelPackage>de.ulbms.scdh.dts.service.facade.model</modelPackage>
+				<apiPackage>de.ulbms.scdh.seed.xc.api</apiPackage>
+				<modelPackage>de.ulbms.scdh.seed.xc.api</modelPackage>
 				<dateLibrary>java8</dateLibrary>
 				<hideGenerationTimestamp>true</hideGenerationTimestamp>
 				<disallowAdditionalPropertiesIfNotPresent>false</disallowAdditionalPropertiesIfNotPresent>
