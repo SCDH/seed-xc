@@ -63,6 +63,7 @@
 	<quarkus.platform.version>3.30.7</quarkus.platform.version>
 	<skipITs>true</skipITs>
 	<surefire-plugin.version>3.5.4</surefire-plugin.version>
+	<smallrye-jandex-plugin.version>3.5.3</smallrye-jandex-plugin.version>
 
 	<!-- service specific -->
 	<saxon.version>12.5</saxon.version>

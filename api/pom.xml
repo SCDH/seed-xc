@@ -117,21 +117,24 @@
 	    </plugin>
 
 	    <!-- index the beans in this module, see
-		 https://quarkus.io/guides/cdi-reference#how-to-generate-a-jandex-index
+	         https://quarkus.io/guides/cdi-reference#how-to-generate-a-jandex-index
+	         Without indexing the interfaces, the implemented
+	         routes won't show up (at least when we don't want to
+	         repeat all the decorators and annotations)!
 	    -->
-	    <!-- <plugin> -->
-	    <!-- 	<groupId>io.smallrye</groupId> -->
-	    <!-- 	<artifactId>jandex-maven-plugin</artifactId> -->
-	    <!-- 	<version>${smallrye-jandex-plugin.version}</version> -->
-	    <!-- 	<executions> -->
-	    <!-- 	    <execution> -->
-	    <!-- 		<id>make-index</id> -->
-	    <!-- 		<goals> -->
-	    <!-- 		    <goal>jandex</goal> -->
-	    <!-- 		</goals> -->
-	    <!-- 	    </execution> -->
-	    <!-- 	</executions> -->
-	    <!-- </plugin> -->
+	    <plugin>
+		<groupId>io.smallrye</groupId>
+		<artifactId>jandex-maven-plugin</artifactId>
+		<version>${smallrye-jandex-plugin.version}</version>
+		<executions>
+		    <execution>
+			<id>make-index</id>
+			<goals>
+			    <goal>jandex</goal>
+			</goals>
+		    </execution>
+		</executions>
+	    </plugin>
 
 	    <!-- flatten the pom -->
 	    <plugin>
