@@ -7,6 +7,7 @@ import java.util.Map;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.lang.reflect.Constructor;
+import java.util.zip.ZipFile;
 
 import jakarta.inject.Inject;
 import jakarta.enterprise.context.Dependent;
@@ -68,6 +69,7 @@ import de.ulbms.scdh.seed.xc.api.TypedParameter;
 
 import de.ulbms.scdh.seed.xc.harden.RestrictiveResourceResolver;
 import de.ulbms.scdh.seed.xc.harden.RestrictiveFileOnlyResolver;
+import de.ulbms.scdh.seed.xc.harden.ZipFileURIResolver;
 
 
 /**
@@ -96,6 +98,9 @@ public class SaxonXslTransformation implements Transformation {
     protected RestrictiveFileOnlyResolver xsltResourceResolver;
 
     @Inject
+    protected ZipFileURIResolver zipResourceResolver;
+
+    @Inject
     protected RestrictiveResourceResolver documentResourceResolver;
 
     @Inject
@@ -114,6 +119,34 @@ public class SaxonXslTransformation implements Transformation {
 	request.nature = ResourceRequest.XSLT_NATURE;
 	return request;
     }
+
+
+    public void setup(ZipFile zipFile, String stylesheetPath, String saxonConfigPath) throws ConfigurationException {
+	try {
+	    Processor processor;
+	    if (saxonConfigPath != null) {
+		InputStream saxonConfigInputStream = Utils.fromZip(zipFile, saxonConfigPath);
+		processor = new Processor(new StreamSource(saxonConfigInputStream, saxonConfigPath));
+	    } else {
+		LOG.info("using default processor");
+		processor = this.processor;
+	    }
+	    // compile stylesheet to an executable that can be used
+	    // for an abitrary number of transformations
+	    LOG.debug("Compiling '{}' ...", stylesheetPath);
+	    XsltCompiler compiler = processor.newXsltCompiler();
+	    // setup the compiler's resource resolver so that it can read files from the zip
+	    zipResourceResolver.setup(zipFile, null);
+	    compiler.setResourceResolver(zipResourceResolver);
+	    // compile
+	    InputStream stylesheetInputStream = Utils.fromZip(zipFile, stylesheetPath);
+	    this.executable = compiler.compile(new StreamSource(stylesheetInputStream));
+	} catch (SaxonApiException e) {
+	    LOG.error("cannot compile stylesheet: {}", e.getMessage());
+	    throw new ConfigurationException(e);
+	}
+    }
+
 
     /**
      * {@inheritDoc}
