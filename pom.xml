@@ -76,6 +76,9 @@
              cf. https://quarkus.io/guides/container-image#multi-module-projects-and-layering
         -->
 	<quarkus.bootstrap.workspace-discovery>true</quarkus.bootstrap.workspace-discovery>
+
+	<saxon-config.file>${session.executionRootDirectory}/service/src/resources/saxon-config.xml</saxon-config.file>
+	<file-uri-resolver.path>${session.executionRootDirectory}</file-uri-resolver.path>
     </properties>
 
 

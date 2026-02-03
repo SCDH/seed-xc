@@ -34,7 +34,7 @@ public class ConfiguredProcessor {
      * This static method produces a {@link Processor} when the
      * container needs it for injection. It looks up all locations for
      * Saxon configuration files declared in
-     * <code>de.wwu.scdh.seed.xml.transform.saxon.ConfiguredProcessor.saxonConfigLocations</code>.
+     * <code>de.ulbms.scdh.seed.xc.xslt.ConfiguredProcessor.saxonConfigLocations</code>.
      */
     @Produces
     public static Processor createConfiguredProcessor

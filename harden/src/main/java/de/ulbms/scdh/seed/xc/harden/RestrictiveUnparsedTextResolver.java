@@ -65,9 +65,9 @@ public class RestrictiveUnparsedTextResolver extends StandardUnparsedTextResolve
     // }
 
     public RestrictiveUnparsedTextResolver
-	(@ConfigProperty(name = "de.wwu.scdh.seed.xml.transform.saxon.harden.FileURIResolver.path", defaultValue = "/")
+	(@ConfigProperty(name = "de.ulbms.scdh.seed.xc.harden.FileURIResolver.path", defaultValue = "/")
 	 String path,
-	 @ConfigProperty(name = "de.wwu.scdh.seed.xml.transform.ConfiguredTransformationMap.configLocations",
+	 @ConfigProperty(name = "de.ulbms.scdh.seed.xc.harden.ConfiguredTransformationMap.configLocations",
 			 defaultValue = "transformer-config.yaml")
 	 String baseUri) throws ConfigurationException {
 
