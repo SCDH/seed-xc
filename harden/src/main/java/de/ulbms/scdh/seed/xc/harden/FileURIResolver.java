@@ -56,8 +56,7 @@ public class FileURIResolver implements ResourceResolver {
     public FileURIResolver
 	(@ConfigProperty(name = "de.ulbms.scdh.seed.xc.harden.FileURIResolver.path", defaultValue = "/")
 	 String path,
-	 @ConfigProperty(name = "de.ulbms.scdh.seed.xc.harden.ConfiguredTransformationMap.configLocations",
-			 defaultValue = "transformer-config.yaml")
+	 @ConfigProperty(name = "de.ulbms.scdh.seed.xc.harden.FileURIResolver.baseUri", defaultValue = "/")
 	 String baseUri)
 	throws ConfigurationException {
 

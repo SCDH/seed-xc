@@ -79,6 +79,7 @@
 
 	<saxon-config.file>${session.executionRootDirectory}/service/src/resources/saxon-config.xml</saxon-config.file>
 	<file-uri-resolver.path>${session.executionRootDirectory}</file-uri-resolver.path>
+	<file-uri-resolver.baseUri>${session.executionRootDirectory}</file-uri-resolver.baseUri>
     </properties>
 
 
