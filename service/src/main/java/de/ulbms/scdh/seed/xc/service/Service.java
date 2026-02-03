@@ -19,19 +19,39 @@ import de.ulbms.scdh.seed.xc.api.DefaultApi;
 import de.ulbms.scdh.seed.xc.xslt.SaxonXslTransformation;
 
 
+/**
+ * An implementation of the SEED XC compiler's default REST API as
+ * declared in the OpenAPI spec.
+ */
 @RequestScoped
 public class Service implements DefaultApi {
 
-    public static final Logger LOG = LoggerFactory.getLogger(Service.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Service.class);
 
+    /**
+     * As the {@link Service} class is request scoped, the injected
+     * {@link SaxonXsltransformation} with dependend scope is request
+     * scoped, too.
+     */
     @Inject
     SaxonXslTransformation transformation;
 
+    /**
+     * Binds the transformation ID to a compiled transformation
+     * resource. This only makes sense on a service that offers
+     * transformation, not only compilation. Since the implementation
+     * at hand does not offer transformation routes, it returns 501.
+     */
     @Override
     public Response bind(String transformationResource, String transformationId) {
 	return Response.status(501).build();
     }
 
+    /**
+     * Compile stylesheet given in a zip file. This is suitable for
+     * stylesheets with imports and includes packed altogether in the
+     * same zip file.
+     */
     @Override
     public Response compileZip(String stylesheet, File body) {
 	try {
