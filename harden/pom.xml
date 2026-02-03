@@ -47,19 +47,19 @@
 	    <!-- index the beans in this module, see
 		 https://quarkus.io/guides/cdi-reference#how-to-generate-a-jandex-index
 	    -->
-	    <!-- <plugin> -->
-	    <!--    <groupId>io.smallrye</groupId> -->
-	    <!--    <artifactId>jandex-maven-plugin</artifactId> -->
-	    <!--    <version>${smallrye-jandex-plugin.version}</version> -->
-	    <!--    <executions> -->
-            <!--       <execution> -->
-	    <!-- 	  <id>make-index</id> -->
-	    <!-- 	  <goals> -->
-	    <!-- 	     <goal>jandex</goal> -->
-	    <!-- 	  </goals> -->
-            <!--       </execution> -->
-	    <!--    </executions> -->
-	    <!-- </plugin> -->
+	    <plugin>
+	       <groupId>io.smallrye</groupId>
+	       <artifactId>jandex-maven-plugin</artifactId>
+	       <version>${smallrye-jandex-plugin.version}</version>
+	       <executions>
+                  <execution>
+		  <id>make-index</id>
+		  <goals>
+		     <goal>jandex</goal>
+		  </goals>
+                  </execution>
+	       </executions>
+	    </plugin>
 
             <plugin>
 		<groupId>org.apache.maven.plugins</groupId>
