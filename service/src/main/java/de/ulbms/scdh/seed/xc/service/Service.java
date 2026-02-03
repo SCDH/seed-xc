@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipException;
 import java.io.IOException;
+import java.lang.UnsupportedOperationException;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
@@ -22,8 +23,8 @@ public class Service implements DefaultApi {
 
     public static final Logger LOG = LoggerFactory.getLogger(Service.class);
 
-    // @Inject
-    // SaxonXslTransformation transformation;
+    @Inject
+    SaxonXslTransformation transformation;
 
     @Override
     public Response bind(String transformationResource, String transformationId) {
@@ -34,20 +35,23 @@ public class Service implements DefaultApi {
     public Response compileZip(String stylesheet, File body) {
 	try {
 	    ZipFile zipFile = new ZipFile(body);
-
-	    // transformation.setup(zipFile, stylesheet, null);
-
-	    return Response.ok().build();
-
-	// } catch (ConfigurationException e) {
-	//     LOG.error("compilation failed: {}", e.getMessage());
-	//     return Response.status(404, "cannot read zip file: " + e.getMessage()).build();
+	    // compile
+	    transformation.setup(zipFile, stylesheet, null);
+	    // export
+	    byte[] out = transformation.export("JS");
+	    return Response.ok(out).build();
+	} catch (UnsupportedOperationException e) {
+	    LOG.error("not supported: {}", e.getMessage());
+	    return Response.status(Response.Status.NOT_IMPLEMENTED.getStatusCode(), e.getMessage()).build();
+	} catch (ConfigurationException e) {
+	    LOG.error("compilation failed: {}", e.getMessage());
+	    return Response.status(Response.Status.NOT_FOUND.getStatusCode(), "compilation failed:" + e.getMessage()).build();
 	} catch (ZipException e) {
 	    LOG.error("failed to read zip file: {}", e.getMessage());
-	    return Response.status(400, "cannot read zip file: " + e.getMessage()).build();
+	    return Response.status(Response.Status.BAD_REQUEST.getStatusCode(), "cannot read zip file: " + e.getMessage()).build();
 	} catch (IOException e) {
 	    LOG.error("IOException while reading zip file: {}", e.getMessage());
-	    return Response.status(422, "cannot read zip file: " + e.getMessage()).build();
+	    return Response.status(Response.Status.BAD_REQUEST.getStatusCode(), "cannot read zip file: " + e.getMessage()).build();
 	}
     }
 }
