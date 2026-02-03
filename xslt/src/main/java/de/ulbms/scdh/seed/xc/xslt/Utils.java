@@ -27,7 +27,7 @@ public class Utils {
 	    return zipFile.getInputStream(zipEntry);
 	} catch (NullPointerException e) {
 	    LOG.error("file {} not found in zip package", path);
-	    throw new ConfigurationException(e);
+	    throw new ConfigurationException("file not found in zip package: " + path);
 	} catch (Exception e) {
 	    LOG.error("cannot extract file {} from zip package: {}", path, e.getMessage());
 	    throw new ConfigurationException(e);
