@@ -9,6 +9,7 @@ import java.lang.UnsupportedOperationException;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
 import jakarta.enterprise.context.RequestScoped;
+import org.jboss.resteasy.reactive.RestResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,16 +43,25 @@ public class Service implements DefaultApi {
 	    return Response.ok(out).build();
 	} catch (UnsupportedOperationException e) {
 	    LOG.error("not supported: {}", e.getMessage());
-	    return Response.status(Response.Status.NOT_IMPLEMENTED.getStatusCode(), e.getMessage()).build();
+	    // we use RestResponse because it makes the error message occur in response body
+	    RestResponse<String> response =
+		RestResponse.status(Response.Status.NOT_IMPLEMENTED, e.getMessage());
+	    return response.toResponse();
 	} catch (ConfigurationException e) {
 	    LOG.error("compilation failed: {}", e.getMessage());
-	    return Response.status(Response.Status.NOT_FOUND.getStatusCode(), "compilation failed:" + e.getMessage()).build();
+	    RestResponse<String> response =
+		RestResponse.status(Response.Status.NOT_FOUND, "compilation failed:" + e.getMessage());
+	    return response.toResponse();
 	} catch (ZipException e) {
 	    LOG.error("failed to read zip file: {}", e.getMessage());
-	    return Response.status(Response.Status.BAD_REQUEST.getStatusCode(), "cannot read zip file: " + e.getMessage()).build();
+	    RestResponse<String> response =
+		RestResponse.status(Response.Status.BAD_REQUEST, "cannot read zip file: " + e.getMessage());
+	    return response.toResponse();
 	} catch (IOException e) {
 	    LOG.error("IOException while reading zip file: {}", e.getMessage());
-	    return Response.status(Response.Status.BAD_REQUEST.getStatusCode(), "cannot read zip file: " + e.getMessage()).build();
+	    RestResponse<String> response =
+		RestResponse.status(Response.Status.BAD_REQUEST, "cannot read zip file: " + e.getMessage());
+	    return response.toResponse();
 	}
     }
 }
