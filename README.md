@@ -20,3 +20,21 @@ Run dev server:
 Dev-Server will listen on http://localhost:8080
 
 
+## Exporting compiled XSLT Stylesheets
+
+The service can return compiled XSLT stylesheets in SEF format,
+provided, that the instance of the service has a Saxon Enterprise
+Edition License.
+
+Copy this license to `/etc/licenses/saxon-license.lic`.
+
+Then tell the instance to use the EE Saxon configuration that uses
+this license at startup.
+
+dev server:
+
+```shell
+./mvnw -Dde.ulbms.scdh.seed.xc.xslt.ConfiguredProcessor.saxonConfigLocations=$(realpath service/src/main/resources/saxon-config-ee.xml) quarkus:dev
+```
+
+
