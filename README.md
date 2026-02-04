@@ -38,3 +38,13 @@ dev server:
 ```
 
 
+curl example with sample zip from this project:
+
+```shell
+curl -X 'POST' \
+	 'http://localhost:8080/xslc/zip/xsl%2Fid.xsl' \
+	 -H 'accept: */*' \
+	 -H 'Content-Type: application/zip' \
+	 --data-binary '@harden/src/test/resources/xsl.zip' \
+	 -i
+```
