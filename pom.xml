@@ -66,10 +66,10 @@
 	<smallrye-jandex-plugin.version>3.5.3</smallrye-jandex-plugin.version>
 
 	<!-- service specific -->
-	<saxon.version>12.5</saxon.version>
-	<saxon.artifactId>Saxon-HE</saxon.artifactId>
 	<xmlresolver.version>4.5.1</xmlresolver.version>
 	<slf4j.version>2.0.6</slf4j.version>
+	<saxon.version>12.2</saxon.version>
+	<saxon.artifactId>Saxon-HE</saxon.artifactId>
 
 	<quarkus.native.native-image-xmx>8192m</quarkus.native.native-image-xmx>
 	<!-- enable docker layers with additional dependencies,
@@ -77,9 +77,10 @@
         -->
 	<quarkus.bootstrap.workspace-discovery>true</quarkus.bootstrap.workspace-discovery>
 
-	<saxon-config.file>${session.executionRootDirectory}/service/src/resources/saxon-config.xml</saxon-config.file>
+	<saxon-config.file>${session.executionRootDirectory}/service/src/main/resources/saxon-config.xml</saxon-config.file>
 	<file-uri-resolver.path>${session.executionRootDirectory}</file-uri-resolver.path>
 	<file-uri-resolver.baseUri>${session.executionRootDirectory}</file-uri-resolver.baseUri>
+
     </properties>
 
 
@@ -101,6 +102,10 @@
 	<repository>
 	    <id>seed-xc-maven</id>
 	    <url>${distribution.url}</url>
+	</repository>
+	<repository>
+	    <id>saxonica</id>
+	    <url>https://maven.saxonica.com/maven/</url>
 	</repository>
     </repositories>
     <!-- get the build artifacts into the gitlab maven package registry -->

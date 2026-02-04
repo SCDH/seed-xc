@@ -3,7 +3,8 @@
      and adapted.
 -->
 <configuration xmlns="http://saxon.sf.net/ns/configuration"
-               edition="HE"
+               edition="EE"
+	       licenseFileLocation="/etc/licenses/saxon-license.lic"
                label="Hardened configuration">
   <global
     allowedProtocols="http,https,ftp,ftps"

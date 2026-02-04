@@ -135,6 +135,7 @@ public class SaxonXslTransformation implements Transformation {
 	    // for an abitrary number of transformations
 	    LOG.debug("Compiling '{}' ...", stylesheetPath);
 	    XsltCompiler compiler = processor.newXsltCompiler();
+	    compiler.setJustInTimeCompilation(false);
 	    // setup the compiler's resource resolver so that it can read files from the zip
 	    zipResourceResolver.setup(zipFile, null);
 	    compiler.setResourceResolver(zipResourceResolver);
@@ -167,6 +168,7 @@ public class SaxonXslTransformation implements Transformation {
 	    // for an abitrary number of transformations
 	    LOG.debug("Compiling '{}' ...", stylesheet.getSystemId());
 	    XsltCompiler compiler = processor.newXsltCompiler();
+	    compiler.setJustInTimeCompilation(false);
 	    compiler.setResourceResolver(xsltResourceResolver);
 	    // set compile time parameters
 	    if (transformationInfo.getCompileTimeParameters() != null) {

@@ -54,6 +54,11 @@
             <artifactId>rest-assured</artifactId>
             <scope>test</scope>
         </dependency>
+	<dependency>
+	    <groupId>com.saxonica</groupId>
+	    <artifactId>Saxon-EE</artifactId>
+	    <version>${saxon.version}</version>
+	</dependency>
     </dependencies>
 
     <build>
@@ -70,6 +75,27 @@
 	</resources>
 
 	<plugins>
+
+	    <!-- <plugin> -->
+	    <!-- 	<groupId>io.github.download-maven-plugin</groupId> -->
+	    <!-- 	<artifactId>download-maven-plugin</artifactId> -->
+	    <!-- 	<version>2.0.0</version> -->
+	    <!-- 	<executions> -->
+	    <!-- 	    <execution> -->
+	    <!-- 		<id>SaxonEE</id> -->
+	    <!-- 		<phase>generate-sources</phase> -->
+	    <!-- 		<goals> -->
+	    <!-- 		    <goal>wget</goal> -->
+	    <!-- 		</goals> -->
+	    <!-- 		<configuration> -->
+	    <!-- 		    <url>https://downloads.saxonica.com/SaxonJ/${saxon-ee.version-url-path}.zip</url> -->
+	    <!-- 		    <unpack>true</unpack> -->
+	    <!-- 		    <outputDirectory>${project.build.directory}/lib</outputDirectory> -->
+	    <!-- 		</configuration> -->
+	    <!-- 	    </execution> -->
+	    <!-- 	</executions> -->
+	    <!-- </plugin> -->
+
             <plugin>
                 <groupId>${quarkus.platform.group-id}</groupId>
                 <artifactId>quarkus-maven-plugin</artifactId>
