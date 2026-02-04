@@ -77,7 +77,7 @@
         -->
 	<quarkus.bootstrap.workspace-discovery>true</quarkus.bootstrap.workspace-discovery>
 
-	<saxon-config.file>${session.executionRootDirectory}/service/src/main/resources/saxon-config.xml</saxon-config.file>
+	<saxon-config.file>${session.executionRootDirectory}/service/src/main/resources/saxon-config-he.xml</saxon-config.file>
 	<file-uri-resolver.path>${session.executionRootDirectory}</file-uri-resolver.path>
 	<file-uri-resolver.baseUri>${session.executionRootDirectory}</file-uri-resolver.baseUri>
 
