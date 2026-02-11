@@ -28,7 +28,7 @@ public class RestrictiveResourceResolver extends ChainedResourceResolver {
      * does not get called.
      */
     public RestrictiveResourceResolver() {
-	super(new DenyingResourceResolver(), new DenyingResourceResolver());
+    super(new DenyingResourceResolver(), new DenyingResourceResolver());
     }
 
     /**
@@ -36,9 +36,9 @@ public class RestrictiveResourceResolver extends ChainedResourceResolver {
      */
     @Inject
     public RestrictiveResourceResolver
-    	(@Context FileURIResolver fileResourceResolver,
-	 @Context Processor processor) {
-	super(fileResourceResolver, (ResourceResolver) processor.getConfigurationProperty(Feature.RESOURCE_RESOLVER));
+        (@Context FileURIResolver fileResourceResolver,
+     @Context Processor processor) {
+    super(fileResourceResolver, (ResourceResolver) processor.getConfigurationProperty(Feature.RESOURCE_RESOLVER));
     }
 
 }

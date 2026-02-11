@@ -44,7 +44,7 @@ public class Service implements DefaultApi {
      */
     @Override
     public Response bind(String transformationResource, String transformationId) {
-	return Response.status(501).build();
+    return Response.status(501).build();
     }
 
     /**
@@ -54,34 +54,34 @@ public class Service implements DefaultApi {
      */
     @Override
     public Response compileZip(String stylesheet, File body) {
-	try {
-	    ZipFile zipFile = new ZipFile(body);
-	    // compile
-	    transformation.setup(zipFile, stylesheet, null);
-	    // export
-	    byte[] out = transformation.export("JS");
-	    return Response.ok(out).build();
-	} catch (UnsupportedOperationException e) {
-	    LOG.error("not supported: {}", e.getMessage());
-	    // we use RestResponse because it makes the error message occur in response body
-	    RestResponse<String> response =
-		RestResponse.status(Response.Status.NOT_IMPLEMENTED, e.getMessage());
-	    return response.toResponse();
-	} catch (ConfigurationException e) {
-	    LOG.error("compilation failed: {}", e.getMessage());
-	    RestResponse<String> response =
-		RestResponse.status(Response.Status.NOT_FOUND, "compilation failed:" + e.getMessage());
-	    return response.toResponse();
-	} catch (ZipException e) {
-	    LOG.error("failed to read zip file: {}", e.getMessage());
-	    RestResponse<String> response =
-		RestResponse.status(Response.Status.BAD_REQUEST, "cannot read zip file: " + e.getMessage());
-	    return response.toResponse();
-	} catch (IOException e) {
-	    LOG.error("IOException while reading zip file: {}", e.getMessage());
-	    RestResponse<String> response =
-		RestResponse.status(Response.Status.BAD_REQUEST, "cannot read zip file: " + e.getMessage());
-	    return response.toResponse();
-	}
+    try {
+        ZipFile zipFile = new ZipFile(body);
+        // compile
+        transformation.setup(zipFile, stylesheet, null);
+        // export
+        byte[] out = transformation.export("JS");
+        return Response.ok(out).build();
+    } catch (UnsupportedOperationException e) {
+        LOG.error("not supported: {}", e.getMessage());
+        // we use RestResponse because it makes the error message occur in response body
+        RestResponse<String> response =
+        RestResponse.status(Response.Status.NOT_IMPLEMENTED, e.getMessage());
+        return response.toResponse();
+    } catch (ConfigurationException e) {
+        LOG.error("compilation failed: {}", e.getMessage());
+        RestResponse<String> response =
+        RestResponse.status(Response.Status.NOT_FOUND, "compilation failed:" + e.getMessage());
+        return response.toResponse();
+    } catch (ZipException e) {
+        LOG.error("failed to read zip file: {}", e.getMessage());
+        RestResponse<String> response =
+        RestResponse.status(Response.Status.BAD_REQUEST, "cannot read zip file: " + e.getMessage());
+        return response.toResponse();
+    } catch (IOException e) {
+        LOG.error("IOException while reading zip file: {}", e.getMessage());
+        RestResponse<String> response =
+        RestResponse.status(Response.Status.BAD_REQUEST, "cannot read zip file: " + e.getMessage());
+        return response.toResponse();
+    }
     }
 }

@@ -46,99 +46,99 @@ public class RestrictiveUnparsedTextResolverTest {
 
     @BeforeEach
     public void setupResolver() throws ConfigurationException {
-	resolver = new RestrictiveUnparsedTextResolver(XSL_DIR.getAbsoluteFile().toString(), ID_XSL.getAbsoluteFile().toString());
+    resolver = new RestrictiveUnparsedTextResolver(XSL_DIR.getAbsoluteFile().toString(), ID_XSL.getAbsoluteFile().toString());
     }
 
 
     @Test
     public void nullPath() {
-	assertThrows(ConfigurationException.class, () -> new RestrictiveUnparsedTextResolver(null, null));
+    assertThrows(ConfigurationException.class, () -> new RestrictiveUnparsedTextResolver(null, null));
     }
 
     @Test
     public void nullFilePath() {
-	assertThrows(ConfigurationException.class, () -> new RestrictiveUnparsedTextResolver("file:/etc", "/etc/passwd"));
+    assertThrows(ConfigurationException.class, () -> new RestrictiveUnparsedTextResolver("file:/etc", "/etc/passwd"));
     }
 
     @Test
     public void emptyPath() throws ConfigurationException, XPathException {
-	assertThrows(ConfigurationException.class, () -> new RestrictiveUnparsedTextResolver("", "/etc/passwd"));
+    assertThrows(ConfigurationException.class, () -> new RestrictiveUnparsedTextResolver("", "/etc/passwd"));
     }
 
     @Test
     @EnabledOnOs(OS.LINUX)
     public void rootPath() throws ConfigurationException, XPathException, URISyntaxException, IOException {
-	RestrictiveUnparsedTextResolver resolver = new RestrictiveUnparsedTextResolver("/", "/gnu-herd-2.1");
-	URI request = new URI("/etc/passwd");
-	// resolving may fail on non-*nix
-	Reader resource = resolver.resolve(request, encoding, config);
-	assertTrue(resource.read() > 0); // not EOF
+    RestrictiveUnparsedTextResolver resolver = new RestrictiveUnparsedTextResolver("/", "/gnu-herd-2.1");
+    URI request = new URI("/etc/passwd");
+    // resolving may fail on non-*nix
+    Reader resource = resolver.resolve(request, encoding, config);
+    assertTrue(resource.read() > 0); // not EOF
     }
 
     @Test
     public void validPathIdentityXSL() throws XPathException, URISyntaxException, IOException {
-	URI request = new URI(ID_XSL.getAbsolutePath().toString());
-	Reader resource = resolver.resolve(request, encoding, config);
-	assertEquals(0x3c, resource.read()); // 0x3c == '<'
+    URI request = new URI(ID_XSL.getAbsolutePath().toString());
+    Reader resource = resolver.resolve(request, encoding, config);
+    assertEquals(0x3c, resource.read()); // 0x3c == '<'
     }
 
     @Test
     public void validPathFileIdentityXSL() throws XPathException, URISyntaxException, IOException {
-	URI request = new URI("file:" + ID_XSL.getAbsolutePath().toString());
-	Reader resource = resolver.resolve(request, encoding, config);
-	assertEquals(0x3c, resource.read()); // 0x3c == '<'
+    URI request = new URI("file:" + ID_XSL.getAbsolutePath().toString());
+    Reader resource = resolver.resolve(request, encoding, config);
+    assertEquals(0x3c, resource.read()); // 0x3c == '<'
     }
 
     @Test
     public void relativePathIdentityXSL() throws XPathException, URISyntaxException, IOException {
-	URI request = new URI("id.xsl");
-	Reader resource = resolver.resolve(request, encoding, config);
-	assertEquals(0x3c, resource.read()); // 0x3c == '<'
+    URI request = new URI("id.xsl");
+    Reader resource = resolver.resolve(request, encoding, config);
+    assertEquals(0x3c, resource.read()); // 0x3c == '<'
     }
 
     @Test
     public void validPathUnknownXSL() throws XPathException, URISyntaxException {
-	URI request = new URI(UNKNOWN_XSL.getAbsolutePath().toString());
-	// the resource does not exist, so trying to make a FileReader from it fails
-	assertThrows(XPathException.class, () -> resolver.resolve(request, encoding, config));
+    URI request = new URI(UNKNOWN_XSL.getAbsolutePath().toString());
+    // the resource does not exist, so trying to make a FileReader from it fails
+    assertThrows(XPathException.class, () -> resolver.resolve(request, encoding, config));
     }
 
     @Test
     public void illegalPathFileEtcPasswd() throws URISyntaxException {
-	URI request = new URI("file:/etc/passwd");
-	assertThrows(XPathException.class, () -> resolver.resolve(request, encoding, config));
+    URI request = new URI("file:/etc/passwd");
+    assertThrows(XPathException.class, () -> resolver.resolve(request, encoding, config));
     }
 
     @Test
     public void illegalPathEtcPasswd() throws URISyntaxException {
-	URI request = new URI("/etc/passwd");
-	assertThrows(XPathException.class, () -> resolver.resolve(request, encoding, config));
+    URI request = new URI("/etc/passwd");
+    assertThrows(XPathException.class, () -> resolver.resolve(request, encoding, config));
     }
 
     // @Test
     // @Disabled
     // public void delegateHttpRequest() throws XPathException, URISyntaxException {
-    // 	URI request = new URI("http://example.com/some/transform.xsl");
-    // 	assertNull(resolver.resolve(request, encoding, config));
+    //     URI request = new URI("http://example.com/some/transform.xsl");
+    //     assertNull(resolver.resolve(request, encoding, config));
     // }
 
     // @Test
     // @Disabled
     // public void delegateHttpsRequest() throws XPathException, URISyntaxException {
-    // 	URI request = new URI("https://example.com/some/transform.xsl");
-    // 	assertNull(resolver.resolve(request, encoding, config));
+    //     URI request = new URI("https://example.com/some/transform.xsl");
+    //     assertNull(resolver.resolve(request, encoding, config));
     // }
 
     @Test
     public void illegalPathHelloXML() throws URISyntaxException {
-	URI request = new URI(HELLO_XML.getAbsolutePath().toString());
-	assertThrows(XPathException.class, () -> resolver.resolve(request, encoding, config));
+    URI request = new URI(HELLO_XML.getAbsolutePath().toString());
+    assertThrows(XPathException.class, () -> resolver.resolve(request, encoding, config));
     }
 
     @Test
     public void normalizationWorksForHelloXMLViaDots() throws URISyntaxException {
-	URI request = new URI(HELLO_XML_VIA_DOTS.getAbsolutePath().toString());
-	assertThrows(XPathException.class, () -> resolver.resolve(request, encoding, config));
+    URI request = new URI(HELLO_XML_VIA_DOTS.getAbsolutePath().toString());
+    assertThrows(XPathException.class, () -> resolver.resolve(request, encoding, config));
     }
 
 }

@@ -70,7 +70,7 @@ public interface Transformation {
      * @return This returns the transformed XML as a byte array.
      */
     byte[] transform(RuntimeParameters parameters, Config config, String systemId, InputStream source)
-	throws TransformationPreparationException, TransformationException;
+    throws TransformationPreparationException, TransformationException;
 
     /**
      * Transform the document given as {@param systemId}, which is
@@ -84,7 +84,7 @@ public interface Transformation {
      * @return This returns the transformed XML as a byte array.
      */
     byte[] transform(RuntimeParameters parameters, Config config, String systemId)
-	throws TransformationPreparationException, TransformationException;
+    throws TransformationPreparationException, TransformationException;
 
     /**
      * Run a transform with {@link RuntimeParameters} only. This will
@@ -98,7 +98,7 @@ public interface Transformation {
      * @return This returns the transformed XML as a byte array.
      */
     byte[] transform(RuntimeParameters parameters, Config config)
-	throws TransformationPreparationException, TransformationException;
+    throws TransformationPreparationException, TransformationException;
 
     /**
      * Returns the media type. This is used in the response header. So

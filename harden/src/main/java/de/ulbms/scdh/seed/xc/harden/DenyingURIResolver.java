@@ -37,8 +37,8 @@ public class DenyingURIResolver implements NonDelegatingURIResolver {
      */
     @Override
     public Source resolve(String href, String base) throws TransformerException {
-	LOG.warn("a transformation tries to resolve {} on the base of {}! Denying", href, base);
-	throw new TransformerException("URI not allowed: " + href + "resolved in " + base);
+    LOG.warn("a transformation tries to resolve {} on the base of {}! Denying", href, base);
+    throw new TransformerException("URI not allowed: " + href + "resolved in " + base);
     }
 
 }

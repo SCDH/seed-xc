@@ -5,6 +5,6 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 import com.saxonica.config.EnterpriseConfiguration;
 
 @RegisterForReflection(targets = {
-	EnterpriseConfiguration.class
+    EnterpriseConfiguration.class
     })
 public class ReflectionConfiguration {}

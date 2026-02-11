@@ -50,12 +50,12 @@ public class ZipFileURIResolver implements ResourceResolver {
      * Sets the zip file.
      */
     public void setup(ZipFile zip, URI baseUri) throws ConfigurationException {
-	if (zip == null) {
-	    LOG.error("cannot read zip archive: null");
-	    throw new ConfigurationException("Cannot read zip archive: null");
-	}
-	this.zipFile = zip;
-	this.baseUri = baseUri;
+    if (zip == null) {
+        LOG.error("cannot read zip archive: null");
+        throw new ConfigurationException("Cannot read zip archive: null");
+    }
+    this.zipFile = zip;
+    this.baseUri = baseUri;
     }
 
     /**
@@ -63,60 +63,60 @@ public class ZipFileURIResolver implements ResourceResolver {
      */
     @Override
     public Source resolve(ResourceRequest request) throws XPathException {
-	LOG.debug("resolving {} URI {} ", request.nature, request.uri);
-	// System.out.println(request.uri);
+    LOG.debug("resolving {} URI {} ", request.nature, request.uri);
+    // System.out.println(request.uri);
 
-	try {
-	    // 1. parse to URI instance
-	    URI uri = new URI(request.uri);
+    try {
+        // 1. parse to URI instance
+        URI uri = new URI(request.uri);
 
-	    // 2. resolve relative URIs against the configured path
-	    if (!uri.isAbsolute() && baseUri != null) {
-		uri = baseUri.resolve(uri);
-		LOG.debug("resolved {} in zip file to {}", request.uri, uri.toString());
-	    }
+        // 2. resolve relative URIs against the configured path
+        if (!uri.isAbsolute() && baseUri != null) {
+        uri = baseUri.resolve(uri);
+        LOG.debug("resolved {} in zip file to {}", request.uri, uri.toString());
+        }
 
-	    // 3. normalize URI, i.e. process '.' and '..'
-	    uri = uri.normalize();
+        // 3. normalize URI, i.e. process '.' and '..'
+        uri = uri.normalize();
 
-	    // 4. add "file:" scheme if no scheme specified
-	    if (uri.getScheme() == null) {
-		uri = new URI("file:" + uri.toString());
-		//uri = new URI("file", uri.getSchemeSpecificPart(), uri.getFragment());
-	    }
+        // 4. add "file:" scheme if no scheme specified
+        if (uri.getScheme() == null) {
+        uri = new URI("file:" + uri.toString());
+        //uri = new URI("file", uri.getSchemeSpecificPart(), uri.getFragment());
+        }
 
-	    // check URI
-	    if (uri.getScheme().equals("file")) {
-		// For some reason, uri.getPath() returns null. But for a file scheme,
-		// uri.getSchemeSpecificPart() returns the path.
-		if (uri.getSchemeSpecificPart() == null) {
-		    LOG.error("illegal file URI: null path (ssp) in {}", uri.toString());
-		    throw new XPathException("illegal file URI: null path (ssp)");
-		}
-		ZipEntry zipEntry = zipFile.getEntry(uri.getSchemeSpecificPart());
-		if (zipEntry != null) {
-		    InputStream is = zipFile.getInputStream(zipEntry);
-		    return new StreamSource(is, uri.toString());
-		} else {
-		    LOG.error("illegal file URI: {}", uri.toString());
-		    throw new XPathException("illegal file URI: " + uri.toString());
-		}
-	    } else {
-		// delegate to the next resolver in the chain
-		return null;
-	    }
-	} catch (NullPointerException e) {
-	    LOG.error("illegal URI {}: {}", request.uri, e.getMessage());
-	    throw new XPathException(e);
-	} catch (IllegalArgumentException e) {
-	    LOG.error("illegal URI {}: {}", request.uri, e.getMessage());
-	    throw new XPathException(e);
-	} catch (URISyntaxException e) {
-	    LOG.error("illegal URI {}: {}", request.uri, e.getMessage());
-	    throw new XPathException(e);
-	} catch (Exception e) {
-	    LOG.error("cannot resolve URI {} in zip file: {}", request.uri, e.getMessage());
-	    throw new XPathException(e);
-	}
+        // check URI
+        if (uri.getScheme().equals("file")) {
+        // For some reason, uri.getPath() returns null. But for a file scheme,
+        // uri.getSchemeSpecificPart() returns the path.
+        if (uri.getSchemeSpecificPart() == null) {
+            LOG.error("illegal file URI: null path (ssp) in {}", uri.toString());
+            throw new XPathException("illegal file URI: null path (ssp)");
+        }
+        ZipEntry zipEntry = zipFile.getEntry(uri.getSchemeSpecificPart());
+        if (zipEntry != null) {
+            InputStream is = zipFile.getInputStream(zipEntry);
+            return new StreamSource(is, uri.toString());
+        } else {
+            LOG.error("illegal file URI: {}", uri.toString());
+            throw new XPathException("illegal file URI: " + uri.toString());
+        }
+        } else {
+        // delegate to the next resolver in the chain
+        return null;
+        }
+    } catch (NullPointerException e) {
+        LOG.error("illegal URI {}: {}", request.uri, e.getMessage());
+        throw new XPathException(e);
+    } catch (IllegalArgumentException e) {
+        LOG.error("illegal URI {}: {}", request.uri, e.getMessage());
+        throw new XPathException(e);
+    } catch (URISyntaxException e) {
+        LOG.error("illegal URI {}: {}", request.uri, e.getMessage());
+        throw new XPathException(e);
+    } catch (Exception e) {
+        LOG.error("cannot resolve URI {} in zip file: {}", request.uri, e.getMessage());
+        throw new XPathException(e);
+    }
     }
 }

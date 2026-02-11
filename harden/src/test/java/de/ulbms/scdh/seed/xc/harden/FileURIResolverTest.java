@@ -36,115 +36,115 @@ public class FileURIResolverTest {
 
     @BeforeEach
     public void setupResolver() throws ConfigurationException {
-	resolver = new FileURIResolver(XSL_DIR.getAbsoluteFile().toString(), ID_XSL.getAbsoluteFile().toString());
+    resolver = new FileURIResolver(XSL_DIR.getAbsoluteFile().toString(), ID_XSL.getAbsoluteFile().toString());
     }
 
 
     @Test
     public void nullPath() {
-	assertThrows(ConfigurationException.class, () -> new FileURIResolver(null, null));
+    assertThrows(ConfigurationException.class, () -> new FileURIResolver(null, null));
     }
 
     @Test
     public void nullFilePath() {
-	assertThrows(ConfigurationException.class, () -> new FileURIResolver("file:/etc", "/etc/passwd"));
+    assertThrows(ConfigurationException.class, () -> new FileURIResolver("file:/etc", "/etc/passwd"));
     }
 
     @Test
     public void emptyPath() throws ConfigurationException, XPathException {
-	assertThrows(ConfigurationException.class, () -> new FileURIResolver("", "/etc/passwd"));
+    assertThrows(ConfigurationException.class, () -> new FileURIResolver("", "/etc/passwd"));
     }
 
     @Test
     public void rootPath() throws ConfigurationException, XPathException {
-	ResourceResolver resolver = new FileURIResolver("/", "/gnu-herd-2.1");
-	ResourceRequest request = new ResourceRequest();
-	request.uri = "/etc/passwd";
-	Source resource = resolver.resolve(request);
-	assertTrue(resource.getSystemId().startsWith("file:"));
-	assertTrue(resource.getSystemId().endsWith("/etc/passwd"));
+    ResourceResolver resolver = new FileURIResolver("/", "/gnu-herd-2.1");
+    ResourceRequest request = new ResourceRequest();
+    request.uri = "/etc/passwd";
+    Source resource = resolver.resolve(request);
+    assertTrue(resource.getSystemId().startsWith("file:"));
+    assertTrue(resource.getSystemId().endsWith("/etc/passwd"));
     }
 
     @Test
     public void validPathIdentityXSL() throws XPathException {
-	ResourceRequest request = new ResourceRequest();
-	request.uri = ID_XSL.getAbsolutePath().toString();
-	System.out.println(request.uri);
-	Source resource = resolver.resolve(request);
-	System.out.println(resource.getSystemId());
-	assertTrue(resource.getSystemId().startsWith("file:"));
-	assertTrue(resource.getSystemId().endsWith("xsl/id.xsl"));
+    ResourceRequest request = new ResourceRequest();
+    request.uri = ID_XSL.getAbsolutePath().toString();
+    System.out.println(request.uri);
+    Source resource = resolver.resolve(request);
+    System.out.println(resource.getSystemId());
+    assertTrue(resource.getSystemId().startsWith("file:"));
+    assertTrue(resource.getSystemId().endsWith("xsl/id.xsl"));
     }
 
     @Test
     public void validPathFileIdentityXSL() throws XPathException {
-	ResourceRequest request = new ResourceRequest();
-	request.uri = "file:" + ID_XSL.getAbsolutePath().toString();
-	Source resource = resolver.resolve(request);
-	assertTrue(resource.getSystemId().startsWith("file:"));
-	assertTrue(resource.getSystemId().endsWith("xsl/id.xsl"));
+    ResourceRequest request = new ResourceRequest();
+    request.uri = "file:" + ID_XSL.getAbsolutePath().toString();
+    Source resource = resolver.resolve(request);
+    assertTrue(resource.getSystemId().startsWith("file:"));
+    assertTrue(resource.getSystemId().endsWith("xsl/id.xsl"));
     }
 
     @Test
     public void relativePathIdentityXSL() throws XPathException {
-	ResourceRequest request = new ResourceRequest();
-	request.uri = "id.xsl";
-	Source resource = resolver.resolve(request);
-	assertTrue(resource.getSystemId().startsWith("file:"));
-	assertTrue(resource.getSystemId().endsWith("xsl/id.xsl"));
+    ResourceRequest request = new ResourceRequest();
+    request.uri = "id.xsl";
+    Source resource = resolver.resolve(request);
+    assertTrue(resource.getSystemId().startsWith("file:"));
+    assertTrue(resource.getSystemId().endsWith("xsl/id.xsl"));
     }
 
     @Test
     public void validPathUnknownXSL() throws XPathException {
-	ResourceRequest request = new ResourceRequest();
-	request.uri = UNKNOWN_XSL.getAbsolutePath().toString();
-	// neither the resolver nor the source asserts that the resource really exists
-	Source resource = resolver.resolve(request);
-	assertTrue(resource.getSystemId().startsWith("file:"));
-	assertTrue(resource.getSystemId().endsWith("xsl/unknown.xsl"));
-	//assertThrows(XPathException.class, () -> resource.get(request));
+    ResourceRequest request = new ResourceRequest();
+    request.uri = UNKNOWN_XSL.getAbsolutePath().toString();
+    // neither the resolver nor the source asserts that the resource really exists
+    Source resource = resolver.resolve(request);
+    assertTrue(resource.getSystemId().startsWith("file:"));
+    assertTrue(resource.getSystemId().endsWith("xsl/unknown.xsl"));
+    //assertThrows(XPathException.class, () -> resource.get(request));
     }
 
     @Test
     public void illegalPathFileEtcPasswd() {
-	ResourceRequest request = new ResourceRequest();
-	request.uri = "file:/etc/passwd";
-	assertThrows(XPathException.class, () -> resolver.resolve(request));
+    ResourceRequest request = new ResourceRequest();
+    request.uri = "file:/etc/passwd";
+    assertThrows(XPathException.class, () -> resolver.resolve(request));
     }
 
     @Test
     public void illegalPathEtcPasswd() {
-	ResourceRequest request = new ResourceRequest();
-	request.uri = "/etc/passwd";
-	assertThrows(XPathException.class, () -> resolver.resolve(request));
+    ResourceRequest request = new ResourceRequest();
+    request.uri = "/etc/passwd";
+    assertThrows(XPathException.class, () -> resolver.resolve(request));
     }
 
     @Test
     public void delegateHttpRequest() throws XPathException {
-	ResourceRequest request = new ResourceRequest();
-	request.uri = "http://example.com/some/transform.xsl";
-	assertNull(resolver.resolve(request));
+    ResourceRequest request = new ResourceRequest();
+    request.uri = "http://example.com/some/transform.xsl";
+    assertNull(resolver.resolve(request));
     }
 
     @Test
     public void delegateHttpsRequest() throws XPathException {
-	ResourceRequest request = new ResourceRequest();
-	request.uri = "https://example.com/some/transform.xsl";
-	assertNull(resolver.resolve(request));
+    ResourceRequest request = new ResourceRequest();
+    request.uri = "https://example.com/some/transform.xsl";
+    assertNull(resolver.resolve(request));
     }
 
     @Test
     public void illegalPathHelloXML() {
-	ResourceRequest request = new ResourceRequest();
-	request.uri = HELLO_XML.getAbsolutePath().toString();
-	assertThrows(XPathException.class, () -> resolver.resolve(request));
+    ResourceRequest request = new ResourceRequest();
+    request.uri = HELLO_XML.getAbsolutePath().toString();
+    assertThrows(XPathException.class, () -> resolver.resolve(request));
     }
 
     @Test
     public void normalizationWorksForHelloXMLViaDots() {
-	ResourceRequest request = new ResourceRequest();
-	request.uri = HELLO_XML_VIA_DOTS.getAbsolutePath().toString();
-	assertThrows(XPathException.class, () -> resolver.resolve(request));
+    ResourceRequest request = new ResourceRequest();
+    request.uri = HELLO_XML_VIA_DOTS.getAbsolutePath().toString();
+    assertThrows(XPathException.class, () -> resolver.resolve(request));
     }
 
 }

@@ -14,7 +14,7 @@ import net.sf.saxon.trans.XPathException;
 public class DenyingResourceResolver implements ResourceResolver {
 
     public Source resolve(ResourceRequest request) throws XPathException {
-	throw new XPathException("illegal resource " + request.uri);
+    throw new XPathException("illegal resource " + request.uri);
     }
 
 }

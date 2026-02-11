@@ -12,11 +12,11 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 public class ServiceConfiguration {
 
     @ConfigProperty(name = "de.ulbms.scdh.seed.xc.xslt.ServiceConfiguration.nonProtocolURIsAllowed",
-		    defaultValue = "false")
+                    defaultValue = "false")
     protected boolean nonProtocolURIsAllowed;
 
     public boolean getNonProtocolURIsAllowed() {
-	return nonProtocolURIsAllowed;
+        return nonProtocolURIsAllowed;
     }
 
 }

@@ -21,7 +21,7 @@ public class RestrictiveFileOnlyResolver extends ChainedResourceResolver {
      * does not get called.
      */
     public RestrictiveFileOnlyResolver() {
-	super(new DenyingResourceResolver(), new DenyingResourceResolver());
+    super(new DenyingResourceResolver(), new DenyingResourceResolver());
     }
 
     /**
@@ -29,7 +29,7 @@ public class RestrictiveFileOnlyResolver extends ChainedResourceResolver {
      */
     @Inject
     public RestrictiveFileOnlyResolver(@Context FileURIResolver fileResourceResolver) {
-	super(fileResourceResolver, new DenyingResourceResolver());
+    super(fileResourceResolver, new DenyingResourceResolver());
     }
 
 }

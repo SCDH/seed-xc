@@ -20,6 +20,6 @@ public class ConfigurationException extends Exception {
         super(cause);
     }
     public ConfigurationException(String msg, Throwable cause) {
-	super(msg, cause);
+    super(msg, cause);
     }
 }
