@@ -28,6 +28,8 @@ public class Service implements DefaultApi {
 
     private static final Logger LOG = LoggerFactory.getLogger(Service.class);
 
+    private static final long MAX_ZIP_SIZE = 10485760L; // 10 MiB
+
     /**
      * As the {@link Service} class is request scoped, the injected
      * {@link SaxonXsltransformation} with dependend scope is request
@@ -54,8 +56,10 @@ public class Service implements DefaultApi {
      */
     @Override
     public Response compileZip(String stylesheet, File body) {
-	try {
-	    ZipFile zipFile = new ZipFile(body);
+	try (ZipFile zipFile = new ZipFile(body)) {
+	    if (body.length() > MAX_ZIP_SIZE) {
+		throw new IOException("payload too large");
+	    }
 	    // compile
 	    transformation.setup(zipFile, stylesheet, null);
 	    // export
@@ -63,25 +67,20 @@ public class Service implements DefaultApi {
 	    return Response.ok(out).build();
 	} catch (UnsupportedOperationException e) {
 	    LOG.error("not supported: {}", e.getMessage());
-	    // we use RestResponse because it makes the error message occur in response body
-	    RestResponse<String> response =
-		RestResponse.status(Response.Status.NOT_IMPLEMENTED, e.getMessage());
-	    return response.toResponse();
+	    return RestResponse.status(Response.Status.NOT_IMPLEMENTED, e.getMessage()).toResponse();
 	} catch (ConfigurationException e) {
 	    LOG.error("compilation failed: {}", e.getMessage());
-	    RestResponse<String> response =
-		RestResponse.status(Response.Status.NOT_FOUND, "compilation failed:" + e.getMessage());
-	    return response.toResponse();
+	    // OpenAPI returns 400 StylesheetNotFound, so we use BAD_REQUEST instead of NOT_FOUND
+	    return RestResponse.status(Response.Status.BAD_REQUEST, "compilation failed: " + e.getMessage()).toResponse();
 	} catch (ZipException e) {
 	    LOG.error("failed to read zip file: {}", e.getMessage());
-	    RestResponse<String> response =
-		RestResponse.status(Response.Status.BAD_REQUEST, "cannot read zip file: " + e.getMessage());
-	    return response.toResponse();
+	    return RestResponse.status(Response.Status.BAD_REQUEST, "cannot read zip file: " + e.getMessage()).toResponse();
 	} catch (IOException e) {
+	    if (body.length() > MAX_ZIP_SIZE || "payload too large".equals(e.getMessage())) {
+		return RestResponse.status(Response.Status.REQUEST_ENTITY_TOO_LARGE, "payload too large").toResponse();
+	    }
 	    LOG.error("IOException while reading zip file: {}", e.getMessage());
-	    RestResponse<String> response =
-		RestResponse.status(Response.Status.BAD_REQUEST, "cannot read zip file: " + e.getMessage());
-	    return response.toResponse();
+	    return RestResponse.status(Response.Status.INTERNAL_SERVER_ERROR, "error reading zip file").toResponse();
 	}
     }
 }
