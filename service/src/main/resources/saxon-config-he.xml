@@ -6,10 +6,10 @@
                edition="HE"
                label="Hardened configuration">
   <global
-    allowedProtocols="http,https,ftp,ftps"
-    allowExternalFunctions="true"
-    unparsedTextURIResolver="net.sf.saxon.lib.StandardUnparsedTextResolver"
-    uriResolver="net.sf.saxon.lib.StandardURIResolver"
+    allowedProtocols=""
+    allowExternalFunctions="false"
+    unparsedTextURIResolver="de.ulbms.scdh.seed.xc.harden.DenyingResourceResolver"
+    uriResolver="de.ulbms.scdh.seed.xc.harden.DenyingResourceResolver"
     xpathVersionForXsd="20"
     xpathVersionForXslt="31"
     />

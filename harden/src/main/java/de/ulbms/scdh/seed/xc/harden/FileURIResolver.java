@@ -146,8 +146,9 @@ public class FileURIResolver implements ResourceResolver {
 		    throw new XPathException("illegal file URI: " + uri.toString());
 		}
 	    } else {
-		// delegate to the next resolver in the chain
-		return null;
+		// do NOT delegate to the next resolver in the chain to avoid SSRF
+		LOG.error("not allowed protocol in URI: {}", uri.toString());
+		throw new XPathException("not allowed protocol in URI: " + uri.toString());
 	    }
 	} catch (NullPointerException e) {
 	    LOG.error("illegal URI {}: {}", request.uri, e.getMessage());
