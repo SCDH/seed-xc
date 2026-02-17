@@ -54,8 +54,7 @@ public class Service implements DefaultApi {
      */
     @Override
     public Response compileZip(String stylesheet, File body) {
-	try {
-	    ZipFile zipFile = new ZipFile(body);
+	try (ZipFile zipFile = new ZipFile(body)) {
 	    // compile
 	    transformation.setup(zipFile, stylesheet, null);
 	    // export
