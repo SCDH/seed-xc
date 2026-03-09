@@ -13,13 +13,9 @@ package de.ulbms.scdh.seed.xc.api;
  * exception class for these kinds of errors.
  */
 public class ConfigurationException extends Exception {
-    public ConfigurationException(String msg) {
-        super(msg);
-    }
-    public ConfigurationException(Throwable cause) {
-        super(cause);
-    }
-    public ConfigurationException(String msg, Throwable cause) {
-	super(msg, cause);
-    }
+	public ConfigurationException(String msg) { super(msg); }
+	public ConfigurationException(Throwable cause) { super(cause); }
+	public ConfigurationException(String msg, Throwable cause) {
+		super(msg, cause);
+	}
 }
