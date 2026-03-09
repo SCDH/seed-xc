@@ -41,4 +41,6 @@ formatting:
     - apk add git findutils clang-extra-tools
   script:
     - find . -type f -name '*.java' -exec clang-format -i {} +
-    - if [ -z "$(git status --porcelain)" ]; then echo "formatting OK"; else echo "broken formatting"; exit 1; fi
+    - if [ -z "$(git status --porcelain)" ]; then echo "formatting OK"; else echo "broken formatting"; git status; git diff; exit 1; fi
+  when: manual
+
