@@ -10,6 +10,7 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
 import jakarta.enterprise.context.RequestScoped;
 import org.jboss.resteasy.reactive.RestResponse;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +29,10 @@ public class Service implements DefaultApi {
 
     private static final Logger LOG = LoggerFactory.getLogger(Service.class);
 
-    private static final long MAX_ZIP_SIZE = 10485760L; // 10 MiB
+    @Inject
+    @ConfigProperty(name = "de.ulbms.scdh.seed.xc.service.Service.MAX_ZIP_SIZE",
+		    defaultValue = "10485760") // 10 MiB
+    private Long MAX_ZIP_SIZE;
 
     /**
      * As the {@link Service} class is request scoped, the injected
@@ -56,10 +60,11 @@ public class Service implements DefaultApi {
      */
     @Override
     public Response compileZip(String stylesheet, File body) {
+	if (body.length() > MAX_ZIP_SIZE) {
+	    LOG.warn("zip file too large: ", body.length());
+	    return RestResponse.status(Response.Status.REQUEST_ENTITY_TOO_LARGE, "payload too large").toResponse();
+	}
 	try (ZipFile zipFile = new ZipFile(body)) {
-	    if (body.length() > MAX_ZIP_SIZE) {
-		throw new IOException("payload too large");
-	    }
 	    // compile
 	    transformation.setup(zipFile, stylesheet, null);
 	    // export
@@ -76,9 +81,6 @@ public class Service implements DefaultApi {
 	    LOG.error("failed to read zip file: {}", e.getMessage());
 	    return RestResponse.status(Response.Status.BAD_REQUEST, "cannot read zip file: " + e.getMessage()).toResponse();
 	} catch (IOException e) {
-	    if (body.length() > MAX_ZIP_SIZE || "payload too large".equals(e.getMessage())) {
-		return RestResponse.status(Response.Status.REQUEST_ENTITY_TOO_LARGE, "payload too large").toResponse();
-	    }
 	    LOG.error("IOException while reading zip file: {}", e.getMessage());
 	    return RestResponse.status(Response.Status.INTERNAL_SERVER_ERROR, "error reading zip file").toResponse();
 	}
