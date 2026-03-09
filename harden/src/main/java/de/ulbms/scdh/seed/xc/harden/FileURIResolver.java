@@ -61,26 +61,26 @@ public class FileURIResolver implements ResourceResolver {
 
 		// check preconditions
 		if (path == null) {
-			LOG.error("configuration error: path of FileURIResolver may not " +
-					  "be null.");
+			LOG.error("configuration error: path of FileURIResolver may not "
+					  + "be null.");
 			throw new ConfigurationException(
-				"configuration error: path of FileURIResolver may not be " +
-				"null.");
+				"configuration error: path of FileURIResolver may not be "
+				+ "null.");
 		} else if (path.startsWith("file:")) {
 			LOG.error(
 				"configuration error: path of FileURIResolver may not start "
 				+ "with 'file:'");
 			throw new ConfigurationException(
-				"configuration error: path of FileURIResolver may not start " +
-				"with "
+				"configuration error: path of FileURIResolver may not start "
+				+ "with "
 				+ "'file:'");
 		} else if (path.isEmpty()) {
 			LOG.error(
 				"configuration error: path of FileURIResolver may not be the "
 				+ "empty string");
 			throw new ConfigurationException(
-				"configuration error: path of FileURIResolver may not be the " +
-				"empty "
+				"configuration error: path of FileURIResolver may not be the "
+				+ "empty "
 				+ "string");
 		}
 

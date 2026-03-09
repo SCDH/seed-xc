@@ -303,8 +303,8 @@ public class SaxonXslTransformation implements Transformation {
 				description.setItemType(
 					details.getDeclaredItemType().getTypeName().toString());
 			} catch (NullPointerException e) {
-				LOG.error("item type not declared for parameter {} in " +
-						  "transformation {}",
+				LOG.error("item type not declared for parameter {} in "
+							  + "transformation {}",
 						  name, transformationInfo.getIdent());
 			}
 			try {
@@ -459,8 +459,8 @@ public class SaxonXslTransformation implements Transformation {
 					LOG.error("malformed URI: {}", e.getMessage());
 					return false;
 				} catch (NullPointerException e) {
-					LOG.info("URI '{}' failed test with a " +
-							 "NullPointerException exception",
+					LOG.info("URI '{}' failed test with a "
+								 + "NullPointerException exception",
 							 systemId);
 					return serviceConfig.getNonProtocolURIsAllowed();
 				}

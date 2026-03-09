@@ -297,8 +297,8 @@ public class SaxonXslTransformationTest {
 		output = transformation.transform(params, null, helloXml.toString(),
 										  inputStream);
 		assertEquals("<?xml version=\"1.0\" "
-						 + "encoding=\"UTF-8\"?><result><allowed>*<star/>*</" +
-						   "allowed></result>",
+						 + "encoding=\"UTF-8\"?><result><allowed>*<star/>*</"
+						 + "allowed></result>",
 					 outputToString(output));
 	}
 
@@ -458,8 +458,8 @@ public class SaxonXslTransformationTest {
 		FileInputStream input = new FileInputStream(unparsedEntityXml);
 		output = transformation.transform(null, null,
 										  unparsedEntityXml.toString(), input);
-		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><test " +
-					 "source=\"passwd\"/>",
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><test "
+						 + "source=\"passwd\"/>",
 					 outputToString(output));
 	}
 
@@ -471,8 +471,8 @@ public class SaxonXslTransformationTest {
 		FileInputStream input = new FileInputStream(unparsedEntityXml);
 		output =
 			transformation.transform(null, null, unparsedEntityXml.toString());
-		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><test " +
-					 "source=\"passwd\"/>",
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><test "
+						 + "source=\"passwd\"/>",
 					 outputToString(output));
 	}
 
@@ -644,11 +644,11 @@ public class SaxonXslTransformationTest {
 		assertEquals(
 			"<?xml version=\"1.0\" encoding=\"UTF-8\"?><wrapper "
 				+ "xmlns:xi=\"http://www.w3.org/2001/XInclude\">\n    <hello "
-				+ "xml:base=\"hello.xml\"><greating>Hello</greating></" +
-				  "hello>\n    "
+				+ "xml:base=\"hello.xml\"><greating>Hello</greating></"
+				+ "hello>\n    "
 				+ "<hello "
-				+ "xml:base=\"hello.xml\"><greating>Hello</greating></" +
-				  "hello>\n</wrapper>",
+				+ "xml:base=\"hello.xml\"><greating>Hello</greating></"
+				+ "hello>\n</wrapper>",
 			outputToString(output));
 	}
 

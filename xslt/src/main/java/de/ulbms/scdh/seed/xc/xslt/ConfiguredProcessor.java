@@ -34,8 +34,8 @@ public class ConfiguredProcessor {
 	 */
 	@Produces
 	public static Processor createConfiguredProcessor(
-		@ConfigProperty(name = "de.ulbms.scdh.seed.xc.xslt." +
-							   "ConfiguredProcessor.saxonConfigLocations",
+		@ConfigProperty(name = "de.ulbms.scdh.seed.xc.xslt."
+							   + "ConfiguredProcessor.saxonConfigLocations",
 						defaultValue = "") String saxonConfigLocations)
 		throws ConfigurationException {
 		Processor processor = null;
