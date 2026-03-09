@@ -33,3 +33,13 @@ verify:
   image: $JAVA_DOCKER_IMAGE
   script:
     - ./mvnw $MAVEN_CLI_OPTS -Popenapi clean verify
+
+formatting:
+  stage: test
+  image: $JAVA_DOCKER_IMAGE
+  before_script:
+    - apk add findutils clang-extra-tools
+  script:
+    - find . -type f -name '*.java' -exec clang-format -i {} +
+    - if [ -z "$(git status --porcelain)" ]; then echo "formatting OK"; else echo "broken formatting"; exit 1; fi
+  when: manual
