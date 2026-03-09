@@ -8,7 +8,7 @@
 Build:
 
 ```shell
-./mvnw package
+./mvnw generate-sources package
 ```
 
 Run dev server:
