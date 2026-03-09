@@ -48,3 +48,7 @@ curl -X 'POST' \
 	 --data-binary '@harden/src/test/resources/xsl.zip' \
 	 -i
 ```
+
+## Contributing
+
+See [contributing guide](contributing.md)!
