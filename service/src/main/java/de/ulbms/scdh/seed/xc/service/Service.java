@@ -10,6 +10,7 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
 import jakarta.enterprise.context.RequestScoped;
 import org.jboss.resteasy.reactive.RestResponse;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +28,11 @@ import de.ulbms.scdh.seed.xc.xslt.SaxonXslTransformation;
 public class Service implements DefaultApi {
 
     private static final Logger LOG = LoggerFactory.getLogger(Service.class);
+
+    @Inject
+    @ConfigProperty(name = "de.ulbms.scdh.seed.xc.service.Service.MAX_ZIP_SIZE",
+		    defaultValue = "10485760") // 10 MiB
+    private Long MAX_ZIP_SIZE;
 
     /**
      * As the {@link Service} class is request scoped, the injected
@@ -54,8 +60,11 @@ public class Service implements DefaultApi {
      */
     @Override
     public Response compileZip(String stylesheet, File body) {
-	try {
-	    ZipFile zipFile = new ZipFile(body);
+	if (body.length() > MAX_ZIP_SIZE) {
+	    LOG.warn("zip file too large: ", body.length());
+	    return RestResponse.status(Response.Status.REQUEST_ENTITY_TOO_LARGE, "payload too large").toResponse();
+	}
+	try (ZipFile zipFile = new ZipFile(body)) {
 	    // compile
 	    transformation.setup(zipFile, stylesheet, null);
 	    // export
@@ -63,25 +72,17 @@ public class Service implements DefaultApi {
 	    return Response.ok(out).build();
 	} catch (UnsupportedOperationException e) {
 	    LOG.error("not supported: {}", e.getMessage());
-	    // we use RestResponse because it makes the error message occur in response body
-	    RestResponse<String> response =
-		RestResponse.status(Response.Status.NOT_IMPLEMENTED, e.getMessage());
-	    return response.toResponse();
+	    return RestResponse.status(Response.Status.NOT_IMPLEMENTED, e.getMessage()).toResponse();
 	} catch (ConfigurationException e) {
 	    LOG.error("compilation failed: {}", e.getMessage());
-	    RestResponse<String> response =
-		RestResponse.status(Response.Status.NOT_FOUND, "compilation failed:" + e.getMessage());
-	    return response.toResponse();
+	    // OpenAPI returns 400 StylesheetNotFound, so we use BAD_REQUEST instead of NOT_FOUND
+	    return RestResponse.status(Response.Status.BAD_REQUEST, "compilation failed: " + e.getMessage()).toResponse();
 	} catch (ZipException e) {
 	    LOG.error("failed to read zip file: {}", e.getMessage());
-	    RestResponse<String> response =
-		RestResponse.status(Response.Status.BAD_REQUEST, "cannot read zip file: " + e.getMessage());
-	    return response.toResponse();
+	    return RestResponse.status(Response.Status.BAD_REQUEST, "cannot read zip file: " + e.getMessage()).toResponse();
 	} catch (IOException e) {
 	    LOG.error("IOException while reading zip file: {}", e.getMessage());
-	    RestResponse<String> response =
-		RestResponse.status(Response.Status.BAD_REQUEST, "cannot read zip file: " + e.getMessage());
-	    return response.toResponse();
+	    return RestResponse.status(Response.Status.INTERNAL_SERVER_ERROR, "error reading zip file").toResponse();
 	}
     }
 }
