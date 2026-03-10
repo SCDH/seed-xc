@@ -137,6 +137,7 @@ public class SaxonXslTransformation implements Transformation {
 	    XsltCompiler compiler = processor.newXsltCompiler();
 	    compiler.setJustInTimeCompilation(false);
 	    // setup the compiler's resource resolver so that it can read files from the zip
+	    zipResourceResolver.setNonDelegating();
 	    zipResourceResolver.setup(zipFile, null);
 	    compiler.setResourceResolver(zipResourceResolver);
 	    // compile

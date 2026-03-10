@@ -57,10 +57,20 @@ public class ZipFileURIResolverTest {
     @Test
     public void rootBaseUri() throws ConfigurationException, XPathException, URISyntaxException {
 	// We cannot resolve against / base URI
+	resolver.setNonDelegating();
 	resolver.setup(zipFile, new URI("/"));
 	ResourceRequest request = new ResourceRequest();
 	request.uri = "xsl/id.xsl";
 	assertThrows(XPathException.class, () -> resolver.resolve(request));
+    }
+
+    @Test
+    public void rootBaseUriDelegating() throws ConfigurationException, XPathException, URISyntaxException {
+	// We cannot resolve against / base URI
+	resolver.setup(zipFile, new URI("/"));
+	ResourceRequest request = new ResourceRequest();
+	request.uri = "xsl/id.xsl";
+	assertNull(resolver.resolve(request));
     }
 
     @Test
@@ -118,6 +128,7 @@ public class ZipFileURIResolverTest {
     @Test
     public void singleSegmentWithLeadingSlashBaseUri() throws ConfigurationException, XPathException, URISyntaxException {
 	resolver.setup(zipFile, new URI("/xsl"));
+	resolver.setNonDelegating();
 	ResourceRequest request = new ResourceRequest();
 	request.uri = "xsl/id.xsl";
 	assertThrows(XPathException.class, () -> resolver.resolve(request));
@@ -125,6 +136,18 @@ public class ZipFileURIResolverTest {
 	assertThrows(XPathException.class, () -> resolver.resolve(request));
 	request.uri = "id.xsl";
 	assertThrows(XPathException.class, () -> resolver.resolve(request));
+    }
+
+    @Test
+    public void singleSegmentWithLeadingSlashBaseUriDelegating() throws ConfigurationException, XPathException, URISyntaxException {
+	resolver.setup(zipFile, new URI("/xsl"));
+	ResourceRequest request = new ResourceRequest();
+	request.uri = "xsl/id.xsl";
+	assertNull(resolver.resolve(request));
+	request.uri = "/xsl/id.xsl";
+	assertNull(resolver.resolve(request));
+	request.uri = "id.xsl";
+	assertNull(resolver.resolve(request));
     }
 
     @Test
@@ -149,40 +172,84 @@ public class ZipFileURIResolverTest {
     @Test
     public void unknownFile() throws ConfigurationException, XPathException, URISyntaxException {
 	resolver.setup(zipFile, null);
+	resolver.setNonDelegating();
 	ResourceRequest request = new ResourceRequest();
 	request.uri = "xsl/unknown.xsl";
 	assertThrows(XPathException.class, () -> resolver.resolve(request));
     }
 
     @Test
+    public void unknownFileDelegating() throws ConfigurationException, XPathException, URISyntaxException {
+	resolver.setup(zipFile, null);
+	ResourceRequest request = new ResourceRequest();
+	request.uri = "xsl/unknown.xsl";
+	assertNull(resolver.resolve(request));
+    }
+
+    @Test
     public void directoryPath() throws ConfigurationException, XPathException, URISyntaxException {
 	resolver.setup(zipFile, null);
+	resolver.setNonDelegating();
 	ResourceRequest request = new ResourceRequest();
 	request.uri = "xsl";
 	assertThrows(XPathException.class, () -> resolver.resolve(request));
     }
 
     @Test
+    public void directoryPathDelegating() throws ConfigurationException, XPathException, URISyntaxException {
+	resolver.setup(zipFile, null);
+	ResourceRequest request = new ResourceRequest();
+	request.uri = "xsl";
+	assertNull(resolver.resolve(request));
+    }
+
+    @Test
     @Disabled
     public void nonXmlFile() throws ConfigurationException, XPathException, URISyntaxException {
 	resolver.setup(zipFile, null);
+	resolver.setNonDelegating();
 	ResourceRequest request = new ResourceRequest();
 	request.uri = "samples/secret.txt";
 	assertThrows(XPathException.class, () -> resolver.resolve(request));
     }
 
     @Test
+    @Disabled
+    public void nonXmlFileDelegating() throws ConfigurationException, XPathException, URISyntaxException {
+	resolver.setup(zipFile, null);
+	ResourceRequest request = new ResourceRequest();
+	request.uri = "samples/secret.txt";
+	assertNull(resolver.resolve(request));
+    }
+
+    @Test
     public void illegalPathFileEtcPasswd() {
+	resolver.setNonDelegating();
 	ResourceRequest request = new ResourceRequest();
 	request.uri = "file:/etc/passwd";
 	assertThrows(XPathException.class, () -> resolver.resolve(request));
     }
 
     @Test
+    public void illegalPathFileEtcPasswdDelegating() throws XPathException {
+	ResourceRequest request = new ResourceRequest();
+	request.uri = "file:/etc/passwd";
+	assertNull(resolver.resolve(request));
+    }
+
+    @Test
     public void illegalPathEtcPasswd() {
+	resolver.setNonDelegating();
 	ResourceRequest request = new ResourceRequest();
 	request.uri = "/etc/passwd";
 	assertThrows(XPathException.class, () -> resolver.resolve(request));
+    }
+
+    @Test
+    public void illegalPathEtcPasswdDelegating() throws XPathException {
+	ResourceRequest request = new ResourceRequest();
+	request.uri = "/etc/passwd";
+	assertNull(resolver.resolve(request));
     }
 
     @Test

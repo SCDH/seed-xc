@@ -24,12 +24,20 @@ import de.ulbms.scdh.seed.xc.api.ConfigurationException;
 
 /**
  * A resource resolver that resolves request to the contents of a zip
- * file.
+ * file.<P>
+ *
+ * The resolver delegates to the next configured resolver if the
+ * resource is not found in the zip file.
+ *
+ * Use {@link ZipFileURIResolver.setNonDelegating()} to make it
+ * non-delegating.
  */
 @Dependent
 public class ZipFileURIResolver implements ResourceResolver {
 
     private static final Logger LOG = LoggerFactory.getLogger(ZipFileURIResolver.class);
+
+    private boolean delegating = true;
 
     /**
      * Only paths under this path will be accessible through this resource resolver.
@@ -56,6 +64,13 @@ public class ZipFileURIResolver implements ResourceResolver {
 	}
 	this.zipFile = zip;
 	this.baseUri = baseUri;
+    }
+
+    /**
+     * Makes this resolver non-delegating.
+     */
+    public void setNonDelegating() {
+	this.delegating = false;
     }
 
     /**
@@ -102,19 +117,28 @@ public class ZipFileURIResolver implements ResourceResolver {
 		    throw new XPathException("illegal file URI: " + uri.toString());
 		}
 	    } else {
-		// delegate to the next resolver in the chain
-		return null;
+		if (delegating) {
+		    // delegate to the next resolver in the chain
+		    return null;
+		} else {
+		    LOG.error("cannot resolve URI {} in zip file: {}", request.uri);
+		    throw new XPathException("cannot resolve URI {} in zip file");
+		}
 	    }
 	} catch (NullPointerException e) {
+	    if (delegating) return null;
 	    LOG.error("illegal URI {}: {}", request.uri, e.getMessage());
 	    throw new XPathException(e);
 	} catch (IllegalArgumentException e) {
+	    if (delegating) return null;
 	    LOG.error("illegal URI {}: {}", request.uri, e.getMessage());
 	    throw new XPathException(e);
 	} catch (URISyntaxException e) {
+	    if (delegating) return null;
 	    LOG.error("illegal URI {}: {}", request.uri, e.getMessage());
 	    throw new XPathException(e);
 	} catch (Exception e) {
+	    if (delegating) return null;
 	    LOG.error("cannot resolve URI {} in zip file: {}", request.uri, e.getMessage());
 	    throw new XPathException(e);
 	}
