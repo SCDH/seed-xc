@@ -83,7 +83,7 @@
 				<dateLibrary>java8</dateLibrary>
 				<hideGenerationTimestamp>true</hideGenerationTimestamp>
 				<disallowAdditionalPropertiesIfNotPresent>false</disallowAdditionalPropertiesIfNotPresent>
-				<useTags>true</useTags>
+				<useTags>false</useTags>
 				<interfaceOnly>true</interfaceOnly>
 				<returnResponse>true</returnResponse>
 				<useSwaggerAnnotations>false</useSwaggerAnnotations>

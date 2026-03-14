@@ -1,7 +1,7 @@
 package de.ulbms.scdh.seed.xc.service;
 
 import de.ulbms.scdh.seed.xc.api.ConfigurationException;
-import de.ulbms.scdh.seed.xc.api.DefaultApi;
+import de.ulbms.scdh.seed.xc.api.XslcApi;
 import de.ulbms.scdh.seed.xc.xslt.SaxonXslTransformation;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
  * declared in the OpenAPI spec.
  */
 @RequestScoped
-public class Service implements DefaultApi {
+public class Service implements XslcApi {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Service.class);
 
@@ -36,18 +36,6 @@ public class Service implements DefaultApi {
 	 * scoped, too.
 	 */
 	@Inject SaxonXslTransformation transformation;
-
-	/**
-	 * Binds the transformation ID to a compiled transformation
-	 * resource. This only makes sense on a service that offers
-	 * transformation, not only compilation. Since the implementation
-	 * at hand does not offer transformation routes, it returns 501.
-	 */
-	@Override
-	public Response bind(String transformationResource,
-						 String transformationId) {
-		return Response.status(501).build();
-	}
 
 	/**
 	 * Compile stylesheet given in a zip file. This is suitable for
