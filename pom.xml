@@ -17,7 +17,7 @@
 	<module>api</module>
 	<module>harden</module>
 	<module>xslt</module>
-	<module>service</module>
+	<module>compiler</module>
 	<module>transformations</module>
 	<module>transformer</module>
     </modules>

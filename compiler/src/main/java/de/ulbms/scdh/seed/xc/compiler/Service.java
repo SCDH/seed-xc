@@ -1,4 +1,4 @@
-package de.ulbms.scdh.seed.xc.service;
+package de.ulbms.scdh.seed.xc.compiler;
 
 import de.ulbms.scdh.seed.xc.api.ConfigurationException;
 import de.ulbms.scdh.seed.xc.api.XslcApi;

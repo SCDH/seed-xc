@@ -1,4 +1,4 @@
-package de.ulbms.scdh.seed.xc.service;
+package de.ulbms.scdh.seed.xc.compiler;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import io.quarkus.runtime.annotations.RegisterForReflection;
