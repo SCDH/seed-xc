@@ -4,10 +4,33 @@ info:
   description: SEED XC is an API for compiling XSLT stylesheets and packages
   version: 1.0.0
 
+tags:
+  - name: transformer
+    description: A Transformer API offers transformations user input
+  - name: compiler
+    description: A Compiler API offers operations for compiling user input
+
 paths:
+  /transformations:
+    get:
+      tags:
+        - transformer
+      operationId: transformationsGet
+      summary: Get IDs of all transformations available on this service
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/transformationIDs'
+        "5XX":
+          description: Unexpected error.
 
   /xslc/zip/{stylesheet}:
     post:
+      tags:
+        - compiler
       operationId: compileZip
       summary: Compiles the stylesheet contained in the posted zip and stores it under the given transformation ID.
       parameters:
@@ -37,6 +60,8 @@ paths:
 
   /bind/{transformationResource}/{transformationId}:
     get:
+      tags:
+        - compiler
       operationId: bind
       summary: Binds the transformation resource to the transformation ID. A server without transformation capability SHOULD respond with 501.
       parameters:
@@ -318,6 +343,3 @@ components:
       description: The error message.
       type: string
       format: binary
-            
-    
-  
