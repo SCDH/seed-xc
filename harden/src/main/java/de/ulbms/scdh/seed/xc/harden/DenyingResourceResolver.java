@@ -1,7 +1,6 @@
 package de.ulbms.scdh.seed.xc.harden;
 
 import javax.xml.transform.Source;
-
 import net.sf.saxon.lib.ResourceRequest;
 import net.sf.saxon.lib.ResourceResolver;
 import net.sf.saxon.trans.XPathException;
@@ -13,8 +12,7 @@ import net.sf.saxon.trans.XPathException;
  */
 public class DenyingResourceResolver implements ResourceResolver {
 
-    public Source resolve(ResourceRequest request) throws XPathException {
-	throw new XPathException("illegal resource " + request.uri);
-    }
-
+	public Source resolve(ResourceRequest request) throws XPathException {
+		throw new XPathException("illegal resource " + request.uri);
+	}
 }

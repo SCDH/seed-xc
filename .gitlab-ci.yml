@@ -36,6 +36,15 @@ verify:
     - ./mvnw $MAVEN_CLI_OPTS -Popenapi generate-sources verify
 
 
+formatting:
+  stage: test
+  image: $JAVA_DOCKER_IMAGE
+  before_script:
+    - apk add git findutils clang-extra-tools
+  script:
+    - find . -type f -name '*.java' -exec clang-format -i {} +
+    - if [ -z "$(git status --porcelain)" ]; then echo "formatting OK"; else echo "broken formatting"; git status; git diff; exit 1; fi
+
 push packages:
   stage: push
   image: $JAVA_DOCKER_IMAGE
@@ -45,3 +54,4 @@ push packages:
     - ./mvnw -Drevision=$CI_COMMIT_REF_NAME -Dchangelist="" $MAVEN_CLI_OPTS -s .gitlab/settings.xml deploy
   rules:
     - !reference [ .release_tag, rules ]
+

@@ -6,10 +6,7 @@ package de.ulbms.scdh.seed.xc.xslt;
  */
 public class TestingConfiguration extends ServiceConfiguration {
 
-    protected boolean nonProtocolURIsAllowed;
+	protected boolean nonProtocolURIsAllowed;
 
-    public TestingConfiguration() {
-	this.nonProtocolURIsAllowed = true;
-    }
-
+	public TestingConfiguration() { this.nonProtocolURIsAllowed = true; }
 }
