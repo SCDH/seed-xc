@@ -1,0 +1,23 @@
+identity:
+  description: The identity transformation.
+  class: de.ulbms.scdh.seed.xc.xslt.SaxonXslTransformation
+  location: xsl/id.xsl
+  requiresSource: true
+  mediaType: text/xml
+
+
+param-integer:
+  description: a template with a required integer parameter
+  class: de.ulbms.scdh.seed.xc.xslt.SaxonXslTransformation
+  location: xsl/param-integer.xsl
+  requiresSource: true
+  mediaType: text/xml
+
+tagsoup:
+  description: The identity transformation, but with a tag soup parser per default.
+  class: de.ulbms.scdh.seed.xc.xslt.SaxonXslTransformation
+  location: xsl/id.xsl
+  requiresSource: true
+  mediaType: text/html
+  parser:
+    class: org.ccil.cowan.tagsoup.Parser

@@ -18,6 +18,7 @@
 	<module>harden</module>
 	<module>xslt</module>
 	<module>service</module>
+	<module>transformations</module>
     </modules>
 
     <developers>
