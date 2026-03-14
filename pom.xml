@@ -104,10 +104,6 @@
 	    <id>seed-xc-maven</id>
 	    <url>${distribution.url}</url>
 	</repository>
-	<repository>
-	    <id>saxonica</id>
-	    <url>https://maven.saxonica.com/maven/</url>
-	</repository>
     </repositories>
     <!-- get the build artifacts into the gitlab maven package registry -->
     <distributionManagement>

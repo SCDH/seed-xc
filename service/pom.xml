@@ -61,6 +61,13 @@
 	</dependency>
     </dependencies>
 
+    <repositories>
+	<repository>
+	    <id>saxonica</id>
+	    <url>https://maven.saxonica.com/maven/</url>
+	</repository>
+    </repositories>
+
     <build>
 
 	<resources>
