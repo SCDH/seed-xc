@@ -1,18 +1,15 @@
 package de.ulbms.scdh.seed.xc.harden;
 
+import de.ulbms.scdh.seed.xc.harden.DenyingResourceResolver;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Context;
-
-import org.eclipse.microprofile.config.inject.ConfigProperty;
-
-import net.sf.saxon.lib.ResourceResolver;
 import net.sf.saxon.lib.ChainedResourceResolver;
-import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.lib.Feature;
-
-import de.ulbms.scdh.seed.xc.harden.DenyingResourceResolver;
+import net.sf.saxon.lib.ResourceResolver;
+import net.sf.saxon.s9api.Processor;
+import net.sf.saxon.trans.XPathException;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
  * A resource resolver that chains together the FileURIResolver and
@@ -23,22 +20,23 @@ import de.ulbms.scdh.seed.xc.harden.DenyingResourceResolver;
 @ApplicationScoped
 public class RestrictiveResourceResolver extends ChainedResourceResolver {
 
-    /**
-     * A dummy constructor needed for CDI. It must be present, but
-     * does not get called.
-     */
-    public RestrictiveResourceResolver() {
-	super(new DenyingResourceResolver(), new DenyingResourceResolver());
-    }
+	/**
+	 * A dummy constructor needed for CDI. It must be present, but
+	 * does not get called.
+	 */
+	public RestrictiveResourceResolver() {
+		super(new DenyingResourceResolver(), new DenyingResourceResolver());
+	}
 
-    /**
-     * The constructor to use for this resolver.
-     */
-    @Inject
-    public RestrictiveResourceResolver
-    	(@Context FileURIResolver fileResourceResolver,
-	 @Context Processor processor) {
-	super(fileResourceResolver, (ResourceResolver) processor.getConfigurationProperty(Feature.RESOURCE_RESOLVER));
-    }
-
+	/**
+	 * The constructor to use for this resolver.
+	 */
+	@Inject
+	public RestrictiveResourceResolver(@Context FileURIResolver
+										   fileResourceResolver,
+									   @Context Processor processor) {
+		super(fileResourceResolver,
+			  (ResourceResolver)processor.getConfigurationProperty(
+				  Feature.RESOURCE_RESOLVER));
+	}
 }
