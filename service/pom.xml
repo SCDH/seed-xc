@@ -8,9 +8,9 @@
 	<version>${revision}${changelist}</version>
     </parent>
 
-    <artifactId>seed-xc-service</artifactId>
-    <name>SEED XC Service</name>
-    <description>This package provides the SEED XC RESTful webservice</description>
+    <artifactId>seed-xslt-compiler</artifactId>
+    <name>SEED XSLT Compilation Service</name>
+    <description>This webservice can compile XSLT to SEF</description>
 
 
     <dependencies>
@@ -97,22 +97,6 @@
 	    <!-- </plugin> -->
 
             <plugin>
-                <groupId>${quarkus.platform.group-id}</groupId>
-                <artifactId>quarkus-maven-plugin</artifactId>
-                <version>${quarkus.platform.version}</version>
-                <extensions>true</extensions>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>build</goal>
-                            <goal>generate-code</goal>
-                            <goal>generate-code-tests</goal>
-                            <goal>native-image-agent</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <version>${surefire-plugin.version}</version>
                 <executions>
@@ -161,11 +145,37 @@
     </build>
 
     <profiles>
+
+	<profile>
+	    <!-- ./mvnw -Pcompiler quarkus:dev to bring up the compiler service -->
+	    <id>compiler</id>
+	    <build>
+		<plugins>
+		    <plugin>
+			<groupId>${quarkus.platform.group-id}</groupId>
+			<artifactId>quarkus-maven-plugin</artifactId>
+			<version>${quarkus.platform.version}</version>
+			<extensions>true</extensions>
+			<executions>
+			    <execution>
+				<goals>
+				    <goal>build</goal>
+				    <goal>generate-code</goal>
+				    <goal>generate-code-tests</goal>
+				    <goal>native-image-agent</goal>
+				</goals>
+			    </execution>
+			</executions>
+		    </plugin>
+		</plugins>
+	    </build>
+	</profile>
+
         <profile>
-            <id>native</id>
+            <id>compiler-native</id>
             <activation>
                 <property>
-                    <name>native</name>
+                    <name>compiler-native</name>
                 </property>
             </activation>
             <properties>
@@ -173,6 +183,27 @@
                 <skipITs>false</skipITs>
                 <quarkus.native.enabled>true</quarkus.native.enabled>
             </properties>
+	    <build>
+		<plugins>
+		    <plugin>
+			<groupId>${quarkus.platform.group-id}</groupId>
+			<artifactId>quarkus-maven-plugin</artifactId>
+			<version>${quarkus.platform.version}</version>
+			<extensions>true</extensions>
+			<executions>
+			    <execution>
+				<goals>
+				    <goal>build</goal>
+				    <goal>generate-code</goal>
+				    <goal>generate-code-tests</goal>
+				    <goal>native-image-agent</goal>
+				</goals>
+			    </execution>
+			</executions>
+		    </plugin>
+		</plugins>
+	    </build>
         </profile>
+
     </profiles>
 </project>
