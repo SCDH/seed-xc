@@ -27,6 +27,181 @@ paths:
         "5XX":
           description: Unexpected error.
 
+  /transform/{transformation}/info:
+    get:
+      tags:
+        - transformer
+      operationId: transformTransformationInfoGet
+      summary: Get info for transformation with the ID
+      parameters:
+        - name: transformation
+          in: path
+          description: The ID of the transformation
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/transformationInfo'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/InternalError'
+
+  /transform/{transformation}/parameters:
+    get:
+      tags:
+        - transformer
+      operationId: transformTransformationParametersGet
+      summary: Get a compiler-generated description of the global parameters of this transformation.
+      parameters:
+        - name: transformation
+          in: path
+          description: The ID of the transformation
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/xsltParameterDetails'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/InternalError'
+
+  /transform/{transformation}/{url}:
+    post:
+      tags:
+        - transformer
+      operationId: transformTransformationUrlPost
+      summary: Transform the XML document from the specified URL. Runtime parameters are provided in the request body.
+      parameters:
+        - name: transformation
+          in: path
+          description: The ID of the transformation
+          required: true
+          schema:
+            type: string
+        - name: url
+          in: path
+          description: The URL of the source document to be transformed
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: The input to the transformation
+        required: false
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                runtimeParameters:
+                  $ref: '#/components/schemas/runtimeParameters'
+                config:
+                  $ref: '#/components/schemas/config'
+            encoding:
+              runtimeParameters:
+                contentType: application/json
+              config:
+                contentType: application/json
+      responses:
+        "200":
+          $ref: '#/components/responses/TransformationOK'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/InternalError'
+    get:
+      tags:
+        - transformer
+      operationId: transformTransformationUrlGet
+      summary: Transform the XML document from the specified URL. No runtime parameters can be provided.
+      parameters:
+        - name: transformation
+          in: path
+          description: The ID of the transformation
+          required: true
+          schema:
+            type: string
+        - name: url
+          in: path
+          description: The URL of the source document to be transformed
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          $ref: '#/components/responses/TransformationOK'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/InternalError'
+
+  /transform/{transformation}:
+    post:
+      tags:
+        - transformer
+      operationId: transformTransformationPost
+      summary: Transform the XML document posted in the request body. Its URL and the runtime parameters are also provided in the request body.
+      parameters:
+        - name: transformation
+          in: path
+          description: The ID of the transformation
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: The input to the transformation
+        required: false
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                source:
+                  description: The source document
+                  type: string
+                  format: binary
+                sourceUrl:
+                  description: URL of the source document
+                  type: string
+                runtimeParameters:
+                  $ref: '#/components/schemas/runtimeParameters'
+                config:
+                  $ref: '#/components/schemas/config'
+              required:
+                - source
+            encoding:
+              source:
+                contentType: application/xml, text/xml, application/atom+xml, application/svg+xml, application/xhtml+xml
+      responses:
+        "200":
+          $ref: '#/components/responses/TransformationOK'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/InternalError'
+
+
   /xslc/zip/{stylesheet}:
     post:
       tags:
@@ -121,6 +296,29 @@ components:
         text/plain:
           schema:
             type: string
+    TransformationOK:
+      description: OK
+      content:
+        "*/*":
+          schema:
+            type: string
+            format: binary
+    NotFound:
+      description: The specified resource was not found
+    BadRequest:
+      description: Bad request.
+      content:
+        text/plain:
+          schema:
+            type: string
+            format: binary
+    InternalError:
+      description: An error occurred while performing the transformation.
+      content:
+        text/plain:
+          schema:
+            type: string
+            format: binary
   schemas:
     parser:
       description: How to parse the main input.

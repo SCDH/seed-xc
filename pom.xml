@@ -8,7 +8,7 @@
     <version>${revision}${changelist}</version>
 
     <name>SEED XC</name>
-    <description>SEED XC is a Compiler for XSLT and XQuery based on Saxon</description>
+    <description>SEED XC offers components for XML processing webservices</description>
     <url>https://github.com/scdh/seed-xc</url>
 
     <packaging>pom</packaging>
@@ -19,6 +19,7 @@
 	<module>xslt</module>
 	<module>service</module>
 	<module>transformations</module>
+	<module>transformer</module>
     </modules>
 
     <developers>
