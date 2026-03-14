@@ -38,7 +38,7 @@ public class TransformServiceTest {
 	public void testTransformIdentityInfoGet() {
 		given()
 			.when()
-			.get("/transform/identity/info")
+			.get("/transformations/identity/info")
 			.then()
 			.statusCode(200)
 			.contentType(ContentType.JSON)
@@ -51,7 +51,7 @@ public class TransformServiceTest {
 	public void testTransformIdentityParametersGet() {
 		given()
 			.when()
-			.get("/transform/identity/parameters")
+			.get("/transformations/identity/parameters")
 			.then()
 			.statusCode(200)
 			.body("size()", is(0));
@@ -75,7 +75,7 @@ public class TransformServiceTest {
 	public void testTransformParamIntegerInfoGet() {
 		given()
 			.when()
-			.get("/transform/param-integer/info")
+			.get("/transformations/param-integer/info")
 			.then()
 			.statusCode(200)
 			.contentType(ContentType.JSON)
@@ -88,7 +88,7 @@ public class TransformServiceTest {
 	public void testTransformParamIntegerParametersGet() {
 		given()
 			.when()
-			.get("/transform/param-integer/parameters")
+			.get("/transformations/param-integer/parameters")
 			.then()
 			.statusCode(200)
 			.contentType(ContentType.JSON)

@@ -27,11 +27,11 @@ paths:
         "5XX":
           description: Unexpected error.
 
-  /transform/{transformation}/info:
+  /transformations/{transformation}/info:
     get:
       tags:
         - transformer
-      operationId: transformTransformationInfoGet
+      operationId: transformationsTransformationInfoGet
       summary: Get info for transformation with the ID
       parameters:
         - name: transformation
@@ -54,11 +54,11 @@ paths:
         "500":
           $ref: '#/components/responses/InternalError'
 
-  /transform/{transformation}/parameters:
+  /transformations/{transformation}/parameters:
     get:
       tags:
         - transformer
-      operationId: transformTransformationParametersGet
+      operationId: transformationsTransformationParametersGet
       summary: Get a compiler-generated description of the global parameters of this transformation.
       parameters:
         - name: transformation

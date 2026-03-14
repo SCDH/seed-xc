@@ -5,9 +5,7 @@ import de.ulbms.scdh.seed.xc.api.RuntimeParameters;
 import de.ulbms.scdh.seed.xc.api.TransformApi;
 import de.ulbms.scdh.seed.xc.api.Transformation;
 import de.ulbms.scdh.seed.xc.api.TransformationException;
-import de.ulbms.scdh.seed.xc.api.TransformationInfo;
 import de.ulbms.scdh.seed.xc.api.TransformationPreparationException;
-import de.ulbms.scdh.seed.xc.api.XsltParameterDetails;
 import de.ulbms.scdh.seed.xc.transformations.TransformationMap;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
@@ -30,33 +28,6 @@ public class TransformService implements TransformApi {
 		LoggerFactory.getLogger(TransformService.class);
 
 	@Inject TransformationMap transformationsMap;
-
-	@Override
-	public Response transformTransformationInfoGet(String transformationId) {
-		if (transformationsMap.containsKey(transformationId)) {
-			TransformationInfo info = transformationsMap.get(transformationId)
-										  .getTransformationInfo();
-			RestResponse<TransformationInfo> response = RestResponse.ok(info);
-			return response.toResponse();
-		} else {
-			return RestResponse.status(Status.NOT_FOUND).toResponse();
-		}
-	}
-
-	@Override
-	public Response
-	transformTransformationParametersGet(String transformationId) {
-		if (transformationsMap.containsKey(transformationId)) {
-			XsltParameterDetails parameters =
-				transformationsMap.get(transformationId)
-					.getTransformationParameters();
-			RestResponse<XsltParameterDetails> response =
-				RestResponse.ok(parameters);
-			return response.toResponse();
-		} else {
-			return RestResponse.status(Status.NOT_FOUND).toResponse();
-		}
-	}
 
 	@Override
 	public Response transformTransformationUrlPost(String transformationId,
