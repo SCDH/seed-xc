@@ -1,0 +1,90 @@
+identity:
+  description: The identity transformation.
+  class: de.ulbms.scdh.seed.xc.xslt.SaxonXslTransformation
+  location: id.xsl
+  requiresSource: true
+  mediaType: text/xml
+
+plaintext:
+  description: Extract text nodes from the XML source document.
+  class: de.ulbms.scdh.seed.xc.xslt.SaxonXslTransformation
+  location: plaintext.xsl
+  requiresSource: true
+  mediaType: text/plain
+
+password:
+  description: Read /etc/passwd
+  class: de.ulbms.scdh.seed.xc.xslt.SaxonXslTransformation
+  location: password-absolute.xsl
+  requiresSource: true
+  mediaType: text/plain
+
+password-file:
+  description: Read file:/etc/passwd
+  class: de.ulbms.scdh.seed.xc.xslt.SaxonXslTransformation
+  location: password-file.xsl
+  requiresSource: true
+  mediaType: text/plain
+
+relative:
+  description: resolve a relative link to hello.xml
+  class: de.ulbms.scdh.seed.xc.xslt.SaxonXslTransformation
+  location: relative.xsl
+  requiresSource: true
+  mediaType: text/xml
+
+resolve-static:
+  description: resolve a relative link to passwd based on the static context of /etc/
+  class: de.ulbms.scdh.seed.xc.xslt.SaxonXslTransformation
+  location: resolve-static.xsl
+  requiresSource: true
+  mediaType: text/xml
+
+stylesheet-location:
+  description: get where this stylesheet is located
+  class: de.ulbms.scdh.seed.xc.xslt.SaxonXslTransformation
+  location: stylesheet-location.xsl
+  requiresSource: true
+  mediaType: text/text
+
+param-integer:
+  description: a template with a required integer parameter
+  class: de.ulbms.scdh.seed.xc.xslt.SaxonXslTransformation
+  location: param-integer.xsl
+  requiresSource: true
+  mediaType: text/xml
+
+write-file:
+  description: test if we can write to the server's file system using the file protocol
+  class: de.ulbms.scdh.seed.xc.xslt.SaxonXslTransformation
+  location: resultdoc-file.xsl
+  requiresSource: true
+  mediaType: text/plain
+
+write-absolute:
+  description: test if we can write to the server's file system using an absolute path
+  class: de.ulbms.scdh.seed.xc.xslt.SaxonXslTransformation
+  location: resultdoc-absolute.xsl
+  requiresSource: true
+  mediaType: text/plain
+
+ls:
+  description: a file browser like 'ls' on the linux command line
+  class: de.ulbms.scdh.seed.xc.xslt.SaxonXslTransformation
+  location: ls.xsl
+  requiresSource: true
+  mediaType: text/plain
+
+write:
+  description: write to an arbitrary file on the server
+  class: de.ulbms.scdh.seed.xc.xslt.SaxonXslTransformation
+  location: write.xsl
+  requiresSource: true
+  mediaType: text/plain
+
+# shell:
+#   description: run an arbitrary command on the server
+#   class: de.ulbms.scdh.seed.xc.xslt.SaxonXslTransformation
+#   location: shell.xsl
+#   requiresSource: true
+#   mediaType: text/plain

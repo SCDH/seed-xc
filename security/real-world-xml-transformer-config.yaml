@@ -1,0 +1,39 @@
+identity:
+  description: The identity transformation.
+  class: de.wwu.scdh.seed.xml.transform.saxon.SaxonXslTransformation
+  location: id.xsl
+  requiresSource: true
+  mediaType: text/xml
+
+plaintext:
+  description: Extract text nodes from the XML source document.
+  class: de.wwu.scdh.seed.xml.transform.saxon.SaxonXslTransformation
+  location: plaintext.xsl
+  requiresSource: true
+  mediaType: text/plain
+
+# json-witnesses:
+#   description: A JSON object listing all the text witnesses used in a TEI document.
+#   class: de.wwu.scdh.seed.xml.transform.saxon.SaxonXslTransformation
+#   location: https://scdh.zivgitlabpages.uni-muenster.de/tei-processing/seed-tei-transformations/xsl/json/witnesses.xsl
+#   requiresSource: true
+#   mediaType: application/json
+#   libraries:
+#     - location: https://scdh.zivgitlabpages.uni-muenster.de/tei-processing/seed-tei-transformations/xsl/common/libwit.xsl
+
+# alea-preview:
+#   description: HTML preview for Edition Ibn Nubatah
+#   class: de.wwu.scdh.seed.xml.transform.saxon.SaxonXslTransformation
+#   location: https://scdh.zivgitlabpages.uni-muenster.de/tei-processing/seed-tei-transformations/xsl/projects/alea/preview.xsl
+#   requiresSource: true
+#   mediaType: text/html
+#   libraries:
+#     - location: https://scdh.zivgitlabpages.uni-muenster.de/tei-processing/seed-tei-transformations/xsl/common/libbetween.xsl
+#     - location: https://scdh.zivgitlabpages.uni-muenster.de/tei-processing/seed-tei-transformations/xsl/common/libcommon.xsl
+#     - location: https://scdh.zivgitlabpages.uni-muenster.de/tei-processing/seed-tei-transformations/xsl/common/libwit.xsl
+#     - location: https://scdh.zivgitlabpages.uni-muenster.de/tei-processing/seed-tei-transformations/xsl/html/libi18n.xsl
+#     - location: https://scdh.zivgitlabpages.uni-muenster.de/tei-processing/seed-tei-transformations/xsl/html/libwit.xsl
+#     - location: https://scdh.zivgitlabpages.uni-muenster.de/tei-processing/seed-tei-transformations/xsl/html/librend.xsl
+#     - location: https://scdh.zivgitlabpages.uni-muenster.de/tei-processing/seed-tei-transformations/xsl/html/libcouplet.xsl
+#     - location: https://scdh.zivgitlabpages.uni-muenster.de/tei-processing/seed-tei-transformations/xsl/html/libapp2.xsl
+#     - location: https://scdh.zivgitlabpages.uni-muenster.de/tei-processing/seed-tei-transformations/xsl/projects/alea/libmeta.xsl
