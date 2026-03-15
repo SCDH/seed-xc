@@ -8,15 +8,15 @@
 	<artifactId>seed-xc</artifactId>
 	<version>${revision}${changelist}</version>
     </parent>
-    
-    <artifactId>seed-xc-api</artifactId>
-    <name>SEED XC API</name>
+
+    <artifactId>seed-dts</artifactId>
+    <name>SEED DTS</name>
 
     <properties>
-        <seed-xc-specs.version>0.0.1-rc2</seed-xc-specs.version>
-	<openapi-specs.dir>${project.basedir}/src/main/resources/openapi</openapi-specs.dir>
+	<dts-openapi.version>0.0.2</dts-openapi.version>
+	<openapi-specs.dir>${project.build.directory}</openapi-specs.dir>
     </properties>
-    
+
     <dependencies>
 	<!-- for the annotations in the model and in the api -->
 	<dependency>
@@ -28,32 +28,44 @@
             <artifactId>quarkus-smallrye-openapi</artifactId>
         </dependency>
     </dependencies>
-    
+
     <build>
 	<plugins>
 
-	    <!-- download OpenAPI specs -->
-	    <!-- moved to profiles because of conflicts with quarkus:dev -->
-	    <!-- <plugin> -->
-	    <!-- 	<groupId>io.github.download-maven-plugin</groupId> -->
-	    <!-- 	<artifactId>download-maven-plugin</artifactId> -->
-	    <!-- 	<version>2.0.0</version> -->
-	    <!-- 	<executions> -->
-	    <!-- 	    <execution> -->
-	    <!-- 		<id>download-facade-openapi-specs</id> -->
-	    <!-- 		<!-\- this has to precede the OA generation which is in generate-sources -\-> -->
-	    <!-- 		<phase>initialize</phase> -->
-	    <!-- 		<goals> -->
-	    <!-- 		    <goal>wget</goal> -->
-	    <!-- 		</goals> -->
-	    <!-- 		<configuration> -->
-	    <!-- 		    <url>https://zivgitlab.uni-muenster.de/api/v4/projects/10748/packages/generic/scdh-apis/${seed-xc-specs.version}/seed-xc-openapi.yaml</url> -->
-	    <!-- 		    <unpack>false</unpack> -->
-	    <!-- 		    <outputDirectory>${openapi-specs.dir}</outputDirectory> -->
-	    <!-- 		</configuration> -->
-	    <!-- 	    </execution> -->
-	    <!-- 	</executions> -->
-	    <!-- </plugin> -->
+	    <plugin>
+		<groupId>io.github.download-maven-plugin</groupId>
+		<artifactId>download-maven-plugin</artifactId>
+		<version>2.0.0</version>
+		<executions>
+		    <!-- download OpenAPI specs -->
+		    <execution>
+			<id>download-facade-openapi-specs</id>
+			<!-- this has to precede the OA generation which is in generate-sources -->
+			<phase>generate-sources</phase>
+			<goals>
+			    <goal>wget</goal>
+			</goals>
+			<configuration>
+			    <url>https://zivgitlab.uni-muenster.de/api/v4/projects/10389/packages/generic/scdh-apis/${dts-openapi.version}/facade-openapi.yaml</url>
+			    <unpack>false</unpack>
+			    <outputDirectory>${openapi-specs.dir}</outputDirectory>
+			</configuration>
+		    </execution>
+		    <!-- download DTS transformations (XSLT) -->
+                    <execution>
+                        <id>download-dts-transformations</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>https://github.com/SCDH/dts-transformations/releases/download/${dts-transformations.version}/dts-transformations-${dts-transformations.version}-seed-resources.tar.gz</url>
+                            <unpack>true</unpack>
+                            <outputDirectory>${project.build.directory}/dependencies/</outputDirectory>
+                        </configuration>
+                    </execution>
+		</executions>
+	    </plugin>
 
 	    <!-- this generates the code for the service -->
 	    <plugin>
@@ -66,7 +78,7 @@
 			    <goal>generate</goal>
 			</goals>
 			<configuration>
-			    <inputSpec>${openapi-specs.dir}/seed-xc-openapi.yaml</inputSpec>
+			    <inputSpec>${openapi-specs.dir}/facade-openapi.yaml</inputSpec>
 			    <generatorName>jaxrs-spec</generatorName>
 			    <generateAliasAsModel>true</generateAliasAsModel>
 			    <generateModelTests>false</generateModelTests>
@@ -161,8 +173,14 @@
 		    </execution>
 		</executions>
 	    </plugin>
-	    
+
 	</plugins>
     </build>
+
+    <profiles>
+	<profile>
+	    <id>dts</id>
+	</profile>
+    </profiles>
 
 </project>

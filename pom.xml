@@ -20,6 +20,7 @@
 	<module>compiler</module>
 	<module>transformations</module>
 	<module>transformer</module>
+	<module>dts</module>
     </modules>
 
     <developers>
@@ -72,6 +73,8 @@
 	<slf4j.version>2.0.6</slf4j.version>
 	<saxon.version>12.9</saxon.version>
 	<saxon.artifactId>Saxon-HE</saxon.artifactId>
+	<openapitools.version>7.18.0</openapitools.version>
+	<dts-transformations.version>0.4.7</dts-transformations.version>
 
 	<quarkus.native.native-image-xmx>8192m</quarkus.native.native-image-xmx>
 	<!-- enable docker layers with additional dependencies,
