@@ -1,7 +1,42 @@
-# SEED XC - XSLT/XQuery Compilation Service
+# SEED XC - XML Processing with Composable REST Services
 
-[OpenAPI specification](api/src/main/resources/openapi/seed-xc-openapi.yaml)
+This project provides high-level components for XML-processing REST
+services and different services built from them.
 
+Services
+
+- [SEED XML Transformer](transformer): A RESTful webservice for
+  transforming XML (and even HTML tag soup) with XSLT, XQuery, etc.
+- [DTS](dts): A RESTful webservice implementing a subset of the
+  endpoints of Distributed Text Services
+- [SEED XSLT Compiler](compiler): Compiles XSLT to
+  [SEF](https://www.saxonica.com/saxonjs/documentation3/index.html)
+  (needs a license for the Saxon entreprise edition)
+
+Components
+
+- [SEED API](api): [OpenAPI
+  specs](api/src/main/resources/openapi/seed-xc-openapi.yaml) and
+  derived data models and service interfaces, common supporting
+  classes
+- [SEED XC Transformation Map](transformations): compile
+  transformations once ahead of time and make them available for
+  processing subsequent transformation request instantly
+- [XSLT](xslt): a plugin to the SEED XC Transformation Map that
+  provides transformation by XSLT
+
+Planned components:
+
+- XQuery: a plugin similar to the XSLT plugin, but for XQuery
+- Source plugins: Plugins for accessing source documents from
+  different storage types by ID: URL, URN, DOI, local filesystem,
+  Solr, OpenSearch, DBMSs
+
+
+This project is part of the SEED, which is a recursive acronym for
+SEED *E*lectronic *Ed*itions, which is to mean *digital* scholarly
+editions (DSEs). If you dislike recursion, take some iterations on
+SCDH DSE until you got the letters in right order.
 
 ## Getting Started
 
@@ -11,43 +46,23 @@ Build:
 ./mvnw generate-sources package
 ```
 
-Run dev server:
+To run one of the services in dev mode, use `-P` switch to select a
+service profile.
+
+XSLT Compiler:
 
 ```shell
-./mvnw quarkus:dev
+./mvnw -Pcompiler quarkus:dev
+```
+
+XML Transformer:
+
+```shell
+./mvnw -Ptransformer quarkus:dev
 ```
 
 Dev-Server will listen on http://localhost:8080
 
-
-## Exporting compiled XSLT Stylesheets
-
-The service can return compiled XSLT stylesheets in SEF format,
-provided, that the instance of the service has a Saxon Enterprise
-Edition License.
-
-Copy this license to `/etc/licenses/saxon-license.lic`.
-
-Then tell the instance to use the EE Saxon configuration that uses
-this license at startup.
-
-dev server:
-
-```shell
-./mvnw -Dde.ulbms.scdh.seed.xc.xslt.ConfiguredProcessor.saxonConfigLocations=$(realpath service/src/main/resources/saxon-config-ee.xml) quarkus:dev
-```
-
-
-curl example with sample zip from this project:
-
-```shell
-curl -X 'POST' \
-	 'http://localhost:8080/xslc/zip/xsl%2Fid.xsl' \
-	 -H 'accept: */*' \
-	 -H 'Content-Type: application/zip' \
-	 --data-binary '@harden/src/test/resources/xsl.zip' \
-	 -i
-```
 
 ## Contributing
 
