@@ -1,12 +1,12 @@
 package de.ulbms.scdh.seed.xc.transformations;
 
-import de.ulbms.scdh.seed.xc.xslt.SaxonXslTransformation;
-import io.restassured.http.ContentType;
 import static io.restassured.RestAssured.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.collection.ArrayMatching.*;
 
+import de.ulbms.scdh.seed.xc.xslt.SaxonXslTransformation;
 import io.quarkus.test.junit.QuarkusTest;
+import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -91,5 +91,4 @@ public class TransformationsServiceTest {
 			.body("times.underlyingDeclaredType", is("xs:integer"))
 			.body("times.isRequired", is(true));
 	}
-
 }

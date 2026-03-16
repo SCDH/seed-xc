@@ -1,8 +1,8 @@
 package de.ulbms.scdh.seed.xc.transformations;
 
 import de.ulbms.scdh.seed.xc.api.Transformation;
-import de.ulbms.scdh.seed.xc.api.TransformationInfo;
 import de.ulbms.scdh.seed.xc.api.TransformationIDs;
+import de.ulbms.scdh.seed.xc.api.TransformationInfo;
 import de.ulbms.scdh.seed.xc.api.TransformationsApi;
 import de.ulbms.scdh.seed.xc.api.XsltParameterDetails;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -41,8 +41,9 @@ public class TransformationsService implements TransformationsApi {
 		return response.toResponse();
 	}
 
-        @Override
-	public Response transformationsTransformationInfoGet(String transformationId) {
+	@Override
+	public Response
+	transformationsTransformationInfoGet(String transformationId) {
 		if (transformationsMap.containsKey(transformationId)) {
 			TransformationInfo info = transformationsMap.get(transformationId)
 										  .getTransformationInfo();
