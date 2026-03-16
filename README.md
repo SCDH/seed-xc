@@ -1,4 +1,4 @@
-# SEED XC - Composable XML REST Services
+# SEED XC - XML Processing with Composable REST Services
 
 This project provides high-level components for XML-processing REST
 services and different services built from them.
