@@ -89,14 +89,16 @@
 			    <configOptions>
 				<library>quarkus</library>
 				<useJakartaEe>true</useJakartaEe>
+				<supportAsync>true</supportAsync>
+				<useMutiny>true</useMutiny>
+				<returnResponse>false</returnResponse>
+				<interfaceOnly>true</interfaceOnly>
 				<apiPackage>de.ulbms.scdh.seed.xc.api</apiPackage>
 				<modelPackage>de.ulbms.scdh.seed.xc.api</modelPackage>
 				<dateLibrary>java8</dateLibrary>
 				<hideGenerationTimestamp>true</hideGenerationTimestamp>
 				<disallowAdditionalPropertiesIfNotPresent>false</disallowAdditionalPropertiesIfNotPresent>
 				<useTags>false</useTags>
-				<interfaceOnly>true</interfaceOnly>
-				<returnResponse>true</returnResponse>
 				<useSwaggerAnnotations>false</useSwaggerAnnotations>
 				<useMicroProfileOpenAPIAnnotations>true</useMicroProfileOpenAPIAnnotations>
 				<openApiNullable>false</openApiNullable>
