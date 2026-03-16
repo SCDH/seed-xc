@@ -33,6 +33,11 @@ Planned components:
   Solr, OpenSearch, DBMSs
 
 
+This project is part of the SEED, which is a recursive acronym for
+SEED *E*lectronic *Ed*itions, which is to mean *digital* scholarly
+editions (DSEs). If you dislike recursion, take some iterations on
+SCDH DSE until you got the letters in right order.
+
 ## Getting Started
 
 Build:
