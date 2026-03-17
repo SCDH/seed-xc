@@ -17,6 +17,7 @@ import de.ulbms.scdh.seed.xc.harden.FileURIResolver;
 import de.ulbms.scdh.seed.xc.harden.RestrictiveFileOnlyResolver;
 import de.ulbms.scdh.seed.xc.harden.RestrictiveResourceResolver;
 import de.ulbms.scdh.seed.xc.harden.RestrictiveUnparsedTextResolver;
+import de.ulbms.scdh.seed.xc.harden.ServiceConfiguration;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
