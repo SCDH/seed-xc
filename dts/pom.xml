@@ -69,8 +69,8 @@
 				<!-- see https://github.com/quarkusio/quarkus/discussions/29844 -->
 				<returnResponse>true</returnResponse>
 				<interfaceOnly>true</interfaceOnly>
-				<apiPackage>de.ulbms.scdh.seed.xc.dts</apiPackage>
-				<modelPackage>de.ulbms.scdh.seed.xc.dts</modelPackage>
+				<apiPackage>de.ulbms.scdh.seed.xc.dts.endpoints</apiPackage>
+				<modelPackage>de.ulbms.scdh.seed.xc.dts.model</modelPackage>
 				<dateLibrary>java8</dateLibrary>
 				<hideGenerationTimestamp>true</hideGenerationTimestamp>
 				<disallowAdditionalPropertiesIfNotPresent>false</disallowAdditionalPropertiesIfNotPresent>

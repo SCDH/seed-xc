@@ -1,6 +1,7 @@
-package de.ulbms.scdh.seed.xc.dts;
+package de.ulbms.scdh.seed.xc.dts.navigation;
 
 import de.ulbms.scdh.seed.xc.api.Transformation;
+import de.ulbms.scdh.seed.xc.dts.endpoints.NavigationApi;
 import de.ulbms.scdh.seed.xc.transformations.TransformationMap;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.RequestScoped;
