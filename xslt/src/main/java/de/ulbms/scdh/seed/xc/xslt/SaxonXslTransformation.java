@@ -14,6 +14,7 @@ import de.ulbms.scdh.seed.xc.api.XsltParameterDetails;
 import de.ulbms.scdh.seed.xc.api.XsltParameterDetailsValue;
 import de.ulbms.scdh.seed.xc.harden.RestrictiveFileOnlyResolver;
 import de.ulbms.scdh.seed.xc.harden.RestrictiveResourceResolver;
+import de.ulbms.scdh.seed.xc.harden.ServiceConfiguration;
 import de.ulbms.scdh.seed.xc.harden.ZipFileURIResolver;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
