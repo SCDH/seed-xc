@@ -180,18 +180,18 @@
 			</configuration>
 		    </execution>
 		    <!-- download DTS transformations (XSLT) -->
-                    <!-- <execution> -->
-                    <!--     <id>download-dts-transformations</id> -->
-                    <!--     <phase>generate-sources</phase> -->
-                    <!--     <goals> -->
-                    <!--         <goal>wget</goal> -->
-                    <!--     </goals> -->
-                    <!--     <configuration> -->
-                    <!--         <url>https://github.com/SCDH/dts-transformations/releases/download/${dts-transformations.version}/dts-transformations-${dts-transformations.version}-seed-resources.tar.gz</url> -->
-                    <!--         <unpack>true</unpack> -->
-                    <!--         <outputDirectory>${project.build.directory}/dependencies/</outputDirectory> -->
-                    <!--     </configuration> -->
-                    <!-- </execution> -->
+                    <execution>
+                        <id>download-dts-transformations</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>https://github.com/SCDH/dts-transformations/releases/download/${dts-transformations.version}/dts-transformations-${dts-transformations.version}-seed-resources.tar.gz</url>
+                            <unpack>true</unpack>
+                            <outputDirectory>${project.build.directory}/dependencies/</outputDirectory>
+                        </configuration>
+                    </execution>
 		</executions>
 	    </plugin>
 		</plugins>
