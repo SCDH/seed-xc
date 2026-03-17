@@ -75,6 +75,7 @@
 	<saxon.artifactId>Saxon-HE</saxon.artifactId>
 	<openapitools.version>7.19.0</openapitools.version>
 	<dts-transformations.version>0.4.7</dts-transformations.version>
+	<dts-transformations.url>https://github.com/SCDH/dts-transformations/releases/download/${dts-transformations.version}/dts-transformations-${dts-transformations.version}-seed-resources.tar.gz</dts-transformations.url>
 
 	<quarkus.native.native-image-xmx>8192m</quarkus.native.native-image-xmx>
 	<!-- enable docker layers with additional dependencies,
