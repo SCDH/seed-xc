@@ -18,6 +18,16 @@
     </properties>
 
     <dependencies>
+        <dependency>
+	    <groupId>${project.groupId}</groupId>
+	    <artifactId>seed-xc-api</artifactId>
+	    <version>${revision}${changelist}</version>
+        </dependency>
+        <dependency>
+	    <groupId>${project.groupId}</groupId>
+	    <artifactId>seed-xc-transformations</artifactId>
+	    <version>${revision}${changelist}</version>
+        </dependency>
 	<!-- for the annotations in the model and in the api -->
 	<dependency>
 	    <groupId>io.quarkus</groupId>
@@ -31,41 +41,6 @@
 
     <build>
 	<plugins>
-
-	    <plugin>
-		<groupId>io.github.download-maven-plugin</groupId>
-		<artifactId>download-maven-plugin</artifactId>
-		<version>2.0.0</version>
-		<executions>
-		    <!-- download OpenAPI specs -->
-		    <execution>
-			<id>download-facade-openapi-specs</id>
-			<!-- this has to precede the OA generation which is in generate-sources -->
-			<phase>generate-sources</phase>
-			<goals>
-			    <goal>wget</goal>
-			</goals>
-			<configuration>
-			    <url>https://zivgitlab.uni-muenster.de/api/v4/projects/10389/packages/generic/scdh-apis/${dts-openapi.version}/facade-openapi.yaml</url>
-			    <unpack>false</unpack>
-			    <outputDirectory>${openapi-specs.dir}</outputDirectory>
-			</configuration>
-		    </execution>
-		    <!-- download DTS transformations (XSLT) -->
-                    <execution>
-                        <id>download-dts-transformations</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>wget</goal>
-                        </goals>
-                        <configuration>
-                            <url>https://github.com/SCDH/dts-transformations/releases/download/${dts-transformations.version}/dts-transformations-${dts-transformations.version}-seed-resources.tar.gz</url>
-                            <unpack>true</unpack>
-                            <outputDirectory>${project.build.directory}/dependencies/</outputDirectory>
-                        </configuration>
-                    </execution>
-		</executions>
-	    </plugin>
 
 	    <!-- this generates the code for the service -->
 	    <plugin>
@@ -91,7 +66,8 @@
 				<useJakartaEe>true</useJakartaEe>
 				<supportAsync>true</supportAsync>
 				<useMutiny>true</useMutiny>
-				<returnResponse>false</returnResponse>
+				<!-- see https://github.com/quarkusio/quarkus/discussions/29844 -->
+				<returnResponse>true</returnResponse>
 				<interfaceOnly>true</interfaceOnly>
 				<apiPackage>de.ulbms.scdh.seed.xc.dts</apiPackage>
 				<modelPackage>de.ulbms.scdh.seed.xc.dts</modelPackage>
@@ -181,7 +157,70 @@
 
     <profiles>
 	<profile>
+	    <id>download-openapi</id>
+	    <build>
+		<plugins>
+	    	    <plugin>
+		<groupId>io.github.download-maven-plugin</groupId>
+		<artifactId>download-maven-plugin</artifactId>
+		<version>2.0.0</version>
+		<executions>
+		    <!-- download OpenAPI specs -->
+		    <execution>
+			<id>download-facade-openapi-specs</id>
+			<!-- this has to precede the OA generation which is in generate-sources -->
+			<phase>initialize</phase>
+			<goals>
+			    <goal>wget</goal>
+			</goals>
+			<configuration>
+			    <url>https://zivgitlab.uni-muenster.de/api/v4/projects/10389/packages/generic/scdh-apis/${dts-openapi.version}/facade-openapi.yaml</url>
+			    <unpack>false</unpack>
+			    <outputDirectory>${openapi-specs.dir}</outputDirectory>
+			</configuration>
+		    </execution>
+		    <!-- download DTS transformations (XSLT) -->
+                    <!-- <execution> -->
+                    <!--     <id>download-dts-transformations</id> -->
+                    <!--     <phase>generate-sources</phase> -->
+                    <!--     <goals> -->
+                    <!--         <goal>wget</goal> -->
+                    <!--     </goals> -->
+                    <!--     <configuration> -->
+                    <!--         <url>https://github.com/SCDH/dts-transformations/releases/download/${dts-transformations.version}/dts-transformations-${dts-transformations.version}-seed-resources.tar.gz</url> -->
+                    <!--         <unpack>true</unpack> -->
+                    <!--         <outputDirectory>${project.build.directory}/dependencies/</outputDirectory> -->
+                    <!--     </configuration> -->
+                    <!-- </execution> -->
+		</executions>
+	    </plugin>
+		</plugins>
+	    </build>
+	</profile>
+
+
+	<profile>
 	    <id>dts</id>
+	    <build>
+		<plugins>
+		    <plugin>
+			<groupId>${quarkus.platform.group-id}</groupId>
+			<artifactId>quarkus-maven-plugin</artifactId>
+			<version>${quarkus.platform.version}</version>
+			<extensions>true</extensions>
+			<executions>
+			    <execution>
+				<goals>
+				    <goal>build</goal>
+				    <goal>generate-code</goal>
+				    <goal>generate-code-tests</goal>
+				    <goal>native-image-agent</goal>
+				</goals>
+			    </execution>
+			</executions>
+		    </plugin>
+		</plugins>
+	    </build>
 	</profile>
     </profiles>
 
