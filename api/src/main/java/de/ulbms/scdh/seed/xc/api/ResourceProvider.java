@@ -13,8 +13,11 @@ public interface ResourceProvider {
 	/**
 	 * Returns a {@link Source} for a given resource identifier as used in the
 	 * DTS service.
+	 *
+	 * @param context - The key to the context the resource is from
+	 * @param resource - An identifier of the requested resource
 	 */
-	InputStream getSource(String resource)
+	InputStream getSource(String context, String resource)
 		throws ResourceNotFoundException, ResourceException,
 			   ResourceProviderConfigurationException, ConfigurationException;
 }
