@@ -10,6 +10,7 @@ import de.ulbms.scdh.seed.xc.api.ResourceInContext;
 import de.ulbms.scdh.seed.xc.api.ResourceNotFoundException;
 import de.ulbms.scdh.seed.xc.api.ResourceProvider;
 import de.ulbms.scdh.seed.xc.api.ResourceProviderConfigurationException;
+import de.ulbms.scdh.seed.xc.api.RuntimeParameters;
 import de.ulbms.scdh.seed.xc.api.Transformation;
 import de.ulbms.scdh.seed.xc.api.TransformationException;
 import de.ulbms.scdh.seed.xc.api.TransformationPreparationException;
@@ -21,6 +22,7 @@ import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Map;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +57,13 @@ public class NavigationEndpoint implements NavigationApi {
 	public Uni<Navigation> navigation(URI collection, String resource,
 									  String ref, String start, String end,
 									  Integer down, String tree, Integer page) {
+		// make RuntimeParameter object from parameters
+		RuntimeParameters params = new RuntimeParameters();
+		Map<String, String> map = Map.of(
+			"resource", resource, "ref", ref, "start", start, "end", end,
+			"down", down.toString(), "tree", tree, "page", page.toString());
+		params.globalParameters(map);
+
 		return Uni.createFrom()
 			.item(new ResourceInContext("", resource))
 			.onItem()
@@ -89,7 +98,7 @@ public class NavigationEndpoint implements NavigationApi {
 						"transformation not available: " + TRANSFORMATION);
 				}
 				try {
-					return transformation.transform(null, null, resource, s);
+					return transformation.transform(params, null, resource, s);
 				} catch (TransformationPreparationException e) {
 					LOG.error(e.getMessage());
 					throw new jakarta.ws.rs.InternalServerErrorException(
