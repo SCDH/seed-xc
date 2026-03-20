@@ -17,7 +17,7 @@ public interface ResourceProvider {
 	 * @param context - The key to the context the resource is from
 	 * @param resource - An identifier of the requested resource
 	 */
-	InputStream getSource(String context, String resource)
+	InputStream getSource(ResourceInContext resourceInContext)
 		throws ResourceNotFoundException, ResourceException,
 			   ResourceProviderConfigurationException, ConfigurationException;
 }
