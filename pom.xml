@@ -21,6 +21,7 @@
 	<module>transformations</module>
 	<module>transformer</module>
 	<module>dts</module>
+	<module>plugins</module>
     </modules>
 
     <developers>
