@@ -30,3 +30,12 @@ from the `dts` subfolder.
 ```shell
 ./mvnw -Pdts quarkus:dev
 ```
+
+
+## Testing with cURL
+
+```shell
+curl -X 'GET' \
+  'http://localhost:8080/navigation?collection=file%3Aasdfg&down=0&end=sdf&page=12&ref=sdf&resource=hello.xml&start=asdf&tree=sdf' \
+  -H 'accept: application/ld+json'
+```

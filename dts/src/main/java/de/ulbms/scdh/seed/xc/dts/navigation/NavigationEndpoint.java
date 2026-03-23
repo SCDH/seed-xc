@@ -22,6 +22,7 @@ import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import java.io.IOException;
 import java.net.URI;
+import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
@@ -46,7 +47,7 @@ public class NavigationEndpoint implements NavigationApi {
 	 */
 	@ConfigProperty(
 		name = "de.ulbms.scdh.seed.xc.dts.NavigationEndpoint.TRANSFORMATION",
-		defaultValue = "navigation")
+		defaultValue = "dts-transformations-xsl-navigation")
 	private String TRANSFORMATION;
 
 	@Inject TransformationMap transformations;
@@ -59,9 +60,21 @@ public class NavigationEndpoint implements NavigationApi {
 									  Integer down, String tree, Integer page) {
 		// make RuntimeParameter object from parameters
 		RuntimeParameters params = new RuntimeParameters();
-		Map<String, String> map = Map.of(
-			"resource", resource, "ref", ref, "start", start, "end", end,
-			"down", down.toString(), "tree", tree, "page", page.toString());
+		Map<String, String> map = new HashMap<String, String>();
+		if (resource != null)
+			map.put("resource", resource);
+		if (down != null)
+			map.put("down", down.toString());
+		if (tree != null)
+			map.put("tree", tree);
+		if (page != null)
+			map.put("page", page.toString());
+		if (ref != null) {
+			map.put("ref", ref);
+		} else if (start != null)
+			map.put("start", start);
+		if (end != null)
+			map.put("end", end);
 		params.globalParameters(map);
 
 		return Uni.createFrom()
@@ -69,6 +82,7 @@ public class NavigationEndpoint implements NavigationApi {
 			.onItem()
 			.transform((ric) -> {
 				try {
+					LOG.info("getting resource {}", resource);
 					return resourceProvider.getSource(ric);
 				} catch (ResourceNotFoundException e) {
 					LOG.error(e.getMessage());

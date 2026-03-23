@@ -27,7 +27,8 @@ public class NavigationEndpointTest {
 	public void testHelloXml() {
 		given()
 			.when()
-			.get("/navigation/asdf?resource=hello.xml")
+			.get("/navigation?collection=file%3A%2F%2Fasdfasd%2F&down=0&"
+				 + "resource=john.xml")
 			.then()
 			.statusCode(200);
 	}

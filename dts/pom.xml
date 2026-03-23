@@ -20,6 +20,7 @@
 	<seed-dts.config>${project.build.directory}/dependencies/dts-transformations.yaml</seed-dts.config>
 	<seed-dts.saxon-config>${project.build.directory}/dependencies/dts-transformations/saxon.he.xml</seed-dts.saxon-config>
 	<seed-dts.accessible-path>${project.basedir}/../</seed-dts.accessible-path>
+	<seed-dts.filesystem>${project.basedir}/../test/</seed-dts.filesystem>
     </properties>
 
     <dependencies>
@@ -37,7 +38,6 @@
 	    <groupId>${project.groupId}</groupId>
 	    <artifactId>seed-resource-providers</artifactId>
 	    <version>${revision}${changelist}</version>
-	    <scope>test</scope>
         </dependency>
 	<!-- for the annotations in the model and in the api -->
 	<dependency>

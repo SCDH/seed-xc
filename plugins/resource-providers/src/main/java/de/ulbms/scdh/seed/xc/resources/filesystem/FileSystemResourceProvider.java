@@ -7,6 +7,7 @@ import de.ulbms.scdh.seed.xc.api.ResourceProvider;
 import de.ulbms.scdh.seed.xc.api.ResourceProviderConfigurationException;
 import io.quarkus.arc.lookup.LookupIfProperty;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -42,22 +43,23 @@ public class FileSystemResourceProvider implements ResourceProvider {
 	private static final Logger LOG =
 		LoggerFactory.getLogger(FileSystemResourceProvider.class);
 
-	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.resources.filesystem."
-						   + "FileSystemResourceProvider.path",
-					defaultValue = "/")
-	private String pathConfigured;
-
-	private URI path;
+	private URI path = null;
 
 	private Exception error = null;
 
-	public FileSystemResourceProvider() { this.setUp(); }
-
-	@Override
-	public void setUp() {
-		LOG.info("----------------- PATH ----------------: {}", pathConfigured);
+	@Inject
+	public FileSystemResourceProvider(
+		@ConfigProperty(name = "de.ulbms.scdh.seed.xc.resources.filesystem."
+							   + "FileSystemResourceProvider.path",
+						defaultValue = "file:/") String path) {
+		LOG.info("----------------- PATH ----------------: {}", path);
 		try {
-			this.path = Paths.get(new URI(pathConfigured).normalize()).toUri();
+			if (path.startsWith("file:")) {
+				this.path = Paths.get(new URI(path).normalize()).toUri();
+			} else {
+				this.path =
+					Paths.get(new URI("file:" + path).normalize()).toUri();
+			}
 		} catch (URISyntaxException e) {
 			LOG.error("invalid URI (path) for FileSystemResourceProvider: {}",
 					  e.getMessage());
@@ -68,6 +70,9 @@ public class FileSystemResourceProvider implements ResourceProvider {
 			error = e;
 		}
 	}
+
+	@Override
+	public void setUp() {}
 
 	@Override
 	public String getName() {
@@ -81,10 +86,16 @@ public class FileSystemResourceProvider implements ResourceProvider {
 	public InputStream getSource(ResourceInContext ric)
 		throws ResourceProviderConfigurationException,
 			   ResourceNotFoundException, ResourceException {
-		if (error != null)
+		LOG.info("----------------- PATH ----------------: {}", path);
+		if (error != null) {
+			LOG.error("failed to setup: {}", error.getMessage());
 			throw new ResourceProviderConfigurationException(error);
+		}
 		try {
-			URI normalized = path.resolve(ric.getResource()).normalize();
+			LOG.debug("resolving {}", ric.getResource());
+			URI normalized =
+				Paths.get(path.resolve(ric.getResource()).normalize()).toUri();
+			LOG.debug("resolved {} to {}", ric.getResource(), normalized);
 			if (!normalized.toString().startsWith(path.toString())) {
 				throw new ResourceException("not allowed");
 			}
