@@ -5,6 +5,8 @@ import de.ulbms.scdh.seed.xc.api.ResourceInContext;
 import de.ulbms.scdh.seed.xc.api.ResourceNotFoundException;
 import de.ulbms.scdh.seed.xc.api.ResourceProvider;
 import de.ulbms.scdh.seed.xc.api.ResourceProviderConfigurationException;
+import io.quarkus.arc.lookup.LookupIfProperty;
+import jakarta.enterprise.context.ApplicationScoped;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -27,6 +29,11 @@ import org.slf4j.LoggerFactory;
  * Security: Only file paths under the configured <code>path</code>
  * are accessible. For path to the outside, an exception is thrown.
  */
+@LookupIfProperty(
+	name = "de.ulbms.scdh.seed.xc.api.ResourceProvider",
+	stringValue =
+		"de.ulbms.scdh.seed.xc.resources.filesystem.FileSystemResourceProvider")
+@ApplicationScoped
 public class FileSystemResourceProvider implements ResourceProvider {
 
 	public static final String NAME =
@@ -44,8 +51,11 @@ public class FileSystemResourceProvider implements ResourceProvider {
 
 	private Exception error = null;
 
+	public FileSystemResourceProvider() { this.setUp(); }
+
 	@Override
 	public void setUp() {
+		LOG.info("----------------- PATH ----------------: {}", pathConfigured);
 		try {
 			this.path = Paths.get(new URI(pathConfigured).normalize()).toUri();
 		} catch (URISyntaxException e) {
