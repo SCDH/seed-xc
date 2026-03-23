@@ -28,7 +28,12 @@ import org.slf4j.LoggerFactory;
  * paths.<P>
  *
  * Security: Only file paths under the configured <code>path</code>
- * are accessible. For path to the outside, an exception is thrown.
+ * are accessible. For path to the outside, an exception is thrown.<P>
+ *
+ * Configuration properties:
+ * <code>de.ulbms.scdh.seed.xc.resources.filesystem.FileSystemResourceProvider.path</code>
+ * takes the path configuration parameter. Relative path names are
+ * resolved against the current user directory.
  */
 @LookupIfProperty(
 	name = "de.ulbms.scdh.seed.xc.api.ResourceProvider",
@@ -51,32 +56,24 @@ public class FileSystemResourceProvider implements ResourceProvider {
 	public FileSystemResourceProvider(
 		@ConfigProperty(name = "de.ulbms.scdh.seed.xc.resources.filesystem."
 							   + "FileSystemResourceProvider.path",
-						defaultValue = "file:/") String path) {
-		LOG.info("----------------- PATH ----------------: {}", path);
+						defaultValue = "/") String path) {
+		LOG.debug("setting up file system resource provider with path {}",
+				  path);
 		try {
-			if (path.startsWith("file:")) {
-				this.path = Paths.get(new URI(path).normalize()).toUri();
-			} else {
-				this.path =
-					Paths.get(new URI("file:" + path).normalize()).toUri();
-			}
-		} catch (URISyntaxException e) {
-			LOG.error("invalid URI (path) for FileSystemResourceProvider: {}",
-					  e.getMessage());
-			error = e;
-		} catch (NullPointerException e) {
-			LOG.error("invalid URI (path) for FileSystemResourceProvider: {}",
+			// resolving relative paths against the current
+			// user directory with getAbsoluteFile()
+			// simplifies testing and configuration.
+			this.path = Paths.get(path)
+							.toFile()
+							.getAbsoluteFile()
+							.getCanonicalFile()
+							.toURI();
+
+		} catch (Exception e) {
+			LOG.error("invalid path for FileSystemResourceProvider: {}",
 					  e.getMessage());
 			error = e;
 		}
-	}
-
-	@Override
-	public void setUp() {}
-
-	@Override
-	public String getName() {
-		return NAME;
 	}
 
 	/**
@@ -86,15 +83,14 @@ public class FileSystemResourceProvider implements ResourceProvider {
 	public InputStream getSource(ResourceInContext ric)
 		throws ResourceProviderConfigurationException,
 			   ResourceNotFoundException, ResourceException {
-		LOG.info("----------------- PATH ----------------: {}", path);
+		LOG.debug("getting source {} by resolving against {}",
+				  ric.getResource(), path);
 		if (error != null) {
 			LOG.error("failed to setup: {}", error.getMessage());
 			throw new ResourceProviderConfigurationException(error);
 		}
 		try {
-			LOG.debug("resolving {}", ric.getResource());
-			URI normalized =
-				Paths.get(path.resolve(ric.getResource()).normalize()).toUri();
+			URI normalized = path.resolve(ric.getResource()).normalize();
 			LOG.debug("resolved {} to {}", ric.getResource(), normalized);
 			if (!normalized.toString().startsWith(path.toString())) {
 				throw new ResourceException("not allowed");

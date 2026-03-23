@@ -11,16 +11,6 @@ import java.io.InputStream;
 public interface ResourceProvider {
 
 	/**
-	 * Returns the name of the class. This may be required in a bean context.
-	 */
-	String getName();
-
-	/**
-	 * Setup method to be called after the initialization.
-	 */
-	void setUp();
-
-	/**
 	 * Returns a {@link Source} for a given resource identifier as used in the
 	 * DTS service.
 	 *
