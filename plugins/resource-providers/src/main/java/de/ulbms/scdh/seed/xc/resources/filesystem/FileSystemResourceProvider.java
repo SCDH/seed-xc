@@ -29,19 +29,25 @@ import org.slf4j.LoggerFactory;
  */
 public class FileSystemResourceProvider implements ResourceProvider {
 
+	public static final String NAME =
+		"de.ulbms.scdh.seed.xc.resources.filesystem.FileSystemResourceProvider";
+
 	private static final Logger LOG =
 		LoggerFactory.getLogger(FileSystemResourceProvider.class);
+
+	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.resources.filesystem."
+						   + "FileSystemResourceProvider.path",
+					defaultValue = "/")
+	private String pathConfigured;
 
 	private URI path;
 
 	private Exception error = null;
 
-	public FileSystemResourceProvider(
-		@ConfigProperty(name = "de.ulbms.scdh.seed.xc.resources.filesystem."
-							   + "FileSystemResourceProvider.path",
-						defaultValue = "/") String path) {
+	@Override
+	public void setUp() {
 		try {
-			this.path = Paths.get(new URI(path).normalize()).toUri();
+			this.path = Paths.get(new URI(pathConfigured).normalize()).toUri();
 		} catch (URISyntaxException e) {
 			LOG.error("invalid URI (path) for FileSystemResourceProvider: {}",
 					  e.getMessage());
@@ -51,6 +57,11 @@ public class FileSystemResourceProvider implements ResourceProvider {
 					  e.getMessage());
 			error = e;
 		}
+	}
+
+	@Override
+	public String getName() {
+		return NAME;
 	}
 
 	/**

@@ -33,6 +33,12 @@
 	    <artifactId>seed-xc-transformations</artifactId>
 	    <version>${revision}${changelist}</version>
         </dependency>
+        <dependency>
+	    <groupId>${project.groupId}</groupId>
+	    <artifactId>seed-resource-providers</artifactId>
+	    <version>${revision}${changelist}</version>
+	    <scope>test</scope>
+        </dependency>
 	<!-- for the annotations in the model and in the api -->
 	<dependency>
 	    <groupId>io.quarkus</groupId>
