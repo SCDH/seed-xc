@@ -511,9 +511,12 @@ components:
         required:
           description: Whether or not the parameter is required.
           type: boolean
+        static:
+          description: Whether this is a static parameter, i.e. a compile time parameter.
+          type: boolean
       required:
-        - description
         - required
+        - static
     transformationMap:
       description: A mapping of transformation IDs to transformation information. This is used to configure the service.
       type: object
