@@ -10,9 +10,9 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 @ApplicationScoped
 public class ServiceConfiguration {
 
-	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.harden."
-						   + "ServiceConfiguration.nonProtocolURIsAllowed",
-					defaultValue = "false")
+	@ConfigProperty(
+			name = "de.ulbms.scdh.seed.xc.harden." + "ServiceConfiguration.nonProtocolURIsAllowed",
+			defaultValue = "false")
 	protected boolean nonProtocolURIsAllowed;
 
 	public boolean getNonProtocolURIsAllowed() {

@@ -16,8 +16,7 @@ import org.slf4j.LoggerFactory;
 @RegisterForReflection
 public class DenyingOutputURIResolver implements OutputURIResolver {
 
-	private static final Logger LOG =
-		LoggerFactory.getLogger(DenyingOutputURIResolver.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DenyingOutputURIResolver.class);
 
 	public DenyingOutputURIResolver() {}
 
@@ -26,19 +25,14 @@ public class DenyingOutputURIResolver implements OutputURIResolver {
 	 */
 	@Override
 	public Result resolve(String href, String base) throws XPathException {
-		LOG.warn(
-			"a transformation tries to resolve {} on the base of {}! Denying",
-			href, base);
-		throw new XPathException("URI not allowed: " + href + " resolved in " +
-								 base);
+		LOG.warn("a transformation tries to resolve {} on the base of {}! Denying", href, base);
+		throw new XPathException("URI not allowed: " + href + " resolved in " + base);
 	}
 
 	@Override
 	public void close(Result result) throws TransformerException {
-		LOG.warn("a transformation tries to close the result {}! Denying",
-				 result.getSystemId());
-		throw new TransformerException("URI not allowed: " +
-									   result.getSystemId());
+		LOG.warn("a transformation tries to close the result {}! Denying", result.getSystemId());
+		throw new TransformerException("URI not allowed: " + result.getSystemId());
 	}
 
 	@Override

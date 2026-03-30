@@ -9,7 +9,12 @@ import org.apache.xerces.parsers.XIncludeAwareParserConfiguration;
 import org.xmlresolver.loaders.XmlLoader;
 
 @RegisterForReflection(
-	targets = {Configuration.class, StandardURIResolver.class,
-			   StandardUnparsedTextResolver.class, XmlLoader.class,
-			   XIncludeAwareParserConfiguration.class, DTDDVFactoryImpl.class})
+		targets = {
+			Configuration.class,
+			StandardURIResolver.class,
+			StandardUnparsedTextResolver.class,
+			XmlLoader.class,
+			XIncludeAwareParserConfiguration.class,
+			DTDDVFactoryImpl.class
+		})
 public class ReflectionConfiguration {}

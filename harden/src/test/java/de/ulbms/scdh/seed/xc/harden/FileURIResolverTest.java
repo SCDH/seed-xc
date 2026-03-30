@@ -4,60 +4,51 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import de.ulbms.scdh.seed.xc.api.ConfigurationException;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import javax.xml.transform.Source;
 import net.sf.saxon.lib.ResourceRequest;
 import net.sf.saxon.lib.ResourceResolver;
 import net.sf.saxon.trans.XPathException;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class FileURIResolverTest {
 
 	private static final File XSL_DIR =
-		Paths.get("src", "test", "resources", "xsl").toFile();
+			Paths.get("src", "test", "resources", "xsl").toFile();
 
 	private static final File ID_XSL = new File(XSL_DIR, "id.xsl");
 
 	private static final File UNKNOWN_XSL = new File(XSL_DIR, "unknown.xsl");
 
 	private static final File HELLO_XML =
-		Paths.get("src", "test", "resources", "samples", "hello.xml").toFile();
+			Paths.get("src", "test", "resources", "samples", "hello.xml").toFile();
 
-	private static final File HELLO_XML_VIA_DOTS =
-		Paths
-			.get("src", "test", "resources", "xsl", "..", "samples",
-				 "hello.xml")
+	private static final File HELLO_XML_VIA_DOTS = Paths.get(
+					"src", "test", "resources", "xsl", "..", "samples", "hello.xml")
 			.toFile();
 
 	FileURIResolver resolver;
 
 	@BeforeEach
 	public void setupResolver() throws ConfigurationException {
-		resolver = new FileURIResolver(XSL_DIR.getAbsoluteFile().toString(),
-									   ID_XSL.getAbsoluteFile().toString());
+		resolver = new FileURIResolver(
+				XSL_DIR.getAbsoluteFile().toString(), ID_XSL.getAbsoluteFile().toString());
 	}
 
 	@Test
 	public void nullPath() {
-		assertThrows(ConfigurationException.class,
-					 () -> new FileURIResolver(null, null));
+		assertThrows(ConfigurationException.class, () -> new FileURIResolver(null, null));
 	}
 
 	@Test
 	public void nullFilePath() {
-		assertThrows(ConfigurationException.class,
-					 () -> new FileURIResolver("file:/etc", "/etc/passwd"));
+		assertThrows(ConfigurationException.class, () -> new FileURIResolver("file:/etc", "/etc/passwd"));
 	}
 
 	@Test
 	public void emptyPath() throws ConfigurationException, XPathException {
-		assertThrows(ConfigurationException.class,
-					 () -> new FileURIResolver("", "/etc/passwd"));
+		assertThrows(ConfigurationException.class, () -> new FileURIResolver("", "/etc/passwd"));
 	}
 
 	@Test

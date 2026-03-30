@@ -2,7 +2,6 @@ package de.ulbms.scdh.seed.xc.harden;
 
 import de.ulbms.scdh.seed.xc.api.ConfigurationException;
 import jakarta.enterprise.context.Dependent;
-import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -29,8 +28,7 @@ import org.slf4j.LoggerFactory;
 @Dependent
 public class ZipFileURIResolver implements ResourceResolver {
 
-	private static final Logger LOG =
-		LoggerFactory.getLogger(ZipFileURIResolver.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ZipFileURIResolver.class);
 
 	private boolean delegating = true;
 
@@ -65,7 +63,9 @@ public class ZipFileURIResolver implements ResourceResolver {
 	/**
 	 * Makes this resolver non-delegating.
 	 */
-	public void setNonDelegating() { this.delegating = false; }
+	public void setNonDelegating() {
+		this.delegating = false;
+	}
 
 	/**
 	 * {@inheritDoc}
@@ -82,8 +82,7 @@ public class ZipFileURIResolver implements ResourceResolver {
 			// 2. resolve relative URIs against the configured path
 			if (!uri.isAbsolute() && baseUri != null) {
 				uri = baseUri.resolve(uri);
-				LOG.debug("resolved {} in zip file to {}", request.uri,
-						  uri.toString());
+				LOG.debug("resolved {} in zip file to {}", request.uri, uri.toString());
 			}
 
 			// 3. normalize URI, i.e. process '.' and '..'
@@ -101,52 +100,41 @@ public class ZipFileURIResolver implements ResourceResolver {
 				// For some reason, uri.getPath() returns null. But for a file
 				// scheme, uri.getSchemeSpecificPart() returns the path.
 				if (uri.getSchemeSpecificPart() == null) {
-					LOG.error("illegal file URI: null path (ssp) in {}",
-							  uri.toString());
-					throw new XPathException(
-						"illegal file URI: null path (ssp)");
+					LOG.error("illegal file URI: null path (ssp) in {}", uri.toString());
+					throw new XPathException("illegal file URI: null path (ssp)");
 				}
-				ZipEntry zipEntry =
-					zipFile.getEntry(uri.getSchemeSpecificPart());
+				ZipEntry zipEntry = zipFile.getEntry(uri.getSchemeSpecificPart());
 				if (zipEntry != null) {
 					InputStream is = zipFile.getInputStream(zipEntry);
 					return new StreamSource(is, uri.toString());
 				} else {
 					LOG.error("illegal file URI: {}", uri.toString());
-					throw new XPathException("illegal file URI: " +
-											 uri.toString());
+					throw new XPathException("illegal file URI: " + uri.toString());
 				}
 			} else {
 				if (delegating) {
 					// delegate to the next resolver in the chain
 					return null;
 				} else {
-					LOG.error("cannot resolve URI {} in zip file: {}",
-							  request.uri);
-					throw new XPathException(
-						"cannot resolve URI {} in zip file");
+					LOG.error("cannot resolve URI {} in zip file: {}", request.uri);
+					throw new XPathException("cannot resolve URI {} in zip file");
 				}
 			}
 		} catch (NullPointerException e) {
-			if (delegating)
-				return null;
+			if (delegating) return null;
 			LOG.error("illegal URI {}: {}", request.uri, e.getMessage());
 			throw new XPathException(e);
 		} catch (IllegalArgumentException e) {
-			if (delegating)
-				return null;
+			if (delegating) return null;
 			LOG.error("illegal URI {}: {}", request.uri, e.getMessage());
 			throw new XPathException(e);
 		} catch (URISyntaxException e) {
-			if (delegating)
-				return null;
+			if (delegating) return null;
 			LOG.error("illegal URI {}: {}", request.uri, e.getMessage());
 			throw new XPathException(e);
 		} catch (Exception e) {
-			if (delegating)
-				return null;
-			LOG.error("cannot resolve URI {} in zip file: {}", request.uri,
-					  e.getMessage());
+			if (delegating) return null;
+			LOG.error("cannot resolve URI {} in zip file: {}", request.uri, e.getMessage());
 			throw new XPathException(e);
 		}
 	}

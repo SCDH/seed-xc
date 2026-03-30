@@ -26,8 +26,7 @@ public class RestrictiveFileOnlyResolver extends ChainedResourceResolver {
 	 * The constructor to use for this resolver.
 	 */
 	@Inject
-	public RestrictiveFileOnlyResolver(
-		@Context FileURIResolver fileResourceResolver) {
+	public RestrictiveFileOnlyResolver(@Context FileURIResolver fileResourceResolver) {
 		super(fileResourceResolver, new DenyingResourceResolver());
 	}
 }

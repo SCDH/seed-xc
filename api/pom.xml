@@ -1,169 +1,167 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-	<groupId>de.ulbms.scdh.seed.xc</groupId>
-	<artifactId>seed-xc</artifactId>
-	<version>${revision}${changelist}</version>
-    </parent>
-    
-    <artifactId>seed-xc-api</artifactId>
-    <name>SEED XC API</name>
+  <parent>
+    <groupId>de.ulbms.scdh.seed.xc</groupId>
+    <artifactId>seed-xc</artifactId>
+    <version>${revision}${changelist}</version>
+  </parent>
 
-    <properties>
-        <seed-xc-specs.version>0.0.1-rc2</seed-xc-specs.version>
-	<openapi-specs.dir>${project.basedir}/src/main/resources/openapi</openapi-specs.dir>
-	<openapitools.version>7.18.0</openapitools.version>
-    </properties>
-    
-    <dependencies>
-	<!-- for the annotations in the model and in the api -->
-	<dependency>
-	    <groupId>io.quarkus</groupId>
-	    <artifactId>quarkus-hibernate-validator</artifactId>
-	</dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-smallrye-openapi</artifactId>
-        </dependency>
-    </dependencies>
-    
-    <build>
-	<plugins>
+  <artifactId>seed-xc-api</artifactId>
+  <name>SEED XC API</name>
 
-	    <!-- download OpenAPI specs -->
-	    <!-- moved to profiles because of conflicts with quarkus:dev -->
-	    <!-- <plugin> -->
-	    <!-- 	<groupId>io.github.download-maven-plugin</groupId> -->
-	    <!-- 	<artifactId>download-maven-plugin</artifactId> -->
-	    <!-- 	<version>2.0.0</version> -->
-	    <!-- 	<executions> -->
-	    <!-- 	    <execution> -->
-	    <!-- 		<id>download-facade-openapi-specs</id> -->
-	    <!-- 		<!-\- this has to precede the OA generation which is in generate-sources -\-> -->
-	    <!-- 		<phase>initialize</phase> -->
-	    <!-- 		<goals> -->
-	    <!-- 		    <goal>wget</goal> -->
-	    <!-- 		</goals> -->
-	    <!-- 		<configuration> -->
-	    <!-- 		    <url>https://zivgitlab.uni-muenster.de/api/v4/projects/10748/packages/generic/scdh-apis/${seed-xc-specs.version}/seed-xc-openapi.yaml</url> -->
-	    <!-- 		    <unpack>false</unpack> -->
-	    <!-- 		    <outputDirectory>${openapi-specs.dir}</outputDirectory> -->
-	    <!-- 		</configuration> -->
-	    <!-- 	    </execution> -->
-	    <!-- 	</executions> -->
-	    <!-- </plugin> -->
+  <properties>
+    <seed-xc-specs.version>0.0.1-rc2</seed-xc-specs.version>
+    <openapi-specs.dir>${project.basedir}/src/main/resources/openapi</openapi-specs.dir>
+    <openapitools.version>7.18.0</openapitools.version>
+  </properties>
 
-	    <!-- this generates the code for the service -->
-	    <plugin>
-		<groupId>org.openapitools</groupId>
-		<artifactId>openapi-generator-maven-plugin</artifactId>
-		<version>${openapitools.version}</version>
-		<executions>
-		    <execution>
-			<goals>
-			    <goal>generate</goal>
-			</goals>
-			<configuration>
-			    <inputSpec>${openapi-specs.dir}/seed-xc-openapi.yaml</inputSpec>
-			    <generatorName>jaxrs-spec</generatorName>
-			    <generateAliasAsModel>true</generateAliasAsModel>
-			    <generateModelTests>false</generateModelTests>
-			    <generateModelDocumentation>false</generateModelDocumentation>
-			    <generateSupportingFiles>false</generateSupportingFiles>
-			    <generateApiTests>false</generateApiTests>
-			    <generateApiDocumentation>false</generateApiDocumentation>
-			    <configOptions>
-				<library>quarkus</library>
-				<useJakartaEe>true</useJakartaEe>
-				<apiPackage>de.ulbms.scdh.seed.xc.api</apiPackage>
-				<modelPackage>de.ulbms.scdh.seed.xc.api</modelPackage>
-				<dateLibrary>java8</dateLibrary>
-				<hideGenerationTimestamp>true</hideGenerationTimestamp>
-				<disallowAdditionalPropertiesIfNotPresent>false</disallowAdditionalPropertiesIfNotPresent>
-				<useTags>false</useTags>
-				<interfaceOnly>true</interfaceOnly>
-				<returnResponse>true</returnResponse>
-				<useSwaggerAnnotations>false</useSwaggerAnnotations>
-				<useMicroProfileOpenAPIAnnotations>true</useMicroProfileOpenAPIAnnotations>
-				<openApiNullable>false</openApiNullable>
-				<legacyDiscriminatorBehavior>false</legacyDiscriminatorBehavior>
-			    </configOptions>
-			</configuration>
-		    </execution>
-		</executions>
-            </plugin>
+  <dependencies>
+    <!-- for the annotations in the model and in the api -->
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-hibernate-validator</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-smallrye-openapi</artifactId>
+    </dependency>
+  </dependencies>
 
-	    <plugin>
-		<groupId>org.codehaus.mojo</groupId>
-		<artifactId>build-helper-maven-plugin</artifactId>
-		<version>3.3.0</version>
-		<executions>
-		    <execution>
-			<phase>generate-sources</phase>
-			<goals>
-			    <goal>add-source</goal>
-			</goals>
-			<configuration>
-			    <sources>
-				<!-- this tells the compiler where generated code is -->
-				<source>${project.build.directory}/generated-sources/openapi/src/gen/java</source>
-			    </sources>
-			</configuration>
-		    </execution>
-		</executions>
-	    </plugin>
+  <build>
+    <plugins>
 
-	    <!-- index the beans in this module, see
+      <!-- download OpenAPI specs -->
+      <!-- moved to profiles because of conflicts with quarkus:dev -->
+      <!-- <plugin> -->
+      <!-- 	<groupId>io.github.download-maven-plugin</groupId> -->
+      <!-- 	<artifactId>download-maven-plugin</artifactId> -->
+      <!-- 	<version>2.0.0</version> -->
+      <!-- 	<executions> -->
+      <!-- 	    <execution> -->
+      <!-- 		<id>download-facade-openapi-specs</id> -->
+      <!-- 		<!-\- this has to precede the OA generation which is in generate-sources -\-> -->
+      <!-- 		<phase>initialize</phase> -->
+      <!-- 		<goals> -->
+      <!-- 		    <goal>wget</goal> -->
+      <!-- 		</goals> -->
+      <!-- 		<configuration> -->
+      <!-- 		    <url>https://zivgitlab.uni-muenster.de/api/v4/projects/10748/packages/generic/scdh-apis/${seed-xc-specs.version}/seed-xc-openapi.yaml</url> -->
+      <!-- 		    <unpack>false</unpack> -->
+      <!-- 		    <outputDirectory>${openapi-specs.dir}</outputDirectory> -->
+      <!-- 		</configuration> -->
+      <!-- 	    </execution> -->
+      <!-- 	</executions> -->
+      <!-- </plugin> -->
+
+      <!-- this generates the code for the service -->
+      <plugin>
+        <groupId>org.openapitools</groupId>
+        <artifactId>openapi-generator-maven-plugin</artifactId>
+        <version>${openapitools.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <inputSpec>${openapi-specs.dir}/seed-xc-openapi.yaml</inputSpec>
+              <generatorName>jaxrs-spec</generatorName>
+              <generateAliasAsModel>true</generateAliasAsModel>
+              <generateModelTests>false</generateModelTests>
+              <generateModelDocumentation>false</generateModelDocumentation>
+              <generateSupportingFiles>false</generateSupportingFiles>
+              <generateApiTests>false</generateApiTests>
+              <generateApiDocumentation>false</generateApiDocumentation>
+              <configOptions>
+                <library>quarkus</library>
+                <useJakartaEe>true</useJakartaEe>
+                <apiPackage>de.ulbms.scdh.seed.xc.api</apiPackage>
+                <modelPackage>de.ulbms.scdh.seed.xc.api</modelPackage>
+                <dateLibrary>java8</dateLibrary>
+                <hideGenerationTimestamp>true</hideGenerationTimestamp>
+                <disallowAdditionalPropertiesIfNotPresent>false</disallowAdditionalPropertiesIfNotPresent>
+                <useTags>false</useTags>
+                <interfaceOnly>true</interfaceOnly>
+                <returnResponse>true</returnResponse>
+                <useSwaggerAnnotations>false</useSwaggerAnnotations>
+                <useMicroProfileOpenAPIAnnotations>true</useMicroProfileOpenAPIAnnotations>
+                <openApiNullable>false</openApiNullable>
+                <legacyDiscriminatorBehavior>false</legacyDiscriminatorBehavior>
+              </configOptions>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>3.3.0</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>add-source</goal>
+            </goals>
+            <phase>generate-sources</phase>
+            <configuration>
+              <sources>
+                <!-- this tells the compiler where generated code is -->
+                <source>${project.build.directory}/generated-sources/openapi/src/gen/java</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- index the beans in this module, see
 	         https://quarkus.io/guides/cdi-reference#how-to-generate-a-jandex-index
 	         Without indexing the interfaces, the implemented
 	         routes won't show up (at least when we don't want to
 	         repeat all the decorators and annotations)!
 	    -->
-	    <plugin>
-		<groupId>io.smallrye</groupId>
-		<artifactId>jandex-maven-plugin</artifactId>
-		<version>${smallrye-jandex-plugin.version}</version>
-		<executions>
-		    <execution>
-			<id>make-index</id>
-			<goals>
-			    <goal>jandex</goal>
-			</goals>
-		    </execution>
-		</executions>
-	    </plugin>
+      <plugin>
+        <groupId>io.smallrye</groupId>
+        <artifactId>jandex-maven-plugin</artifactId>
+        <version>${smallrye-jandex-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>make-index</id>
+            <goals>
+              <goal>jandex</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
 
-	    <!-- flatten the pom -->
-	    <plugin>
-		<groupId>org.codehaus.mojo</groupId>
-		<artifactId>flatten-maven-plugin</artifactId>
-		<version>1.5.0</version>
-		<configuration>
-		</configuration>
-		<executions>
-		    <!-- enable flattening -->
-		    <execution>
-			<id>flatten</id>
-			<phase>process-resources</phase>
-			<goals>
-			    <goal>flatten</goal>
-			</goals>
-		    </execution>
-		    <!-- ensure proper cleanup -->
-		    <execution>
-			<id>flatten.clean</id>
-			<phase>clean</phase>
-			<goals>
-			    <goal>clean</goal>
-			</goals>
-		    </execution>
-		</executions>
-	    </plugin>
-	    
-	</plugins>
-    </build>
+      <!-- flatten the pom -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>flatten-maven-plugin</artifactId>
+        <version>1.5.0</version>
+        <configuration/>
+        <executions>
+          <!-- enable flattening -->
+          <execution>
+            <id>flatten</id>
+            <goals>
+              <goal>flatten</goal>
+            </goals>
+            <phase>process-resources</phase>
+          </execution>
+          <!-- ensure proper cleanup -->
+          <execution>
+            <id>flatten.clean</id>
+            <goals>
+              <goal>clean</goal>
+            </goals>
+            <phase>clean</phase>
+          </execution>
+        </executions>
+      </plugin>
+
+    </plugins>
+  </build>
 
 </project>

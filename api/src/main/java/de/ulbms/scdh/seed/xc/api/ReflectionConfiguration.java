@@ -11,11 +11,16 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
  * model classes, since they use reflection.
  */
 @RegisterForReflection(
-	targets = {ParameterDescriptor.class,
-			   RuntimeParametersInitialCallValue.class, RuntimeParameters.class,
-			   TransformationIDs.class,
-			   TransformationInfoInitialCallablesValue.class,
-			   TransformationInfo.class, TransformationInfoLibrariesInner.class,
-			   TransformationMap.class, XsltParameterDetails.class,
-			   XsltParameterDetailsValue.class})
+		targets = {
+			ParameterDescriptor.class,
+			RuntimeParametersInitialCallValue.class,
+			RuntimeParameters.class,
+			TransformationIDs.class,
+			TransformationInfoInitialCallablesValue.class,
+			TransformationInfo.class,
+			TransformationInfoLibrariesInner.class,
+			TransformationMap.class,
+			XsltParameterDetails.class,
+			XsltParameterDetailsValue.class
+		})
 public class ReflectionConfiguration {}

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import de.ulbms.scdh.seed.xc.api.Config;
 import jakarta.ws.rs.ext.ParamConverter;
 import jakarta.ws.rs.ext.Provider;
@@ -37,5 +36,7 @@ public class ConfigParamConverter implements ParamConverter<Config> {
 	/**
 	 * {@inheritDoc}
 	 */
-	public String toString(Config config) { return config.toString(); }
+	public String toString(Config config) {
+		return config.toString();
+	}
 }

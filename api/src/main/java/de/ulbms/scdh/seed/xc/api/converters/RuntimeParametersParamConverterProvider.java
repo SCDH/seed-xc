@@ -6,7 +6,6 @@ import jakarta.ws.rs.ext.ParamConverterProvider;
 import jakarta.ws.rs.ext.Provider;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.time.Instant;
 
 /**
  * The converter provided by this class is required for the
@@ -14,18 +13,16 @@ import java.time.Instant;
  * form-data.
  */
 @Provider
-public class RuntimeParametersParamConverterProvider
-	implements ParamConverterProvider {
+public class RuntimeParametersParamConverterProvider implements ParamConverterProvider {
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> ParamConverter<T>
-	getConverter(Class<T> rawType, Type genericType, Annotation[] annotations) {
+	public <T> ParamConverter<T> getConverter(Class<T> rawType, Type genericType, Annotation[] annotations) {
 		if (rawType.isAssignableFrom(RuntimeParameters.class)) {
-			return (ParamConverter<T>)new RuntimeParametersParamConverter();
+			return (ParamConverter<T>) new RuntimeParametersParamConverter();
 		}
 		return null;
 	}

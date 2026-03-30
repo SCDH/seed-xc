@@ -8,8 +8,14 @@ package de.ulbms.scdh.seed.xc.api;
  * building up the map of runtime parameters.
  */
 public class TransformationPreparationException extends Exception {
-	public TransformationPreparationException(String msg) { super(msg); }
-	public TransformationPreparationException(Throwable cause) { super(cause); }
+	public TransformationPreparationException(String msg) {
+		super(msg);
+	}
+
+	public TransformationPreparationException(Throwable cause) {
+		super(cause);
+	}
+
 	public TransformationPreparationException(String msg, Throwable cause) {
 		super(msg, cause);
 	}

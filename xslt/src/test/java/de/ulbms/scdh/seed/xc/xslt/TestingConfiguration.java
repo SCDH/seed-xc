@@ -10,5 +10,7 @@ public class TestingConfiguration extends ServiceConfiguration {
 
 	protected boolean nonProtocolURIsAllowed;
 
-	public TestingConfiguration() { this.nonProtocolURIsAllowed = true; }
+	public TestingConfiguration() {
+		this.nonProtocolURIsAllowed = true;
+	}
 }
