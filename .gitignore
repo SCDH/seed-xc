@@ -1,5 +1,6 @@
 *~
 *.eld
+/.idea
 
 target
 .flattened-pom.xml
