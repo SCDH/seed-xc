@@ -2,28 +2,21 @@
 
 ## Code formatting
 
-This project uses
-[`clang-format`](https://clang.llvm.org/docs/ClangFormat.html) for
-formatting Java code. `clang-format` is part of the [LLVM compiler
-infrastructure](https://llvm.org/) which is available for Linux as
-well as for Windows and Mac OS. `clang-format` has good support for
-formatting Java and integrates with git and/or editors like Vim,
-Emacs, or VSCode.
+This project uses [`spotless`](https://github.com/diffplug/spotless)
+and the [Palantir Java
+Format](https://github.com/palantir/palantir-java-format) for
+formatting Java code and Maven POMs.
 
-Formatting from the command line (all files):
+Command line:
 
-```shell
-find . -type f -name '*.java' -exec clang-format -i {} +
-```
-
-Formatting staged changes:
+Check formatting:
 
 ```shell
-git clang-format
+./mvnw spotless:check
 ```
 
-Editor integration:
-https://clang.llvm.org/docs/ClangFormat.html#vim-integration
+Apply formatting rules:
 
-
-The formatting configuration is in `.clang-format`,
+```shell
+./mvnw spotless:apply
+```

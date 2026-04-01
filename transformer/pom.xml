@@ -1,248 +1,246 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-	<groupId>de.ulbms.scdh.seed.xc</groupId>
-	<artifactId>seed-xc</artifactId>
-	<version>${revision}${changelist}</version>
-    </parent>
+  <parent>
+    <groupId>de.ulbms.scdh.seed.xc</groupId>
+    <artifactId>seed-xc</artifactId>
+    <version>${revision}${changelist}</version>
+  </parent>
 
-    <artifactId>seed-xml-transformer</artifactId>
-    <name>SEED XML Transformer</name>
-    <description>This webservice transforms XML</description>
+  <artifactId>seed-xml-transformer</artifactId>
+  <name>SEED XML Transformer</name>
+  <description>This webservice transforms XML</description>
 
-    <properties>
-      <!-- service configuration -->
-      <seed-xml-transformer.config>${session.executionRootDirectory}/security/sample-xml-transformer-config.yaml</seed-xml-transformer.config>
-      <seed-xml-transformer.saxon-config>${session.executionRootDirectory}/security/hardened-saxon-config.xml</seed-xml-transformer.saxon-config>
-      <seed-xml-transformer.accessible-path>${session.executionRootDirectory}</seed-xml-transformer.accessible-path>
-    </properties>
+  <properties>
+    <!-- service configuration -->
+    <seed-xml-transformer.config>${session.executionRootDirectory}/security/sample-xml-transformer-config.yaml</seed-xml-transformer.config>
+    <seed-xml-transformer.saxon-config>${session.executionRootDirectory}/security/hardened-saxon-config.xml</seed-xml-transformer.saxon-config>
+    <seed-xml-transformer.accessible-path>${session.executionRootDirectory}</seed-xml-transformer.accessible-path>
+  </properties>
 
+  <dependencies>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>seed-xc-api</artifactId>
+      <version>${revision}${changelist}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>seed-xc-transformations</artifactId>
+      <version>${revision}${changelist}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-rest</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-smallrye-openapi</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-swagger-ui</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-arc</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-rest-jackson</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-junit5</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.rest-assured</groupId>
+      <artifactId>rest-assured</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>net.sf.saxon</groupId>
+      <artifactId>Saxon-HE</artifactId>
+      <version>${saxon.version}</version>
+    </dependency>
+  </dependencies>
 
-    <dependencies>
-        <dependency>
-	    <groupId>${project.groupId}</groupId>
-	    <artifactId>seed-xc-api</artifactId>
-	    <version>${revision}${changelist}</version>
-        </dependency>
-        <dependency>
-	    <groupId>${project.groupId}</groupId>
-	    <artifactId>seed-xc-transformations</artifactId>
-	    <version>${revision}${changelist}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-rest</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-smallrye-openapi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-swagger-ui</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-arc</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-rest-jackson</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-junit5</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.rest-assured</groupId>
-            <artifactId>rest-assured</artifactId>
-            <scope>test</scope>
-        </dependency>
-	<dependency>
-	    <groupId>net.sf.saxon</groupId>
-	    <artifactId>Saxon-HE</artifactId>
-	    <version>${saxon.version}</version>
-	</dependency>
-    </dependencies>
+  <build>
 
-    <build>
+    <resources>
+      <!-- filtering application.properties -->
+      <resource>
+        <filtering>true</filtering>
+        <directory>src/main/resources</directory>
+        <includes>
+          <include>application.properties</include>
+        </includes>
+      </resource>
+    </resources>
 
-	<resources>
-            <!-- filtering application.properties -->
-            <resource>
-		<directory>src/main/resources</directory>
-		<filtering>true</filtering>
-		<includes>
-		    <include>application.properties</include>
-		</includes>
-            </resource>
-	</resources>
+    <plugins>
+      <plugin>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>${surefire-plugin.version}</version>
+        <configuration>
+          <argLine>--add-opens java.base/java.lang=ALL-UNNAMED</argLine>
+          <systemPropertyVariables>
+            <native.image.path>${project.build.directory}/${project.build.finalName}-runner</native.image.path>
+            <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+            <maven.home>${maven.home}</maven.home>
+          </systemPropertyVariables>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>flatten-maven-plugin</artifactId>
+        <version>1.5.0</version>
+        <configuration/>
+        <executions>
+          <!-- enable flattening -->
+          <execution>
+            <id>flatten</id>
+            <goals>
+              <goal>flatten</goal>
+            </goals>
+            <phase>process-resources</phase>
+          </execution>
+          <!-- ensure proper cleanup -->
+          <execution>
+            <id>flatten.clean</id>
+            <goals>
+              <goal>clean</goal>
+            </goals>
+            <phase>clean</phase>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 
-	<plugins>
-            <plugin>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <version>${surefire-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>integration-test</goal>
-                            <goal>verify</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <argLine>--add-opens java.base/java.lang=ALL-UNNAMED</argLine>
-                    <systemPropertyVariables>
-                        <native.image.path>${project.build.directory}/${project.build.finalName}-runner</native.image.path>
-                        <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
-                        <maven.home>${maven.home}</maven.home>
-                    </systemPropertyVariables>
-                </configuration>
-            </plugin>
-	    <plugin>
-		<groupId>org.codehaus.mojo</groupId>
-		<artifactId>flatten-maven-plugin</artifactId>
-		<version>1.5.0</version>
-		<configuration>
-		</configuration>
-		<executions>
-		    <!-- enable flattening -->
-		    <execution>
-			<id>flatten</id>
-			<phase>process-resources</phase>
-			<goals>
-			    <goal>flatten</goal>
-			</goals>
-		    </execution>
-		    <!-- ensure proper cleanup -->
-		    <execution>
-			<id>flatten.clean</id>
-			<phase>clean</phase>
-			<goals>
-			    <goal>clean</goal>
-			</goals>
-		    </execution>
-		</executions>
-	    </plugin>
+  <profiles>
+
+    <profile>
+      <!-- ./mvnw -Ptransform quarkus:dev to bring up the transformer service -->
+      <id>transformer</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>${quarkus.platform.group-id}</groupId>
+            <artifactId>quarkus-maven-plugin</artifactId>
+            <version>${quarkus.platform.version}</version>
+            <extensions>true</extensions>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>build</goal>
+                  <goal>generate-code</goal>
+                  <goal>generate-code-tests</goal>
+                  <goal>native-image-agent</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
         </plugins>
-    </build>
+      </build>
+    </profile>
 
-    <profiles>
+    <profile>
+      <id>transformer-native</id>
+      <activation>
+        <property>
+          <name>transformer-native</name>
+        </property>
+      </activation>
+      <properties>
+        <quarkus.package.jar.enabled>false</quarkus.package.jar.enabled>
+        <skipITs>false</skipITs>
+        <quarkus.native.enabled>true</quarkus.native.enabled>
 
-	<profile>
-	    <!-- ./mvnw -Ptransform quarkus:dev to bring up the transformer service -->
-	    <id>transformer</id>
-	    <build>
-		<plugins>
-		    <plugin>
-			<groupId>${quarkus.platform.group-id}</groupId>
-			<artifactId>quarkus-maven-plugin</artifactId>
-			<version>${quarkus.platform.version}</version>
-			<extensions>true</extensions>
-			<executions>
-			    <execution>
-				<goals>
-				    <goal>build</goal>
-				    <goal>generate-code</goal>
-				    <goal>generate-code-tests</goal>
-				    <goal>native-image-agent</goal>
-				</goals>
-			    </execution>
-			</executions>
-		    </plugin>
-		</plugins>
-	    </build>
-	</profile>
+        <!-- service configuration -->
+        <!-- these paths should match the setup in the container image -->
+        <native-workdir>/work/resources</native-workdir>
+        <seed-xml-transformer.config>${native-workdir}/seed-config.yaml</seed-xml-transformer.config>
+        <seed-xml-transformer.saxon-config>${native-workdir}/saxon-config.xml</seed-xml-transformer.saxon-config>
+        <seed-xml-transformer.accessible-path>${native-workdir}</seed-xml-transformer.accessible-path>
 
-        <profile>
-            <id>transformer-native</id>
-            <activation>
-                <property>
-                    <name>transformer-native</name>
-                </property>
-            </activation>
-            <properties>
-		<quarkus.package.jar.enabled>false</quarkus.package.jar.enabled>
-                <skipITs>false</skipITs>
-                <quarkus.native.enabled>true</quarkus.native.enabled>
-
-		<!-- service configuration -->
-		<!-- these paths should match the setup in the container image -->
-		<native-workdir>/work/resources</native-workdir>
-		<seed-xml-transformer.config>${native-workdir}/seed-config.yaml</seed-xml-transformer.config>
-		<seed-xml-transformer.saxon-config>${native-workdir}/saxon-config.xml</seed-xml-transformer.saxon-config>
-		<seed-xml-transformer.accessible-path>${native-workdir}</seed-xml-transformer.accessible-path>
-
-		<quarkus.package.type>native</quarkus.package.type>
-		<!-- enable ConfigMaps as configuration source, see https://quarkus.io/guides/kubernetes-config -->
-		<quarkus.kubernetes-config.enabled>true</quarkus.kubernetes-config.enabled>
-		<quarkus.native.auto-service-loader-registration>true</quarkus.native.auto-service-loader-registration>
-		<quarkus.swagger-ui.always-include>true</quarkus.swagger-ui.always-include>
-		<!--
+        <quarkus.package.type>native</quarkus.package.type>
+        <!-- enable ConfigMaps as configuration source, see https://quarkus.io/guides/kubernetes-config -->
+        <quarkus.kubernetes-config.enabled>true</quarkus.kubernetes-config.enabled>
+        <quarkus.native.auto-service-loader-registration>true</quarkus.native.auto-service-loader-registration>
+        <quarkus.swagger-ui.always-include>true</quarkus.swagger-ui.always-include>
+        <!--
                      -/-initialize-at-run-time=com.example.SomeClass\,org.acme.SomeOtherClass
                      is used to initialize classes at runtime instead of
                      build time. This is needed e.g. for classes
                      initialized with a random seed. See
                      https://quarkus.io/guides/writing-native-applications-tips#delay-class-init-in-your-app
 		-->
-		<!-- org.apache.hc.client5.http.impl.auth.NTLMEngineImpl is a transitive dependency of Saxon 11+ -->
-		<quarkus.native.additional-build-args>--initialize-at-run-time=org.apache.hc.client5.http.impl.auth.NTLMEngineImpl\,org.xmlresolver.utils.SaxProducer,-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.SAXMessages\,com.sun.org.apache.xerces.internal.impl.msg.XIncludeMessages</quarkus.native.additional-build-args>
-            </properties>
-	    <dependencies>
-		<dependency>
-		    <groupId>io.quarkus</groupId>
-		    <artifactId>quarkus-kubernetes-config</artifactId>
-		</dependency>
-		<dependency>
-		    <!-- This generates Kubernetes manifests. Even if they aren#t be needed, we leave it here for now. -->
-		    <groupId>io.quarkus</groupId>
-		    <artifactId>quarkus-kubernetes</artifactId>
-		</dependency>
-            </dependencies>
+        <!-- org.apache.hc.client5.http.impl.auth.NTLMEngineImpl is a transitive dependency of Saxon 11+ -->
+        <quarkus.native.additional-build-args>--initialize-at-run-time=org.apache.hc.client5.http.impl.auth.NTLMEngineImpl\,org.xmlresolver.utils.SaxProducer,-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.SAXMessages\,com.sun.org.apache.xerces.internal.impl.msg.XIncludeMessages</quarkus.native.additional-build-args>
+      </properties>
+      <dependencies>
+        <dependency>
+          <groupId>io.quarkus</groupId>
+          <artifactId>quarkus-kubernetes-config</artifactId>
+        </dependency>
+        <dependency>
+          <!-- This generates Kubernetes manifests. Even if they aren#t be needed, we leave it here for now. -->
+          <groupId>io.quarkus</groupId>
+          <artifactId>quarkus-kubernetes</artifactId>
+        </dependency>
+      </dependencies>
 
-	    <build>
-		<plugins>
-		    <plugin>
-			<groupId>${quarkus.platform.group-id}</groupId>
-			<artifactId>quarkus-maven-plugin</artifactId>
-			<version>${quarkus.platform.version}</version>
-			<extensions>true</extensions>
-			<executions>
-			    <execution>
-				<goals>
-				    <goal>build</goal>
-				    <goal>generate-code</goal>
-				    <goal>generate-code-tests</goal>
-				    <goal>native-image-agent</goal>
-				</goals>
-			    </execution>
-			</executions>
-		    </plugin>
-		    <plugin>
-			<artifactId>maven-failsafe-plugin</artifactId>
-			<version>${surefire-plugin.version}</version>
-			<executions>
-			    <execution>
-				<goals>
-				    <goal>integration-test</goal>
-				    <goal>verify</goal>
-				</goals>
-				<configuration>
-				    <systemPropertyVariables>
-					<native.image.path>${project.build.directory}/${project.build.finalName}-runner</native.image.path>
-					<java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
-					<maven.home>${maven.home}</maven.home>
-				    </systemPropertyVariables>
-				</configuration>
-			    </execution>
-			</executions>
-		    </plugin>
-		</plugins>
-	    </build>
-        </profile>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>${quarkus.platform.group-id}</groupId>
+            <artifactId>quarkus-maven-plugin</artifactId>
+            <version>${quarkus.platform.version}</version>
+            <extensions>true</extensions>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>build</goal>
+                  <goal>generate-code</goal>
+                  <goal>generate-code-tests</goal>
+                  <goal>native-image-agent</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <version>${surefire-plugin.version}</version>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>integration-test</goal>
+                  <goal>verify</goal>
+                </goals>
+                <configuration>
+                  <systemPropertyVariables>
+                    <native.image.path>${project.build.directory}/${project.build.finalName}-runner</native.image.path>
+                    <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+                    <maven.home>${maven.home}</maven.home>
+                  </systemPropertyVariables>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
 
-    </profiles>
+  </profiles>
 </project>

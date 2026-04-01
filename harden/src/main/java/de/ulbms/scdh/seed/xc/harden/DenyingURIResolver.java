@@ -2,7 +2,6 @@ package de.ulbms.scdh.seed.xc.harden;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.URIResolver;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.trans.NonDelegatingURIResolver;
 import org.slf4j.Logger;
@@ -17,8 +16,7 @@ import org.slf4j.LoggerFactory;
  */
 public class DenyingURIResolver implements NonDelegatingURIResolver {
 
-	private static final Logger LOG =
-		LoggerFactory.getLogger(DenyingURIResolver.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DenyingURIResolver.class);
 
 	public DenyingURIResolver() {}
 
@@ -31,12 +29,8 @@ public class DenyingURIResolver implements NonDelegatingURIResolver {
 	 * Allways throws an exception.
 	 */
 	@Override
-	public Source resolve(String href, String base)
-		throws TransformerException {
-		LOG.warn(
-			"a transformation tries to resolve {} on the base of {}! Denying",
-			href, base);
-		throw new TransformerException("URI not allowed: " + href +
-									   "resolved in " + base);
+	public Source resolve(String href, String base) throws TransformerException {
+		LOG.warn("a transformation tries to resolve {} on the base of {}! Denying", href, base);
+		throw new TransformerException("URI not allowed: " + href + "resolved in " + base);
 	}
 }

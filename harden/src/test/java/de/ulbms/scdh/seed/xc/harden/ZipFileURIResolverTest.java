@@ -4,20 +4,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import de.ulbms.scdh.seed.xc.api.ConfigurationException;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Iterator;
-import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import javax.xml.transform.Source;
 import net.sf.saxon.lib.ResourceRequest;
-import net.sf.saxon.lib.ResourceResolver;
 import net.sf.saxon.trans.XPathException;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -25,7 +19,7 @@ import org.junit.jupiter.api.Test;
 public class ZipFileURIResolverTest {
 
 	private static final File XSL_ZIP =
-		Paths.get("src", "test", "resources", "xsl.zip").toFile();
+			Paths.get("src", "test", "resources", "xsl.zip").toFile();
 
 	private ZipFile zipFile;
 
@@ -48,13 +42,11 @@ public class ZipFileURIResolverTest {
 	@Test
 	public void nullZip() {
 		resolver = new ZipFileURIResolver();
-		assertThrows(ConfigurationException.class,
-					 () -> resolver.setup(null, null));
+		assertThrows(ConfigurationException.class, () -> resolver.setup(null, null));
 	}
 
 	@Test
-	public void rootBaseUri()
-		throws ConfigurationException, XPathException, URISyntaxException {
+	public void rootBaseUri() throws ConfigurationException, XPathException, URISyntaxException {
 		// We cannot resolve against / base URI
 		resolver.setNonDelegating();
 		resolver.setup(zipFile, new URI("/"));
@@ -64,8 +56,7 @@ public class ZipFileURIResolverTest {
 	}
 
 	@Test
-	public void rootBaseUriDelegating()
-		throws ConfigurationException, XPathException, URISyntaxException {
+	public void rootBaseUriDelegating() throws ConfigurationException, XPathException, URISyntaxException {
 		// We cannot resolve against / base URI
 		resolver.setup(zipFile, new URI("/"));
 		ResourceRequest request = new ResourceRequest();
@@ -74,8 +65,7 @@ public class ZipFileURIResolverTest {
 	}
 
 	@Test
-	public void nullBaseUri()
-		throws ConfigurationException, XPathException, URISyntaxException {
+	public void nullBaseUri() throws ConfigurationException, XPathException, URISyntaxException {
 		// Resolving against null base URI works!
 		resolver.setup(zipFile, null);
 		ResourceRequest request = new ResourceRequest();
@@ -86,8 +76,7 @@ public class ZipFileURIResolverTest {
 	}
 
 	@Test
-	public void nullBaseUriWithFile()
-		throws ConfigurationException, XPathException, URISyntaxException {
+	public void nullBaseUriWithFile() throws ConfigurationException, XPathException, URISyntaxException {
 		// Resolving against null base URI works!
 		resolver.setup(zipFile, null);
 		ResourceRequest request = new ResourceRequest();
@@ -99,19 +88,16 @@ public class ZipFileURIResolverTest {
 	}
 
 	@Test
-	public void fullSystemId()
-		throws ConfigurationException, XPathException, URISyntaxException {
+	public void fullSystemId() throws ConfigurationException, XPathException, URISyntaxException {
 		resolver.setup(zipFile, null);
 		ResourceRequest request = new ResourceRequest();
 		request.uri = "file:xsl/id.xsl";
 		Source resource = resolver.resolve(request);
-		assertEquals("file:xsl/id.xsl",
-					 resource.getSystemId()); // only asserting this once!
+		assertEquals("file:xsl/id.xsl", resource.getSystemId()); // only asserting this once!
 	}
 
 	@Test
-	public void singleSegmentBaseUri()
-		throws ConfigurationException, XPathException, URISyntaxException {
+	public void singleSegmentBaseUri() throws ConfigurationException, XPathException, URISyntaxException {
 		resolver.setup(zipFile, new URI("xsl"));
 		ResourceRequest request = new ResourceRequest();
 		request.uri = "xsl/id.xsl";
@@ -122,7 +108,7 @@ public class ZipFileURIResolverTest {
 
 	@Test
 	public void singleSegmentWithTrailingSlashBaseUri()
-		throws ConfigurationException, XPathException, URISyntaxException {
+			throws ConfigurationException, XPathException, URISyntaxException {
 		resolver.setup(zipFile, new URI("xsl/"));
 		ResourceRequest request = new ResourceRequest();
 		request.uri = "id.xsl";
@@ -133,7 +119,7 @@ public class ZipFileURIResolverTest {
 
 	@Test
 	public void singleSegmentWithLeadingSlashBaseUri()
-		throws ConfigurationException, XPathException, URISyntaxException {
+			throws ConfigurationException, XPathException, URISyntaxException {
 		resolver.setup(zipFile, new URI("/xsl"));
 		resolver.setNonDelegating();
 		ResourceRequest request = new ResourceRequest();
@@ -147,7 +133,7 @@ public class ZipFileURIResolverTest {
 
 	@Test
 	public void singleSegmentWithLeadingSlashBaseUriDelegating()
-		throws ConfigurationException, XPathException, URISyntaxException {
+			throws ConfigurationException, XPathException, URISyntaxException {
 		resolver.setup(zipFile, new URI("/xsl"));
 		ResourceRequest request = new ResourceRequest();
 		request.uri = "xsl/id.xsl";
@@ -159,8 +145,7 @@ public class ZipFileURIResolverTest {
 	}
 
 	@Test
-	public void deepPathBaseUri()
-		throws ConfigurationException, XPathException, URISyntaxException {
+	public void deepPathBaseUri() throws ConfigurationException, XPathException, URISyntaxException {
 		resolver.setup(zipFile, new URI("xsl/id.xsl"));
 		ResourceRequest request = new ResourceRequest();
 		request.uri = "id.xsl";
@@ -170,8 +155,7 @@ public class ZipFileURIResolverTest {
 	}
 
 	@Test
-	public void resolveDots()
-		throws ConfigurationException, XPathException, URISyntaxException {
+	public void resolveDots() throws ConfigurationException, XPathException, URISyntaxException {
 		resolver.setup(zipFile, new URI("xsl/id.xsl"));
 		ResourceRequest request = new ResourceRequest();
 		request.uri = "../samples/hello.xml";
@@ -180,8 +164,7 @@ public class ZipFileURIResolverTest {
 	}
 
 	@Test
-	public void unknownFile()
-		throws ConfigurationException, XPathException, URISyntaxException {
+	public void unknownFile() throws ConfigurationException, XPathException, URISyntaxException {
 		resolver.setup(zipFile, null);
 		resolver.setNonDelegating();
 		ResourceRequest request = new ResourceRequest();
@@ -190,8 +173,7 @@ public class ZipFileURIResolverTest {
 	}
 
 	@Test
-	public void unknownFileDelegating()
-		throws ConfigurationException, XPathException, URISyntaxException {
+	public void unknownFileDelegating() throws ConfigurationException, XPathException, URISyntaxException {
 		resolver.setup(zipFile, null);
 		ResourceRequest request = new ResourceRequest();
 		request.uri = "xsl/unknown.xsl";
@@ -199,8 +181,7 @@ public class ZipFileURIResolverTest {
 	}
 
 	@Test
-	public void directoryPath()
-		throws ConfigurationException, XPathException, URISyntaxException {
+	public void directoryPath() throws ConfigurationException, XPathException, URISyntaxException {
 		resolver.setup(zipFile, null);
 		resolver.setNonDelegating();
 		ResourceRequest request = new ResourceRequest();
@@ -209,8 +190,7 @@ public class ZipFileURIResolverTest {
 	}
 
 	@Test
-	public void directoryPathDelegating()
-		throws ConfigurationException, XPathException, URISyntaxException {
+	public void directoryPathDelegating() throws ConfigurationException, XPathException, URISyntaxException {
 		resolver.setup(zipFile, null);
 		ResourceRequest request = new ResourceRequest();
 		request.uri = "xsl";
@@ -219,8 +199,7 @@ public class ZipFileURIResolverTest {
 
 	@Test
 	@Disabled
-	public void nonXmlFile()
-		throws ConfigurationException, XPathException, URISyntaxException {
+	public void nonXmlFile() throws ConfigurationException, XPathException, URISyntaxException {
 		resolver.setup(zipFile, null);
 		resolver.setNonDelegating();
 		ResourceRequest request = new ResourceRequest();
@@ -230,8 +209,7 @@ public class ZipFileURIResolverTest {
 
 	@Test
 	@Disabled
-	public void nonXmlFileDelegating()
-		throws ConfigurationException, XPathException, URISyntaxException {
+	public void nonXmlFileDelegating() throws ConfigurationException, XPathException, URISyntaxException {
 		resolver.setup(zipFile, null);
 		ResourceRequest request = new ResourceRequest();
 		request.uri = "samples/secret.txt";

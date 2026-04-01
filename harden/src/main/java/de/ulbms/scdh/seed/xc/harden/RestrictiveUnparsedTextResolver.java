@@ -2,8 +2,6 @@ package de.ulbms.scdh.seed.xc.harden;
 
 import de.ulbms.scdh.seed.xc.api.ConfigurationException;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.core.Context;
 import java.io.File;
 import java.io.Reader;
 import java.net.URI;
@@ -34,11 +32,9 @@ import org.slf4j.LoggerFactory;
  * See also: {@link FileURIResolver}
  */
 @ApplicationScoped
-public class RestrictiveUnparsedTextResolver
-	extends StandardUnparsedTextResolver {
+public class RestrictiveUnparsedTextResolver extends StandardUnparsedTextResolver {
 
-	private static final Logger LOG =
-		LoggerFactory.getLogger(FileURIResolver.class);
+	private static final Logger LOG = LoggerFactory.getLogger(FileURIResolver.class);
 
 	/**
 	 * Only paths under this path will be accessible through this resource
@@ -60,38 +56,25 @@ public class RestrictiveUnparsedTextResolver
 	// }
 
 	public RestrictiveUnparsedTextResolver(
-		@ConfigProperty(
-			name = "de.ulbms.scdh.seed.xc.harden.FileURIResolver.path",
-			defaultValue = "/") String path,
-		@ConfigProperty(
-			name = "de.ulbms.scdh.seed.xc.harden.FileURIResolver.baseUri",
-			defaultValue = "/") String baseUri) throws ConfigurationException {
+			@ConfigProperty(name = "de.ulbms.scdh.seed.xc.harden.FileURIResolver.path", defaultValue = "/") String path,
+			@ConfigProperty(name = "de.ulbms.scdh.seed.xc.harden.FileURIResolver.baseUri", defaultValue = "/")
+					String baseUri)
+			throws ConfigurationException {
 
 		super();
 
 		// check preconditions
 		if (path == null) {
-			LOG.error("configuration error: path of FileURIResolver may not "
-					  + "be null.");
-			throw new ConfigurationException(
-				"configuration error: path of FileURIResolver may not be "
-				+ "null.");
+			LOG.error("configuration error: path of FileURIResolver may not " + "be null.");
+			throw new ConfigurationException("configuration error: path of FileURIResolver may not be " + "null.");
 		} else if (path.startsWith("file:")) {
-			LOG.error(
-				"configuration error: path of FileURIResolver may not start "
-				+ "with 'file:'");
+			LOG.error("configuration error: path of FileURIResolver may not start " + "with 'file:'");
 			throw new ConfigurationException(
-				"configuration error: path of FileURIResolver may not start "
-				+ "with "
-				+ "'file:'");
+					"configuration error: path of FileURIResolver may not start " + "with " + "'file:'");
 		} else if (path.isEmpty()) {
-			LOG.error(
-				"configuration error: path of FileURIResolver may not be the "
-				+ "empty string");
+			LOG.error("configuration error: path of FileURIResolver may not be the " + "empty string");
 			throw new ConfigurationException(
-				"configuration error: path of FileURIResolver may not be the "
-				+ "empty "
-				+ "string");
+					"configuration error: path of FileURIResolver may not be the " + "empty " + "string");
 		}
 
 		try {
@@ -99,8 +82,7 @@ public class RestrictiveUnparsedTextResolver
 			// make absolute
 			normalizedPath = new File(normalizedPath).getAbsolutePath();
 			// assert path separator (/) at end
-			if (!normalizedPath.endsWith("/") &&
-				!normalizedPath.endsWith(File.separator)) {
+			if (!normalizedPath.endsWith("/") && !normalizedPath.endsWith(File.separator)) {
 				// if path does not end with a path separator,
 				// resolving against it will interpret the last path
 				// segment as a file
@@ -111,11 +93,8 @@ public class RestrictiveUnparsedTextResolver
 			// store to field
 			this.path = uri.getSchemeSpecificPart();
 		} catch (URISyntaxException e) {
-			LOG.error("invalid path configured for FileURIResolver: {}",
-					  e.getMessage());
-			throw new ConfigurationException(
-				"invalid path configured for FileURIResolver: " +
-				e.getMessage());
+			LOG.error("invalid path configured for FileURIResolver: {}", e.getMessage());
+			throw new ConfigurationException("invalid path configured for FileURIResolver: " + e.getMessage());
 		}
 		LOG.info("allowed path of FileURIResolver configured to '{}'", path);
 		LOG.info("allowed path of FileURIResolver set to '{}'", this.path);
@@ -123,13 +102,10 @@ public class RestrictiveUnparsedTextResolver
 		try {
 			String normalizedFile = baseUri;
 			// make absolute
-			this.baseUri =
-				new File(normalizedFile).getAbsoluteFile().toURI().normalize();
+			this.baseUri = new File(normalizedFile).getAbsoluteFile().toURI().normalize();
 		} catch (SecurityException e) {
-			LOG.error("invalid configuration file: {}, {}", baseUri,
-					  e.getMessage());
-			throw new ConfigurationException(
-				"invalid configuration file: " + baseUri, e);
+			LOG.error("invalid configuration file: {}, {}", baseUri, e.getMessage());
+			throw new ConfigurationException("invalid configuration file: " + baseUri, e);
 		}
 	}
 
@@ -139,8 +115,7 @@ public class RestrictiveUnparsedTextResolver
 	 * not inside the allowed directory, an exceptions is thrown.
 	 */
 	@Override
-	public Reader resolve(URI absoluteURI, String encoding,
-						  Configuration config) throws XPathException {
+	public Reader resolve(URI absoluteURI, String encoding, Configuration config) throws XPathException {
 		LOG.debug("resolving unparsed text URI {}", absoluteURI.toString());
 
 		try {
@@ -149,8 +124,7 @@ public class RestrictiveUnparsedTextResolver
 			// 2. make URI absulute, resolve relatives against config file
 			if (!uri.isAbsolute()) {
 				uri = this.baseUri.resolve(uri);
-				uri = new URI("file", uri.getSchemeSpecificPart(),
-							  uri.getFragment());
+				uri = new URI("file", uri.getSchemeSpecificPart(), uri.getFragment());
 			}
 
 			// 3. normalize URI, i.e. process '.' and '..'
@@ -159,8 +133,7 @@ public class RestrictiveUnparsedTextResolver
 			// 4. add "file:" scheme if no scheme specified
 			if (uri.getScheme() == null) {
 				// uri = new URI("file:" + uri.toString());
-				uri = new URI("file", uri.getSchemeSpecificPart(),
-							  uri.getFragment());
+				uri = new URI("file", uri.getSchemeSpecificPart(), uri.getFragment());
 			}
 
 			// check URI
@@ -173,8 +146,7 @@ public class RestrictiveUnparsedTextResolver
 					return super.resolve(uri, encoding, config);
 				} else {
 					LOG.error("illegal file URI: {}", uri.toString());
-					throw new XPathException("illegal file URI: " +
-											 uri.toString());
+					throw new XPathException("illegal file URI: " + uri.toString());
 				}
 			} else {
 				// delegate to the standard resolver
@@ -182,16 +154,13 @@ public class RestrictiveUnparsedTextResolver
 			}
 
 		} catch (NullPointerException e) {
-			LOG.error("illegal URI {}: {}", absoluteURI.toString(),
-					  e.getMessage());
+			LOG.error("illegal URI {}: {}", absoluteURI.toString(), e.getMessage());
 			throw new XPathException(e);
 		} catch (IllegalArgumentException e) {
-			LOG.error("illegal URI {}: {}", absoluteURI.toString(),
-					  e.getMessage());
+			LOG.error("illegal URI {}: {}", absoluteURI.toString(), e.getMessage());
 			throw new XPathException(e);
 		} catch (URISyntaxException e) {
-			LOG.error("illegal URI {}: {}", absoluteURI.toString(),
-					  e.getMessage());
+			LOG.error("illegal URI {}: {}", absoluteURI.toString(), e.getMessage());
 			throw new XPathException(e);
 		}
 	}
