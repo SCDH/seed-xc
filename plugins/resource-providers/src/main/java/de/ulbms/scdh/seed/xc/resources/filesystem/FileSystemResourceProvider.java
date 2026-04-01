@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
@@ -36,17 +35,14 @@ import org.slf4j.LoggerFactory;
  * resolved against the current user directory.
  */
 @LookupIfProperty(
-	name = "de.ulbms.scdh.seed.xc.api.ResourceProvider",
-	stringValue =
-		"de.ulbms.scdh.seed.xc.resources.filesystem.FileSystemResourceProvider")
+		name = "de.ulbms.scdh.seed.xc.api.ResourceProvider",
+		stringValue = "de.ulbms.scdh.seed.xc.resources.filesystem.FileSystemResourceProvider")
 @ApplicationScoped
 public class FileSystemResourceProvider implements ResourceProvider {
 
-	public static final String NAME =
-		"de.ulbms.scdh.seed.xc.resources.filesystem.FileSystemResourceProvider";
+	public static final String NAME = "de.ulbms.scdh.seed.xc.resources.filesystem.FileSystemResourceProvider";
 
-	private static final Logger LOG =
-		LoggerFactory.getLogger(FileSystemResourceProvider.class);
+	private static final Logger LOG = LoggerFactory.getLogger(FileSystemResourceProvider.class);
 
 	private URI path = null;
 
@@ -54,24 +50,23 @@ public class FileSystemResourceProvider implements ResourceProvider {
 
 	@Inject
 	public FileSystemResourceProvider(
-		@ConfigProperty(name = "de.ulbms.scdh.seed.xc.resources.filesystem."
-							   + "FileSystemResourceProvider.path",
-						defaultValue = "/") String path) {
-		LOG.debug("setting up file system resource provider with path {}",
-				  path);
+			@ConfigProperty(
+							name = "de.ulbms.scdh.seed.xc.resources.filesystem." + "FileSystemResourceProvider.path",
+							defaultValue = "/")
+					String path) {
+		LOG.debug("setting up file system resource provider with path {}", path);
 		try {
 			// resolving relative paths against the current
 			// user directory with getAbsoluteFile()
 			// simplifies testing and configuration.
 			this.path = Paths.get(path)
-							.toFile()
-							.getAbsoluteFile()
-							.getCanonicalFile()
-							.toURI();
+					.toFile()
+					.getAbsoluteFile()
+					.getCanonicalFile()
+					.toURI();
 
 		} catch (Exception e) {
-			LOG.error("invalid path for FileSystemResourceProvider: {}",
-					  e.getMessage());
+			LOG.error("invalid path for FileSystemResourceProvider: {}", e.getMessage());
 			error = e;
 		}
 	}
@@ -81,10 +76,8 @@ public class FileSystemResourceProvider implements ResourceProvider {
 	 */
 	@Override
 	public InputStream getSource(ResourceInContext ric)
-		throws ResourceProviderConfigurationException,
-			   ResourceNotFoundException, ResourceException {
-		LOG.debug("getting source {} by resolving against {}",
-				  ric.getResource(), path);
+			throws ResourceProviderConfigurationException, ResourceNotFoundException, ResourceException {
+		LOG.debug("getting source {} by resolving against {}", ric.getResource(), path);
 		if (error != null) {
 			LOG.error("failed to setup: {}", error.getMessage());
 			throw new ResourceProviderConfigurationException(error);

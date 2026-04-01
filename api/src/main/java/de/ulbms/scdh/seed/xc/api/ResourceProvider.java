@@ -18,6 +18,6 @@ public interface ResourceProvider {
 	 * @param resource - An identifier of the requested resource
 	 */
 	InputStream getSource(ResourceInContext resourceInContext)
-		throws ResourceNotFoundException, ResourceException,
-			   ResourceProviderConfigurationException, ConfigurationException;
+			throws ResourceNotFoundException, ResourceException, ResourceProviderConfigurationException,
+					ConfigurationException;
 }

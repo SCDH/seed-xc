@@ -10,7 +10,11 @@ public class ResourceInContext {
 		this.resource = resource;
 	}
 
-	public String getContext() { return context; }
+	public String getContext() {
+		return context;
+	}
 
-	public String getResource() { return resource; }
+	public String getResource() {
+		return resource;
+	}
 }

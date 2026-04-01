@@ -12,10 +12,14 @@ package de.ulbms.scdh.seed.xc.api;
  * or because of configuration errors.
  */
 public class ResourceProviderConfigurationException extends Exception {
-	public ResourceProviderConfigurationException(String msg) { super(msg); }
+	public ResourceProviderConfigurationException(String msg) {
+		super(msg);
+	}
+
 	public ResourceProviderConfigurationException(Throwable cause) {
 		super(cause);
 	}
+
 	public ResourceProviderConfigurationException(String msg, Throwable cause) {
 		super(msg, cause);
 	}

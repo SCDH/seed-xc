@@ -39,113 +39,103 @@ import org.slf4j.LoggerFactory;
 @RequestScoped
 public class NavigationEndpoint implements NavigationApi {
 
-	private static final Logger LOG =
-		LoggerFactory.getLogger(NavigationEndpoint.class);
+	private static final Logger LOG = LoggerFactory.getLogger(NavigationEndpoint.class);
 
 	/**
 	 * The ID of the transformation using for transforming a resource.
 	 */
 	@ConfigProperty(
-		name = "de.ulbms.scdh.seed.xc.dts.NavigationEndpoint.TRANSFORMATION",
-		defaultValue = "dts-transformations-xsl-navigation")
+			name = "de.ulbms.scdh.seed.xc.dts.NavigationEndpoint.TRANSFORMATION",
+			defaultValue = "dts-transformations-xsl-navigation")
 	private String TRANSFORMATION;
 
-	@Inject TransformationMap transformations;
+	@Inject
+	TransformationMap transformations;
 
-	@Inject ResourceProvider resourceProvider;
+	@Inject
+	ResourceProvider resourceProvider;
 
 	@Override
-	public Uni<Navigation> navigation(URI collection, String resource,
-									  String ref, String start, String end,
-									  Integer down, String tree, Integer page) {
+	public Uni<Navigation> navigation(
+			URI collection,
+			String resource,
+			String ref,
+			String start,
+			String end,
+			Integer down,
+			String tree,
+			Integer page) {
 		// make RuntimeParameter object from parameters
 		RuntimeParameters params = new RuntimeParameters();
 		Map<String, String> map = new HashMap<String, String>();
-		if (resource != null)
-			map.put("resource", resource);
-		if (down != null)
-			map.put("down", down.toString());
-		if (tree != null)
-			map.put("tree", tree);
-		if (page != null)
-			map.put("page", page.toString());
+		if (resource != null) map.put("resource", resource);
+		if (down != null) map.put("down", down.toString());
+		if (tree != null) map.put("tree", tree);
+		if (page != null) map.put("page", page.toString());
 		if (ref != null) {
 			map.put("ref", ref);
-		} else if (start != null)
-			map.put("start", start);
-		if (end != null)
-			map.put("end", end);
+		} else if (start != null) map.put("start", start);
+		if (end != null) map.put("end", end);
 		params.globalParameters(map);
 
 		return Uni.createFrom()
-			.item(new ResourceInContext("", resource))
-			.onItem()
-			.transform((ric) -> {
-				try {
-					LOG.info("getting resource {}", resource);
-					return resourceProvider.getSource(ric);
-				} catch (ResourceNotFoundException e) {
-					LOG.error(e.getMessage());
-					throw new jakarta.ws.rs.NotFoundException(e.getMessage());
-				} catch (ConfigurationException e) {
-					LOG.error(e.getMessage());
-					throw new jakarta.ws.rs.InternalServerErrorException(
-						e.getMessage());
-				} catch (ResourceProviderConfigurationException e) {
-					LOG.error(e.getMessage());
-					throw new jakarta.ws.rs.InternalServerErrorException(
-						e.getMessage());
-				} catch (ResourceException e) {
-					LOG.error(e.getMessage());
-					throw new jakarta.ws.rs.InternalServerErrorException(
-						e.getMessage());
-				}
-			})
-			.onItem()
-			.transform((s) -> {
-				Transformation transformation =
-					transformations.get(TRANSFORMATION);
-				if (transformation == null) {
-					LOG.error("transformation not available: {}",
-							  TRANSFORMATION);
-					throw new jakarta.ws.rs.BadRequestException(
-						"transformation not available: " + TRANSFORMATION);
-				}
-				try {
-					return transformation.transform(params, null, resource, s);
-				} catch (TransformationPreparationException e) {
-					LOG.error(e.getMessage());
-					throw new jakarta.ws.rs.InternalServerErrorException(
-						e.getMessage());
-				} catch (TransformationException e) {
-					LOG.error(e.getMessage());
-					throw new jakarta.ws.rs.InternalServerErrorException(
-						e.getMessage());
-				}
-			})
-			.onItem()
-			.transform((bs) -> {
-				// TODO: Can we get rid of this serialization ○ deserialization
-				// step? We could simple send the bytestream back to the
-				// client, but that would break the signature of the interface
-				// generated from OpenAPI specs. This extra step seems to be the
-				// cost of using OpenAPI specs.
-				try {
-					ObjectMapper om = new ObjectMapper(new JsonFactory());
-					return om.readValue(bs, Navigation.class);
-				} catch (DatabindException e) {
-					LOG.error(e.getMessage());
-					throw new jakarta.ws.rs.InternalServerErrorException(
-						e.getMessage());
-				} catch (StreamReadException e) {
-					LOG.error(e.getMessage());
-					throw new jakarta.ws.rs.InternalServerErrorException(
-						e.getMessage());
-				} catch (IOException e) {
-					LOG.error(e.getMessage());
-					throw new jakarta.ws.rs.InternalServerErrorException(
-						e.getMessage());
-				}
-			});
+				.item(new ResourceInContext("", resource))
+				.onItem()
+				.transform((ric) -> {
+					try {
+						LOG.info("getting resource {}", resource);
+						return resourceProvider.getSource(ric);
+					} catch (ResourceNotFoundException e) {
+						LOG.error(e.getMessage());
+						throw new jakarta.ws.rs.NotFoundException(e.getMessage());
+					} catch (ConfigurationException e) {
+						LOG.error(e.getMessage());
+						throw new jakarta.ws.rs.InternalServerErrorException(e.getMessage());
+					} catch (ResourceProviderConfigurationException e) {
+						LOG.error(e.getMessage());
+						throw new jakarta.ws.rs.InternalServerErrorException(e.getMessage());
+					} catch (ResourceException e) {
+						LOG.error(e.getMessage());
+						throw new jakarta.ws.rs.InternalServerErrorException(e.getMessage());
+					}
+				})
+				.onItem()
+				.transform((s) -> {
+					Transformation transformation = transformations.get(TRANSFORMATION);
+					if (transformation == null) {
+						LOG.error("transformation not available: {}", TRANSFORMATION);
+						throw new jakarta.ws.rs.BadRequestException("transformation not available: " + TRANSFORMATION);
+					}
+					try {
+						return transformation.transform(params, null, resource, s);
+					} catch (TransformationPreparationException e) {
+						LOG.error(e.getMessage());
+						throw new jakarta.ws.rs.InternalServerErrorException(e.getMessage());
+					} catch (TransformationException e) {
+						LOG.error(e.getMessage());
+						throw new jakarta.ws.rs.InternalServerErrorException(e.getMessage());
+					}
+				})
+				.onItem()
+				.transform((bs) -> {
+					// TODO: Can we get rid of this serialization ○ deserialization
+					// step? We could simple send the bytestream back to the
+					// client, but that would break the signature of the interface
+					// generated from OpenAPI specs. This extra step seems to be the
+					// cost of using OpenAPI specs.
+					try {
+						ObjectMapper om = new ObjectMapper(new JsonFactory());
+						return om.readValue(bs, Navigation.class);
+					} catch (DatabindException e) {
+						LOG.error(e.getMessage());
+						throw new jakarta.ws.rs.InternalServerErrorException(e.getMessage());
+					} catch (StreamReadException e) {
+						LOG.error(e.getMessage());
+						throw new jakarta.ws.rs.InternalServerErrorException(e.getMessage());
+					} catch (IOException e) {
+						LOG.error(e.getMessage());
+						throw new jakarta.ws.rs.InternalServerErrorException(e.getMessage());
+					}
+				});
 	}
 }
