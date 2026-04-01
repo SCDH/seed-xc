@@ -1,5 +1,6 @@
 package de.ulbms.scdh.seed.xc.api;
 
+import io.smallrye.mutiny.Uni;
 import java.io.InputStream;
 
 /**
@@ -19,4 +20,11 @@ public interface ResourceProvider {
 	InputStream getSource(ResourceInContext resourceInContext)
 			throws ResourceNotFoundException, ResourceException, ResourceProviderConfigurationException,
 					ConfigurationException;
+
+	/**
+	 * Returns a {@link InputStream} of a resource wrapped in a {@link Uni}.
+	 *
+	 * @param resourceInContextUni - Information for identifying the resource, wrapped in a {@link Uni}
+	 */
+	Uni<InputStream> getResource(Uni<ResourceInContext> resourceInContextUni);
 }

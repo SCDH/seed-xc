@@ -6,6 +6,7 @@ import de.ulbms.scdh.seed.xc.api.ResourceNotFoundException;
 import de.ulbms.scdh.seed.xc.api.ResourceProvider;
 import de.ulbms.scdh.seed.xc.api.ResourceProviderConfigurationException;
 import io.quarkus.arc.lookup.LookupIfProperty;
+import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.io.IOException;
@@ -94,5 +95,30 @@ public class FileSystemResourceProvider implements ResourceProvider {
 		} catch (IOException e) {
 			throw new ResourceNotFoundException(e);
 		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Uni<InputStream> getResource(Uni<ResourceInContext> resourceInContext) {
+		if (error != null) {
+			return resourceInContext.replaceWith(Uni.createFrom().failure(error));
+		}
+
+		return resourceInContext.onItem().transform((ric) -> {
+			try {
+				URI normalized = path.resolve(ric.getResource()).normalize();
+				LOG.debug("resolved {} to {}", ric.getResource(), normalized);
+				if (!normalized.toString().startsWith(path.toString())) {
+					throw new jakarta.ws.rs.NotAllowedException("not allowed");
+				}
+				return normalized.toURL().openStream();
+			} catch (MalformedURLException e) {
+				throw new jakarta.ws.rs.BadRequestException(e);
+			} catch (IOException e) {
+				throw new jakarta.ws.rs.InternalServerErrorException(e);
+			}
+		});
 	}
 }

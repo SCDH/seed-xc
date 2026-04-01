@@ -4,12 +4,8 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.ulbms.scdh.seed.xc.api.ConfigurationException;
-import de.ulbms.scdh.seed.xc.api.ResourceException;
 import de.ulbms.scdh.seed.xc.api.ResourceInContext;
-import de.ulbms.scdh.seed.xc.api.ResourceNotFoundException;
 import de.ulbms.scdh.seed.xc.api.ResourceProvider;
-import de.ulbms.scdh.seed.xc.api.ResourceProviderConfigurationException;
 import de.ulbms.scdh.seed.xc.api.RuntimeParameters;
 import de.ulbms.scdh.seed.xc.api.Transformation;
 import de.ulbms.scdh.seed.xc.api.TransformationException;
@@ -65,6 +61,7 @@ public class NavigationEndpoint implements NavigationApi {
 			Integer down,
 			String tree,
 			Integer page) {
+
 		// make RuntimeParameter object from parameters
 		RuntimeParameters params = new RuntimeParameters();
 		Map<String, String> map = new HashMap<String, String>();
@@ -78,34 +75,21 @@ public class NavigationEndpoint implements NavigationApi {
 		if (end != null) map.put("end", end);
 		params.globalParameters(map);
 
-		return Uni.createFrom()
-				.item(new ResourceInContext("", resource))
-				.onItem()
-				.transform((ric) -> {
-					try {
-						LOG.info("getting resource {}", resource);
-						return resourceProvider.getSource(ric);
-					} catch (ResourceNotFoundException e) {
-						LOG.error(e.getMessage());
-						throw new jakarta.ws.rs.NotFoundException(e.getMessage());
-					} catch (ConfigurationException e) {
-						LOG.error(e.getMessage());
-						throw new jakarta.ws.rs.InternalServerErrorException(e.getMessage());
-					} catch (ResourceProviderConfigurationException e) {
-						LOG.error(e.getMessage());
-						throw new jakarta.ws.rs.InternalServerErrorException(e.getMessage());
-					} catch (ResourceException e) {
-						LOG.error(e.getMessage());
-						throw new jakarta.ws.rs.InternalServerErrorException(e.getMessage());
-					}
-				})
+		// get the transformation or return failure
+		Transformation transformation = transformations.get(TRANSFORMATION);
+		if (transformation == null) {
+			LOG.error("transformation not available: {}", TRANSFORMATION);
+			return Uni.createFrom()
+					.failure(new jakarta.ws.rs.BadRequestException("transformation not available: " + TRANSFORMATION));
+		}
+
+		// Create ResourceInContext from resource parameter and additional parameters
+		ResourceInContext ric = new ResourceInContext("", resource);
+		Uni<ResourceInContext> uniRic = Uni.createFrom().item(ric);
+
+		return uniRic.plug(resourceProvider::getResource)
 				.onItem()
 				.transform((s) -> {
-					Transformation transformation = transformations.get(TRANSFORMATION);
-					if (transformation == null) {
-						LOG.error("transformation not available: {}", TRANSFORMATION);
-						throw new jakarta.ws.rs.BadRequestException("transformation not available: " + TRANSFORMATION);
-					}
 					try {
 						return transformation.transform(params, null, resource, s);
 					} catch (TransformationPreparationException e) {
