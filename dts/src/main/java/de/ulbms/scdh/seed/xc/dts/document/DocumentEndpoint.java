@@ -6,6 +6,7 @@ import de.ulbms.scdh.seed.xc.transformations.TransformationMap;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -47,7 +48,7 @@ public class DocumentEndpoint implements DocumentApi {
 	 * @param tree - See DTS specs. Passed as runtime parameter to the transformation.
 	 * @param mediaType - See DTS specs. Passed as runtime parameter to the transformation.
 	 * @param cr - Context information for getting the resource as {@link Map<String,String>}. This hash map is passed to the resource provider.
-	 * @param cf - Context information for follow up links as {@link Map<String,String>}. These are passed as runtime parameters to the transformation.
+	 * @param cf - Context information for follow-up links as {@link Map<String,String>}. These are passed as runtime parameters to the transformation.
 	 * @return The document or parts of it in the requested media type.
 	 */
 	@Override
@@ -83,7 +84,8 @@ public class DocumentEndpoint implements DocumentApi {
 		params.globalParameters(map);
 
 		// Create ResourceInContext from resource parameter and additional parameters
-		ResourceInContext ric = new ResourceInContext("", resource);
+		if (cr == null) cr = Map.of();
+		ResourceInContext ric = new ResourceInContext(Collections.unmodifiableMap(cr), resource);
 		Uni<ResourceInContext> uniRic = Uni.createFrom().item(ric);
 
 		return uniRic.plug(resourceProvider::getResource).onItem().transform((s) -> {

@@ -52,7 +52,7 @@ public class FileSystemResourceProvider implements ResourceProvider {
 	@Inject
 	public FileSystemResourceProvider(
 			@ConfigProperty(
-							name = "de.ulbms.scdh.seed.xc.resources.filesystem." + "FileSystemResourceProvider.path",
+							name = "de.ulbms.scdh.seed.xc.resources.filesystem.FileSystemResourceProvider.path",
 							defaultValue = "/")
 					String path) {
 		LOG.debug("setting up file system resource provider with path {}", path);
