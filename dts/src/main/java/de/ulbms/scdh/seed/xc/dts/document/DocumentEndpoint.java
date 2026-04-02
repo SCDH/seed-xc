@@ -4,6 +4,7 @@ import de.ulbms.scdh.seed.xc.api.*;
 import de.ulbms.scdh.seed.xc.dts.endpoints.DocumentApi;
 import de.ulbms.scdh.seed.xc.transformations.TransformationMap;
 import io.smallrye.mutiny.Uni;
+import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,6 +12,13 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This implementation of the DTS Document endpoint uses a configurable
+ * {@link ResourceProvider} bean for getting the resource from a
+ * persistence service. It uses the compiled transformations to process
+ * the resource according to the DTS specification.
+ */
+@RequestScoped
 public class DocumentEndpoint implements DocumentApi {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DocumentEndpoint.class);
@@ -29,6 +37,19 @@ public class DocumentEndpoint implements DocumentApi {
 	@Inject
 	ResourceProvider resourceProvider;
 
+	/**
+	 * Implementation of the DTS Document endpoint. This first gets the resource using the resource provider and then transformes it.
+	 *
+	 * @param resource - Resource identifer. Passed as runtime parameter to the transformation and also to the resource provider.
+	 * @param ref - See DTS specs. Passed as runtime parameter to the transformation.
+	 * @param start - See DTS specs. Passed as runtime parameter to the transformation.
+	 * @param end - See DTS specs. Passed as runtime parameter to the transformation.
+	 * @param tree - See DTS specs. Passed as runtime parameter to the transformation.
+	 * @param mediaType - See DTS specs. Passed as runtime parameter to the transformation.
+	 * @param cr - Context information for getting the resource as {@link Map<String,String>}. This hash map is passed to the resource provider.
+	 * @param cf - Context information for follow up links as {@link Map<String,String>}. These are passed as runtime parameters to the transformation.
+	 * @return The document or parts of it in the requested media type.
+	 */
 	@Override
 	public Uni<byte[]> document(
 			String resource,

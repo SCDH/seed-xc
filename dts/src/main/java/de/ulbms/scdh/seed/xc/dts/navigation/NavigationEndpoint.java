@@ -50,6 +50,21 @@ public class NavigationEndpoint implements NavigationApi {
 	@Inject
 	ResourceProvider resourceProvider;
 
+	/**
+	 * <P>Implementation of the DTS Navigation endpoint.</P>
+	 * <P>This first gets the resource using the resource provider and then transformes it.</P>
+	 *
+	 * @param resource - Resource identifer. Passed as runtime parameter to the transformation and also to the resource provider.
+	 * @param ref - See DTS specs. Passed as runtime parameter to the transformation.
+	 * @param start - See DTS specs. Passed as runtime parameter to the transformation.
+	 * @param end - See DTS specs. Passed as runtime parameter to the transformation.
+	 * @param down - See DTS specs. Passed as runtime parameter to the transformation.
+	 * @param tree - See DTS specs. Passed as runtime parameter to the transformation.
+	 * @param page - See DTS specs. Passed as runtime parameter to the transformation.
+	 * @param cr - Context information for getting the resource as {@link Map<String,String>}. This hash map is passed to the resource provider.
+	 * @param cf - Context information for follow up links as {@link Map<String,String>}. These are passed as runtime parameters to the transformation.
+	 * @return The document or parts of it in the requested media type.
+	 */
 	@Override
 	public Uni<Navigation> navigation(
 			String resource,
