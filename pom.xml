@@ -79,6 +79,7 @@
     <smallrye-jandex-plugin.version>3.5.3</smallrye-jandex-plugin.version>
     <spotless.version>3.4.0</spotless.version>
     <palantir-java-format.version>2.90.0</palantir-java-format.version>
+    <assertj.version>3.27.7</assertj.version>
 
     <!-- service specific -->
     <xmlresolver.version>4.5.1</xmlresolver.version>
