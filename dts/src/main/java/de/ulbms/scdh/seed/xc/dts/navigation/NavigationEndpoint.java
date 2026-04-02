@@ -69,10 +69,11 @@ public class NavigationEndpoint implements NavigationApi {
 		if (down != null) map.put("down", down.toString());
 		if (tree != null) map.put("tree", tree);
 		if (page != null) map.put("page", page.toString());
-		if (ref != null) {
-			map.put("ref", ref);
-		} else if (start != null) map.put("start", start);
+		if (ref != null) map.put("ref", ref);
+		if (start != null) map.put("start", start);
 		if (end != null) map.put("end", end);
+		// all cf (= Context Follow ups) parameters are passed to the stylesheet
+		if (cf != null) map.putAll(cf);
 		params.globalParameters(map);
 
 		// get the transformation or return failure

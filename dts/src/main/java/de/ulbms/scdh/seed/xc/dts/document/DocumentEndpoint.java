@@ -52,11 +52,13 @@ public class DocumentEndpoint implements DocumentApi {
 		RuntimeParameters params = new RuntimeParameters();
 		Map<String, String> map = new HashMap<String, String>();
 		if (resource != null) map.put("resource", resource);
-		if (tree != null) map.put("tree", tree);
-		if (ref != null) {
-			map.put("ref", ref);
-		} else if (start != null) map.put("start", start);
+		if (ref != null) map.put("ref", ref);
+		if (start != null) map.put("start", start);
 		if (end != null) map.put("end", end);
+		if (tree != null) map.put("tree", tree);
+		/* TODO: media type */
+		// all cf (= Context Follow ups) parameters are passed to the stylesheet
+		if (cf != null) map.putAll(cf);
 		params.globalParameters(map);
 
 		// Create ResourceInContext from resource parameter and additional parameters
