@@ -17,7 +17,6 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import java.io.IOException;
-import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -53,14 +52,15 @@ public class NavigationEndpoint implements NavigationApi {
 
 	@Override
 	public Uni<Navigation> navigation(
-			URI collection,
 			String resource,
 			String ref,
 			String start,
 			String end,
 			Integer down,
 			String tree,
-			Integer page) {
+			Integer page,
+			Map<String, String> cr,
+			Map<String, String> cf) {
 
 		// make RuntimeParameter object from parameters
 		RuntimeParameters params = new RuntimeParameters();

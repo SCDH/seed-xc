@@ -5,7 +5,6 @@ import de.ulbms.scdh.seed.xc.dts.endpoints.DocumentApi;
 import de.ulbms.scdh.seed.xc.transformations.TransformationMap;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
-import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -32,7 +31,14 @@ public class DocumentEndpoint implements DocumentApi {
 
 	@Override
 	public Uni<byte[]> document(
-			URI collection, String resource, String ref, String start, String end, String tree, String mediaType) {
+			String resource,
+			String ref,
+			String start,
+			String end,
+			String tree,
+			String mediaType,
+			Map<String, String> cr,
+			Map<String, String> cf) {
 
 		// get the transformation or return failure
 		Transformation transformation = transformations.get(TRANSFORMATION);

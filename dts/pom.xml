@@ -12,7 +12,7 @@
   <name>SEED DTS</name>
 
   <properties>
-    <dts-openapi.version>0.0.3</dts-openapi.version>
+    <dts-openapi.version>0.1.1</dts-openapi.version>
     <openapi-specs.dir>${project.build.directory}</openapi-specs.dir>
 
     <!-- service configuration -->
