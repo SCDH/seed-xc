@@ -10,6 +10,7 @@ import de.ulbms.scdh.seed.xc.api.RuntimeParameters;
 import de.ulbms.scdh.seed.xc.api.Transformation;
 import de.ulbms.scdh.seed.xc.api.TransformationException;
 import de.ulbms.scdh.seed.xc.api.TransformationPreparationException;
+import de.ulbms.scdh.seed.xc.api.inject.TransformTimeProvider;
 import de.ulbms.scdh.seed.xc.dts.endpoints.NavigationApi;
 import de.ulbms.scdh.seed.xc.dts.model.Navigation;
 import de.ulbms.scdh.seed.xc.transformations.TransformationMap;
@@ -48,6 +49,7 @@ public class NavigationEndpoint implements NavigationApi {
 	@Inject
 	TransformationMap transformations;
 
+	@TransformTimeProvider
 	@Inject
 	ResourceProvider resourceProvider;
 

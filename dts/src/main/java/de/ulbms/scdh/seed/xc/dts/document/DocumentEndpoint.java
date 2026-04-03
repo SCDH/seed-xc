@@ -1,6 +1,7 @@
 package de.ulbms.scdh.seed.xc.dts.document;
 
 import de.ulbms.scdh.seed.xc.api.*;
+import de.ulbms.scdh.seed.xc.api.inject.TransformTimeProvider;
 import de.ulbms.scdh.seed.xc.dts.endpoints.DocumentApi;
 import de.ulbms.scdh.seed.xc.transformations.TransformationMap;
 import io.smallrye.mutiny.Uni;
@@ -35,6 +36,7 @@ public class DocumentEndpoint implements DocumentApi {
 	@Inject
 	protected TransformationMap transformations;
 
+	@TransformTimeProvider
 	@Inject
 	ResourceProvider resourceProvider;
 
