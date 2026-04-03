@@ -43,7 +43,10 @@ public class TransformService implements TransformApi {
 		return uniRic.plug(resourceProvider::getResource).onItem().transform((s) -> {
 			try {
 				return transformation.transform(parameters, config, url, s, resourceProvider);
-			} catch (TransformationPreparationException | TransformationException e) {
+			} catch (TransformationPreparationException e) {
+				LOG.error(e.getMessage());
+				throw new BadRequestException(e.getMessage());
+			} catch (TransformationException e) {
 				LOG.error(e.getMessage());
 				throw new InternalServerErrorException(e.getMessage());
 			}
@@ -68,11 +71,13 @@ public class TransformService implements TransformApi {
 			return Uni.createFrom().failure(new NotFoundException("unknown transformation " + transformationId));
 		}
 
-		ResourceInContext ric = new ResourceInContext(Map.of(), url);
 		return Uni.createFrom().item(source).onItem().transform((s) -> {
 			try {
 				return transformation.transform(parameters, config, url, s, resourceProvider);
-			} catch (TransformationPreparationException | TransformationException e) {
+			} catch (TransformationPreparationException e) {
+				LOG.error(e.getMessage());
+				throw new BadRequestException(e.getMessage());
+			} catch (TransformationException e) {
 				LOG.error(e.getMessage());
 				throw new InternalServerErrorException(e.getMessage());
 			}

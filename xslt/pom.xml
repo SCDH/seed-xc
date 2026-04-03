@@ -24,6 +24,12 @@
       <version>${revision}${changelist}</version>
     </dependency>
     <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>seed-resource-providers</artifactId>
+      <version>${revision}${changelist}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>net.sf.saxon</groupId>
       <artifactId>${saxon.artifactId}</artifactId>
       <version>${saxon.version}</version>
