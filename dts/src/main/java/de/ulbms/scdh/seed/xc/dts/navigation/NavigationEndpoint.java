@@ -111,7 +111,7 @@ public class NavigationEndpoint implements NavigationApi {
 				.onItem()
 				.transform((s) -> {
 					try {
-						return transformation.transform(params, null, resource, s);
+						return transformation.transform(params, null, resource, s, resourceProvider);
 					} catch (TransformationPreparationException e) {
 						LOG.error(e.getMessage());
 						throw new jakarta.ws.rs.InternalServerErrorException(e.getMessage());

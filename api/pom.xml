@@ -28,6 +28,10 @@
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-rest</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
       <artifactId>quarkus-mutiny</artifactId>
     </dependency>
     <dependency>
@@ -85,6 +89,8 @@
               <configOptions>
                 <library>quarkus</library>
                 <useJakartaEe>true</useJakartaEe>
+                <supportAsync>true</supportAsync>
+                <useMutiny>true</useMutiny>
                 <apiPackage>de.ulbms.scdh.seed.xc.api</apiPackage>
                 <modelPackage>de.ulbms.scdh.seed.xc.api</modelPackage>
                 <dateLibrary>java8</dateLibrary>
@@ -92,12 +98,18 @@
                 <disallowAdditionalPropertiesIfNotPresent>false</disallowAdditionalPropertiesIfNotPresent>
                 <useTags>false</useTags>
                 <interfaceOnly>true</interfaceOnly>
-                <returnResponse>true</returnResponse>
                 <useSwaggerAnnotations>false</useSwaggerAnnotations>
                 <useMicroProfileOpenAPIAnnotations>true</useMicroProfileOpenAPIAnnotations>
                 <openApiNullable>false</openApiNullable>
                 <legacyDiscriminatorBehavior>false</legacyDiscriminatorBehavior>
               </configOptions>
+              <typeMappings>
+                <typeMapping>file=byte[]</typeMapping>
+                <typeMapping>string+local-zip=FileUpload</typeMapping>
+              </typeMappings>
+              <importMappings>
+                <importMapping>FileUpload=org.jboss.resteasy.reactive.multipart.FileUpload</importMapping>
+              </importMappings>
             </configuration>
           </execution>
         </executions>

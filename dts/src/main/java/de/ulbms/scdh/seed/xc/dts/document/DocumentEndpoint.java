@@ -92,7 +92,7 @@ public class DocumentEndpoint implements DocumentApi {
 
 		return uniRic.plug(resourceProvider::getResource).onItem().transform((s) -> {
 			try {
-				return transformation.transform(params, null, resource, s);
+				return transformation.transform(params, null, resource, s, resourceProvider);
 			} catch (TransformationPreparationException | TransformationException e) {
 				LOG.error(e.getMessage());
 				throw new jakarta.ws.rs.InternalServerErrorException(e.getMessage());

@@ -222,7 +222,7 @@ paths:
           application/zip:
             schema:
               type: string
-              format: binary
+              format: local-zip
       responses:
         "200":
           $ref: '#/components/responses/CompilationSuccessful'

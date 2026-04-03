@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
  * The resolver delegates to the next configured resolver if the
  * resource is not found in the zip file.
  *
- * Use {@link ZipFileURIResolver.setNonDelegating()} to make it
+ * Use {@link ZipFileURIResolver#setNonDelegating()} to make it
  * non-delegating.
  */
 @Dependent
@@ -36,10 +36,10 @@ public class ZipFileURIResolver implements ResourceResolver {
 	 * Only paths under this path will be accessible through this resource
 	 * resolver.
 	 */
-	private ZipFile zipFile;
+	private ZipFile zip;
 
 	/**
-	 * URI derived from {@link path}. It is used to resolve relative URIs.
+	 * URI used to resolve relative URIs.
 	 */
 	private URI baseUri;
 
@@ -56,7 +56,7 @@ public class ZipFileURIResolver implements ResourceResolver {
 			LOG.error("cannot read zip archive: null");
 			throw new ConfigurationException("Cannot read zip archive: null");
 		}
-		this.zipFile = zip;
+		this.zip = zip;
 		this.baseUri = baseUri;
 	}
 
@@ -74,7 +74,6 @@ public class ZipFileURIResolver implements ResourceResolver {
 	public Source resolve(ResourceRequest request) throws XPathException {
 		LOG.debug("resolving {} URI {} ", request.nature, request.uri);
 		// System.out.println(request.uri);
-
 		try {
 			// 1. parse to URI instance
 			URI uri = new URI(request.uri);
@@ -103,9 +102,9 @@ public class ZipFileURIResolver implements ResourceResolver {
 					LOG.error("illegal file URI: null path (ssp) in {}", uri.toString());
 					throw new XPathException("illegal file URI: null path (ssp)");
 				}
-				ZipEntry zipEntry = zipFile.getEntry(uri.getSchemeSpecificPart());
+				ZipEntry zipEntry = zip.getEntry(uri.getSchemeSpecificPart());
 				if (zipEntry != null) {
-					InputStream is = zipFile.getInputStream(zipEntry);
+					InputStream is = zip.getInputStream(zipEntry);
 					return new StreamSource(is, uri.toString());
 				} else {
 					LOG.error("illegal file URI: {}", uri.toString());

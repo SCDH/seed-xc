@@ -1,9 +1,11 @@
 package de.ulbms.scdh.seed.xc.xslt;
 
 import de.ulbms.scdh.seed.xc.api.ConfigurationException;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,5 +30,24 @@ public class Utils {
 			LOG.error("cannot extract file {} from zip package: {}", path, e.getMessage());
 			throw new ConfigurationException(e);
 		}
+	}
+
+	/**
+	 * Reads the file given as path from the provided ZIP file.
+	 */
+	public static InputStream fromZip(ZipInputStream zip, String path) throws ConfigurationException {
+		try {
+			zip.reset();
+			ZipEntry ze;
+			while ((ze = zip.getNextEntry()) != null) {
+				if (ze.getName().equals(path)) {
+					return new ByteArrayInputStream(ze.toString().getBytes());
+				}
+			}
+		} catch (Exception e) {
+			LOG.error("cannot extract file {} from zip package: {}", path, e.getMessage());
+			throw new ConfigurationException(e);
+		}
+		throw new ConfigurationException("file not found in zip package: " + path);
 	}
 }

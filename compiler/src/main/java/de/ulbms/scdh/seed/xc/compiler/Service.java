@@ -3,15 +3,16 @@ package de.ulbms.scdh.seed.xc.compiler;
 import de.ulbms.scdh.seed.xc.api.ConfigurationException;
 import de.ulbms.scdh.seed.xc.api.XslcApi;
 import de.ulbms.scdh.seed.xc.xslt.SaxonXslTransformation;
+import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
-import java.io.File;
 import java.io.IOException;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.jboss.resteasy.reactive.RestResponse;
+import org.jboss.resteasy.reactive.multipart.FileUpload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +31,7 @@ public class Service implements XslcApi {
 
 	/**
 	 * As the {@link Service} class is request scoped, the injected
-	 * {@link SaxonXsltransformation} with dependend scope is request
+	 * {@link SaxonXslTransformation} with dependend scope is request
 	 * scoped, too.
 	 */
 	@Inject
@@ -42,36 +43,42 @@ public class Service implements XslcApi {
 	 * same zip file.
 	 */
 	@Override
-	public Response compileZip(String stylesheet, File body) {
-		if (body.length() > MAX_ZIP_SIZE) {
-			LOG.warn("zip file too large: ", body.length());
-			return RestResponse.status(Response.Status.REQUEST_ENTITY_TOO_LARGE, "payload too large")
-					.toResponse();
+	public Uni<Object> compileZip(String stylesheet, FileUpload zipUpload) {
+		if (zipUpload.size() > MAX_ZIP_SIZE) {
+			LOG.warn("zip file too large: ", zipUpload.size());
+			return Uni.createFrom()
+					.failure(
+							new WebApplicationException("payload too large", Response.Status.REQUEST_ENTITY_TOO_LARGE));
 		}
-		try (ZipFile zipFile = new ZipFile(body)) {
+		try {
+			ZipFile zip = new ZipFile(zipUpload.uploadedFile().toFile());
 			// compile
-			transformation.setup(zipFile, stylesheet, null);
+			transformation.setup(zip, stylesheet, null);
 			// export
 			byte[] out = transformation.export("JS");
-			return Response.ok(out).build();
+			zip.close();
+			return Uni.createFrom().item(out);
 		} catch (UnsupportedOperationException e) {
 			LOG.error("not supported: {}", e.getMessage());
-			return RestResponse.status(Response.Status.NOT_IMPLEMENTED, e.getMessage())
-					.toResponse();
+			return Uni.createFrom()
+					.failure(new WebApplicationException(e.getMessage(), Response.Status.NOT_IMPLEMENTED));
 		} catch (ConfigurationException e) {
 			LOG.error("compilation failed: {}", e.getMessage());
 			// OpenAPI returns 400 StylesheetNotFound, so we use BAD_REQUEST
 			// instead of NOT_FOUND
-			return RestResponse.status(Response.Status.BAD_REQUEST, "compilation failed: " + e.getMessage())
-					.toResponse();
+			return Uni.createFrom()
+					.failure(new WebApplicationException(
+							"compilation failed: " + e.getMessage(), Response.Status.BAD_REQUEST));
 		} catch (ZipException e) {
 			LOG.error("failed to read zip file: {}", e.getMessage());
-			return RestResponse.status(Response.Status.BAD_REQUEST, "cannot read zip file: " + e.getMessage())
-					.toResponse();
+			return Uni.createFrom()
+					.failure(new WebApplicationException(
+							"cannot read zip file: " + e.getMessage(), Response.Status.BAD_REQUEST));
 		} catch (IOException e) {
 			LOG.error("IOException while reading zip file: {}", e.getMessage());
-			return RestResponse.status(Response.Status.INTERNAL_SERVER_ERROR, "error reading zip file")
-					.toResponse();
+			return Uni.createFrom()
+					.failure(new WebApplicationException(
+							"error reading zip file", Response.Status.INTERNAL_SERVER_ERROR));
 		}
 	}
 }
