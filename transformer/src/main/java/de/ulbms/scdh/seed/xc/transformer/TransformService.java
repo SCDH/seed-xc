@@ -3,6 +3,7 @@ package de.ulbms.scdh.seed.xc.transformer;
 import de.ulbms.scdh.seed.xc.api.*;
 import de.ulbms.scdh.seed.xc.api.inject.TransformTimeProvider;
 import de.ulbms.scdh.seed.xc.transformations.TransformationMap;
+import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
@@ -29,37 +30,40 @@ public class TransformService implements TransformApi {
 	ResourceProvider resourceProvider;
 
 	@Override
-	public Uni<byte[]> transformTransformationUrlPost(
+	public Multi<byte[]> transformTransformationUrlPost(
 			String transformationId, String url, RuntimeParameters parameters, Config config) {
 
 		Transformation transformation = transformationsMap.get(transformationId);
 		if (transformation == null) {
-			return Uni.createFrom().failure(new NotFoundException("unknown transformation " + transformationId));
+			return Multi.createFrom().failure(new NotFoundException("unknown transformation " + transformationId));
 		}
 
 		ResourceInContext ric = new ResourceInContext(Map.of(), url);
 		Uni<ResourceInContext> uniRic = Uni.createFrom().item(ric);
 
-		return uniRic.plug(resourceProvider::getResource).onItem().transform((s) -> {
-			try {
-				return transformation.transform(parameters, config, url, s, resourceProvider);
-			} catch (TransformationPreparationException e) {
-				LOG.error(e.getMessage());
-				throw new BadRequestException(e.getMessage());
-			} catch (TransformationException e) {
-				LOG.error(e.getMessage());
-				throw new InternalServerErrorException(e.getMessage());
-			}
-		});
+		return uniRic.plug(resourceProvider::getResource)
+				.onItem()
+				.transform((s) -> {
+					try {
+						return transformation.transform(parameters, config, url, s, resourceProvider);
+					} catch (TransformationPreparationException e) {
+						LOG.error(e.getMessage());
+						throw new BadRequestException(e.getMessage());
+					} catch (TransformationException e) {
+						LOG.error(e.getMessage());
+						throw new InternalServerErrorException(e.getMessage());
+					}
+				})
+				.toMulti();
 	}
 
 	@Override
-	public Uni<byte[]> transformTransformationUrlGet(String transformationId, String url) {
+	public Multi<byte[]> transformTransformationUrlGet(String transformationId, String url) {
 		return transformTransformationUrlPost(transformationId, url, null, null);
 	}
 
 	@Override
-	public Uni<byte[]> transformTransformationPost(
+	public Multi<byte[]> transformTransformationPost(
 			String transformationId,
 			InputStream source,
 			String url,
@@ -68,19 +72,23 @@ public class TransformService implements TransformApi {
 
 		Transformation transformation = transformationsMap.get(transformationId);
 		if (transformation == null) {
-			return Uni.createFrom().failure(new NotFoundException("unknown transformation " + transformationId));
+			return Multi.createFrom().failure(new NotFoundException("unknown transformation " + transformationId));
 		}
 
-		return Uni.createFrom().item(source).onItem().transform((s) -> {
-			try {
-				return transformation.transform(parameters, config, url, s, resourceProvider);
-			} catch (TransformationPreparationException e) {
-				LOG.error(e.getMessage());
-				throw new BadRequestException(e.getMessage());
-			} catch (TransformationException e) {
-				LOG.error(e.getMessage());
-				throw new InternalServerErrorException(e.getMessage());
-			}
-		});
+		return Uni.createFrom()
+				.item(source)
+				.onItem()
+				.transform((s) -> {
+					try {
+						return transformation.transform(parameters, config, url, s, resourceProvider);
+					} catch (TransformationPreparationException e) {
+						LOG.error(e.getMessage());
+						throw new BadRequestException(e.getMessage());
+					} catch (TransformationException e) {
+						LOG.error(e.getMessage());
+						throw new InternalServerErrorException(e.getMessage());
+					}
+				})
+				.toMulti();
 	}
 }

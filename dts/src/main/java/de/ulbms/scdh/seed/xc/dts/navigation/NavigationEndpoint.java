@@ -14,6 +14,7 @@ import de.ulbms.scdh.seed.xc.api.inject.TransformTimeProvider;
 import de.ulbms.scdh.seed.xc.dts.endpoints.NavigationApi;
 import de.ulbms.scdh.seed.xc.dts.model.Navigation;
 import de.ulbms.scdh.seed.xc.transformations.TransformationMap;
+import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
@@ -69,7 +70,7 @@ public class NavigationEndpoint implements NavigationApi {
 	 * @return The document or parts of it in the requested media type.
 	 */
 	@Override
-	public Uni<Navigation> navigation(
+	public Multi<Navigation> navigation(
 			String resource,
 			String ref,
 			String start,
@@ -98,7 +99,7 @@ public class NavigationEndpoint implements NavigationApi {
 		Transformation transformation = transformations.get(TRANSFORMATION);
 		if (transformation == null) {
 			LOG.error("transformation not available: {}", TRANSFORMATION);
-			return Uni.createFrom()
+			return Multi.createFrom()
 					.failure(new jakarta.ws.rs.BadRequestException("transformation not available: " + TRANSFORMATION));
 		}
 
@@ -140,6 +141,7 @@ public class NavigationEndpoint implements NavigationApi {
 						LOG.error(e.getMessage());
 						throw new jakarta.ws.rs.InternalServerErrorException(e.getMessage());
 					}
-				});
+				})
+				.toMulti();
 	}
 }

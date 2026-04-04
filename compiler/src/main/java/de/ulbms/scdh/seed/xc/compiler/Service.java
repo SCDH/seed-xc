@@ -3,7 +3,7 @@ package de.ulbms.scdh.seed.xc.compiler;
 import de.ulbms.scdh.seed.xc.api.ConfigurationException;
 import de.ulbms.scdh.seed.xc.api.XslcApi;
 import de.ulbms.scdh.seed.xc.xslt.SaxonXslTransformation;
-import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.Multi;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
@@ -43,10 +43,10 @@ public class Service implements XslcApi {
 	 * same zip file.
 	 */
 	@Override
-	public Uni<Object> compileZip(String stylesheet, FileUpload zipUpload) {
+	public Multi<Object> compileZip(String stylesheet, FileUpload zipUpload) {
 		if (zipUpload.size() > MAX_ZIP_SIZE) {
 			LOG.warn("zip file too large: ", zipUpload.size());
-			return Uni.createFrom()
+			return Multi.createFrom()
 					.failure(
 							new WebApplicationException("payload too large", Response.Status.REQUEST_ENTITY_TOO_LARGE));
 		}
@@ -57,26 +57,26 @@ public class Service implements XslcApi {
 			// export
 			byte[] out = transformation.export("JS");
 			zip.close();
-			return Uni.createFrom().item(out);
+			return Multi.createFrom().item(out);
 		} catch (UnsupportedOperationException e) {
 			LOG.error("not supported: {}", e.getMessage());
-			return Uni.createFrom()
+			return Multi.createFrom()
 					.failure(new WebApplicationException(e.getMessage(), Response.Status.NOT_IMPLEMENTED));
 		} catch (ConfigurationException e) {
 			LOG.error("compilation failed: {}", e.getMessage());
 			// OpenAPI returns 400 StylesheetNotFound, so we use BAD_REQUEST
 			// instead of NOT_FOUND
-			return Uni.createFrom()
+			return Multi.createFrom()
 					.failure(new WebApplicationException(
 							"compilation failed: " + e.getMessage(), Response.Status.BAD_REQUEST));
 		} catch (ZipException e) {
 			LOG.error("failed to read zip file: {}", e.getMessage());
-			return Uni.createFrom()
+			return Multi.createFrom()
 					.failure(new WebApplicationException(
 							"cannot read zip file: " + e.getMessage(), Response.Status.BAD_REQUEST));
 		} catch (IOException e) {
 			LOG.error("IOException while reading zip file: {}", e.getMessage());
-			return Uni.createFrom()
+			return Multi.createFrom()
 					.failure(new WebApplicationException(
 							"error reading zip file", Response.Status.INTERNAL_SERVER_ERROR));
 		}

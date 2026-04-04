@@ -115,6 +115,7 @@
               <generateSupportingFiles>false</generateSupportingFiles>
               <generateApiTests>false</generateApiTests>
               <generateApiDocumentation>false</generateApiDocumentation>
+              <templateDirectory>${project.basedir}/src/main/resources/templates/JavaJaxRS/spec/libraries/quarkus</templateDirectory>
               <configOptions>
                 <library>quarkus</library>
                 <useJakartaEe>true</useJakartaEe>

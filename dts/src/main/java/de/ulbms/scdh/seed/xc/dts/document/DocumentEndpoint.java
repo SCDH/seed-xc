@@ -4,6 +4,7 @@ import de.ulbms.scdh.seed.xc.api.*;
 import de.ulbms.scdh.seed.xc.api.inject.TransformTimeProvider;
 import de.ulbms.scdh.seed.xc.dts.endpoints.DocumentApi;
 import de.ulbms.scdh.seed.xc.transformations.TransformationMap;
+import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
@@ -54,7 +55,7 @@ public class DocumentEndpoint implements DocumentApi {
 	 * @return The document or parts of it in the requested media type.
 	 */
 	@Override
-	public Uni<byte[]> document(
+	public Multi<byte[]> document(
 			String resource,
 			String ref,
 			String start,
@@ -68,7 +69,7 @@ public class DocumentEndpoint implements DocumentApi {
 		Transformation transformation = transformations.get(TRANSFORMATION);
 		if (transformation == null) {
 			LOG.error("transformation not available: {}", TRANSFORMATION);
-			return Uni.createFrom()
+			return Multi.createFrom()
 					.failure(new jakarta.ws.rs.BadRequestException("transformation not available: " + TRANSFORMATION));
 		}
 
@@ -90,13 +91,16 @@ public class DocumentEndpoint implements DocumentApi {
 		ResourceInContext ric = new ResourceInContext(Collections.unmodifiableMap(cr), resource);
 		Uni<ResourceInContext> uniRic = Uni.createFrom().item(ric);
 
-		return uniRic.plug(resourceProvider::getResource).onItem().transform((s) -> {
-			try {
-				return transformation.transform(params, null, resource, s, resourceProvider);
-			} catch (TransformationPreparationException | TransformationException e) {
-				LOG.error(e.getMessage());
-				throw new jakarta.ws.rs.InternalServerErrorException(e.getMessage());
-			}
-		});
+		return uniRic.plug(resourceProvider::getResource)
+				.onItem()
+				.transform((s) -> {
+					try {
+						return transformation.transform(params, null, resource, s, resourceProvider);
+					} catch (TransformationPreparationException | TransformationException e) {
+						LOG.error(e.getMessage());
+						throw new jakarta.ws.rs.InternalServerErrorException(e.getMessage());
+					}
+				})
+				.toMulti();
 	}
 }
