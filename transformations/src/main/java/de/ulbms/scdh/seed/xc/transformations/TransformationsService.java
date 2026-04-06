@@ -5,10 +5,10 @@ import de.ulbms.scdh.seed.xc.api.TransformationInfo;
 import de.ulbms.scdh.seed.xc.api.TransformationsApi;
 import de.ulbms.scdh.seed.xc.api.XsltParameterDetails;
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+import org.jboss.resteasy.reactive.RestMulti;
 
 /**
  * The implementation of the web service,
@@ -28,16 +28,17 @@ public class TransformationsService implements TransformationsApi {
 	public Multi<TransformationIDs> transformationsGet() {
 		TransformationIDs ids = new TransformationIDs();
 		ids.addAll(transformationsMap.keySet());
-		return Uni.createFrom().item(ids).toMulti();
+		return RestMulti.fromMultiData(Multi.createFrom().item(ids)).encodeAsJsonArray(false).build();
 	}
 
 	@Override
 	public Multi<TransformationInfo> transformationsTransformationInfoGet(String transformationId) {
 		if (transformationsMap.containsKey(transformationId)) {
 			TransformationInfo info = transformationsMap.get(transformationId).getTransformationInfo();
-			return Uni.createFrom().item(info).toMulti();
+			Multi<TransformationInfo> data = Multi.createFrom().item(info);
+			return RestMulti.fromMultiData(data).encodeAsJsonArray(false).build();
 		} else {
-			return Multi.createFrom().failure(NotFoundException::new);
+			throw new NotFoundException();
 		}
 	}
 
@@ -46,9 +47,9 @@ public class TransformationsService implements TransformationsApi {
 		if (transformationsMap.containsKey(transformationId)) {
 			XsltParameterDetails parameters =
 					transformationsMap.get(transformationId).getTransformationParameters();
-			return Uni.createFrom().item(parameters).toMulti();
+			return RestMulti.fromMultiData(Multi.createFrom().item(parameters)).encodeAsJsonArray(false).build();
 		} else {
-			return Multi.createFrom().failure(NotFoundException::new);
+			throw new NotFoundException();
 		}
 	}
 }
