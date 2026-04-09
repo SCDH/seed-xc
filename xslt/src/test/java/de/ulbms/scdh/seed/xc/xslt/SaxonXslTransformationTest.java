@@ -51,6 +51,9 @@ public class SaxonXslTransformationTest {
 	private static final String READ_DOC_XSL =
 			Paths.get("xsl", "read-doc.xsl").toFile().toString();
 
+	private static final String RESULT_DOC_XSL =
+			Paths.get("xsl", "resultdoc-file.xsl").toFile().toString();
+
 	public static final String TIMES_3 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<times>\n   <once "
 			+ "n=\"3\"/>\n   <once n=\"2\"/>\n   <once n=\"1\"/>\n   <once "
 			+ "n=\"0\"/>\n</times>\n";
@@ -164,6 +167,16 @@ public class SaxonXslTransformationTest {
 		READ_DOC_CONFIG = info;
 	}
 
+	public static final TransformationInfo RESULT_DOC_CONFIG;
+
+	static {
+		TransformationInfo info = new TransformationInfo();
+		info.setPropertyClass(SaxonXslTransformation.TRANSFORMATION_TYPE);
+		info.setRequiresSource(true);
+		info.setLocation(RESULT_DOC_XSL);
+		RESULT_DOC_CONFIG = info;
+	}
+
 	public static final TransformationInfo PARAM_INTEGER_CONFIG;
 
 	static {
@@ -205,6 +218,16 @@ public class SaxonXslTransformationTest {
 		RuntimeParameters params = new RuntimeParameters();
 		params.putGlobalParametersItem("uri", "lego.txt");
 		PARAM_URI_PARAMS = params;
+	}
+
+	public static final RuntimeParameters PARAM_RESULT_DOC_PARAMS;
+
+	static {
+		RuntimeParameters params = new RuntimeParameters();
+		// Map<String, String> globalParams = new HashMap<String, String>();
+		// globalParams.put("times", "3");
+		params.putGlobalParametersItem("output", "hacked.xml");
+		PARAM_RESULT_DOC_PARAMS = params;
 	}
 
 	@Test
@@ -445,6 +468,27 @@ public class SaxonXslTransformationTest {
 				resourceProvider);
 		assertEquals(
 				"<?xml version=\"1.0\" encoding=\"UTF-8\"?><test " + "source=\"passwd\"/>", outputToString(output));
+	}
+
+	@Test
+	public void testResultDoc()
+			throws IOException, ConfigurationException, TransformationPreparationException, TransformationException {
+		transformation.setup(RESULT_DOC_CONFIG);
+		FileInputStream input = new FileInputStream(helloXml);
+		assertThrows(
+				TransformationException.class,
+				() -> transformation.transform(null, null, helloXml.toString(), input, resourceProvider));
+	}
+
+	@Test
+	public void testResultDocWithOutput()
+			throws IOException, ConfigurationException, TransformationPreparationException, TransformationException {
+		transformation.setup(RESULT_DOC_CONFIG);
+		FileInputStream input = new FileInputStream(helloXml);
+		assertThrows(
+				TransformationException.class,
+				() -> transformation.transform(
+						PARAM_RESULT_DOC_PARAMS, null, helloXml.toString(), input, resourceProvider));
 	}
 
 	public static final Config NU_VALIDATOR_CONFIG;

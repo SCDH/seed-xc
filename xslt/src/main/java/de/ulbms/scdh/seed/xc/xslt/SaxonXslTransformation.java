@@ -401,6 +401,9 @@ public class SaxonXslTransformation implements Transformation, ExportingCompiler
 		transformer.setResourceResolver(resourceProvider);
 		transformer.setUnparsedTextResolver(resourceProvider);
 
+		// calling <xsl:result-document> must always throw an error
+		transformer.setResultDocumentHandler(null);
+
 		try {
 			transformer.setStylesheetParameters(makeStylesheetParameters(parameters));
 		} catch (SaxonApiException e) {
