@@ -508,8 +508,7 @@ public class SaxonXslTransformation implements Transformation, ExportingCompiler
 				}
 			} else if (parameterDetails.isRequired()) {
 				LOG.error("required parameter '{}' missing", name);
-				// throw new TransformationPreparationException("required
-				// parameter '" + nameString + "' missing");
+				// throw new TransformationPreparationException("required parameter " + nameString + " missing");
 			}
 		}
 		LOG.debug("made stylesheet parameters '{}'", stylesheetParameters);
