@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
  * A resource resolver for <code>unparsed-text()</code> etc. It
  * restricts access to the file system to a specific path given by
  * configuration. Requests to URI schemes other than <code>file</code>
- * will be delegated to the {@link StandardUnparsedTextResolver}.<P>
+ * throw an exception.<P>
  *
  * URIs without a specified scheme will be treated as in the file
  * scheme.<P>
@@ -68,20 +68,7 @@ public class RestrictiveUnparsedTextResolver implements UnparsedTextURIResolver 
 		}
 
 		try {
-			String normalizedPath = path;
-			// make absolute
-			normalizedPath = new File(normalizedPath).getAbsolutePath();
-			// assert path separator (/) at end
-			if (!normalizedPath.endsWith("/") && !normalizedPath.endsWith(File.separator)) {
-				// if path does not end with a path separator,
-				// resolving against it will interpret the last path
-				// segment as a file
-				normalizedPath = normalizedPath + File.separator;
-			}
-			// normalize
-			URI uri = new URI("file", normalizedPath, "").normalize();
-			// store to field
-			this.path = uri.getSchemeSpecificPart();
+			this.path = normalizedBase(path).getSchemeSpecificPart();
 		} catch (URISyntaxException e) {
 			LOG.error("invalid path configured for FileURIResolver: {}", e.getMessage());
 			throw new ConfigurationException("invalid path configured for FileURIResolver: " + e.getMessage());
@@ -98,6 +85,21 @@ public class RestrictiveUnparsedTextResolver implements UnparsedTextURIResolver 
 		}
 	}
 
+	private static URI normalizedBase(final String path) throws URISyntaxException {
+		String normalizedPath = path;
+		// make absolute
+		normalizedPath = new File(normalizedPath).getAbsolutePath();
+		// assert path separator (/) at end
+		if (!normalizedPath.endsWith("/") && !normalizedPath.endsWith(File.separator)) {
+			// if path does not end with a path separator,
+			// resolving against it will interpret the last path
+			// segment as a file
+			normalizedPath = normalizedPath + File.separator;
+		}
+		// normalize
+		return new URI("file", normalizedPath, "").normalize();
+	}
+
 	/**
 	 * Resolve the URI passed to the XSLT unparsed-text() function,
 	 * after resolving against the base URI. If it is a file URI and
@@ -110,7 +112,7 @@ public class RestrictiveUnparsedTextResolver implements UnparsedTextURIResolver 
 		try {
 			URI uri = absoluteURI;
 
-			// 2. make URI absulute, resolve relatives against config file
+			// 2. make URI absolute, resolve relatives against config file
 			if (!uri.isAbsolute()) {
 				uri = this.baseUri.resolve(uri);
 				uri = new URI("file", uri.getSchemeSpecificPart(), uri.getFragment());
