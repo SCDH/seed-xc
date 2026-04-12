@@ -90,7 +90,7 @@ public class SaxonXslTransformation implements Transformation, ExportingCompiler
 			}
 			// compile stylesheet to an executable that can be used
 			// for an arbitrary number of transformations
-			LOG.debug("Compiling '{}' ...", stylesheetPath);
+			LOG.debug("Compiling from zip '{}' ...", stylesheetPath);
 			XsltCompiler compiler = processor.newXsltCompiler();
 			compiler.setJustInTimeCompilation(false);
 			// set up the compiler's resource resolver so that it can read files
@@ -123,7 +123,7 @@ public class SaxonXslTransformation implements Transformation, ExportingCompiler
 
 			// compile stylesheet to an executable that can be used
 			// for an arbitrary number of transformations
-			LOG.debug("Compiling '{}' ...", stylesheet.getSystemId());
+			LOG.debug("Compiling from transformation info '{}' ...", stylesheet.getSystemId());
 			XsltCompiler compiler = processor.newXsltCompiler();
 			compiler.setJustInTimeCompilation(false);
 			compiler.setResourceResolver(compileTimeResourceResolver);
