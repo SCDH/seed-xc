@@ -102,7 +102,7 @@ public class SaxonXslTransformationTest {
 		final UnparsedTextURIResolver UNPARSED_TEXT_RESOLVER =
 				new RestrictiveUnparsedTextResolver(XSL_DIR.getAbsolutePath(), CONFIG_FILE.getAbsolutePath());
 
-		transformation.xsltResourceResolver = XSLT_RESOURCE_RESOLVER;
+		transformation.compileTimeResourceResolver = XSLT_RESOURCE_RESOLVER;
 		// transformation.documentResourceResolver = DOCUMENT_RESOURCE_RESOLVER;
 		// transformation.unparsedTextURIResolver = UNPARSED_TEXT_RESOLVER;
 	}

@@ -15,6 +15,7 @@ import java.util.zip.ZipFile;
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
+import net.sf.saxon.lib.ChainedResourceResolver;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.ResourceRequest;
 import net.sf.saxon.s9api.*;
@@ -53,7 +54,7 @@ public class SaxonXslTransformation implements Transformation, ExportingCompiler
 	protected ServiceConfiguration serviceConfig;
 
 	@Inject
-	protected RestrictiveFileOnlyResolver xsltResourceResolver;
+	protected RestrictiveFileOnlyResolver compileTimeResourceResolver;
 
 	@Inject
 	protected ZipFileURIResolver zipResourceResolver;
@@ -110,7 +111,7 @@ public class SaxonXslTransformation implements Transformation, ExportingCompiler
 		this.transformationInfo = transformationInfo;
 		try {
 			// fetch the stylesheet over the web
-			Source stylesheet = xsltResourceResolver.resolve(mkXsltRequest(transformationInfo.getLocation()));
+			Source stylesheet = compileTimeResourceResolver.resolve(mkXsltRequest(transformationInfo.getLocation()));
 			// Setting the systemId sets the static context (XML Base). It
 			// is important for relative imports, but already done by the
 			// resolver!
@@ -120,7 +121,7 @@ public class SaxonXslTransformation implements Transformation, ExportingCompiler
 			LOG.debug("Compiling '{}' ...", stylesheet.getSystemId());
 			XsltCompiler compiler = processor.newXsltCompiler();
 			compiler.setJustInTimeCompilation(false);
-			compiler.setResourceResolver(xsltResourceResolver);
+			compiler.setResourceResolver(compileTimeResourceResolver);
 			// set compile time parameters
 			if (transformationInfo.getCompileTimeParameters() != null) {
 				ConversionRules conversionRules =
@@ -161,7 +162,8 @@ public class SaxonXslTransformation implements Transformation, ExportingCompiler
 				for (TransformationInfoLibrariesInner library : transformationInfo.getLibraries()) {
 					LOG.debug("Compiling package {}", library.getLocation());
 					try {
-						Source packageSource = xsltResourceResolver.resolve(mkXsltRequest(library.getLocation()));
+						Source packageSource =
+								compileTimeResourceResolver.resolve(mkXsltRequest(library.getLocation()));
 						XsltPackage pkg = compiler.compilePackage(packageSource);
 						if (library.getAsName() != null && library.getAsVersion() != null) {
 							compiler.importPackage(pkg, library.getAsName(), library.getAsVersion());
@@ -397,8 +399,13 @@ public class SaxonXslTransformation implements Transformation, ExportingCompiler
 
 		Xslt30Transformer transformer = executable.load30();
 
-		// add file system restriction on top of configured resource resolvers
-		transformer.setResourceResolver(resourceProvider);
+		// add file system restriction: access to the compiled
+		// resources (with fn:static-base-uri()) is allowed as
+		// well as access with the resource provider, e.g. for
+		// XInclude.
+
+		// 1. resource resolver for accessing XML via fn:doc() etc.
+		transformer.setResourceResolver(new ChainedResourceResolver(compileTimeResourceResolver, resourceProvider));
 		transformer.setUnparsedTextResolver(resourceProvider);
 
 		// calling <xsl:result-document> must always throw an error
