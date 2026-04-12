@@ -64,6 +64,17 @@ public interface Transformation {
 			throws TransformationPreparationException, TransformationException;
 
 	/**
+	 * Like <code>Transformation.transform(RuntimeParameters,Config,String,InputStream,ResourceProvider)</code>,
+	 * but throws only runtime exceptions.
+	 */
+	byte[] transformF(
+			RuntimeParameters parameters,
+			Config config,
+			String systemId,
+			InputStream source,
+			ResourceProvider resourceProvider);
+
+	/**
 	 * Returns the media type. This is used in the response header. So
 	 * it should be a real media type. It may return <code>null</code>
 	 * if no information is available. In this case the service will

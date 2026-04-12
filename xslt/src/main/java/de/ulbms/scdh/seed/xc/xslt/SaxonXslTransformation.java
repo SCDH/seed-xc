@@ -7,6 +7,8 @@ import de.ulbms.scdh.seed.xc.harden.ServiceConfiguration;
 import de.ulbms.scdh.seed.xc.harden.ZipFileURIResolver;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.WebApplicationException;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
@@ -63,6 +65,9 @@ public class SaxonXslTransformation implements Transformation, ExportingCompiler
 
 	@Inject
 	protected ZipFileURIResolver zipResourceResolver;
+
+	@Inject
+	protected TransformationExceptionParser transformationExceptionParser;
 
 	private XsltExecutable executable;
 
@@ -317,6 +322,26 @@ public class SaxonXslTransformation implements Transformation, ExportingCompiler
 
 		transform(parameters, config, source, out, resourceProvider);
 		return output.toByteArray();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public byte[] transformF(
+			RuntimeParameters parameters,
+			Config config,
+			String systemId,
+			InputStream sourceStream,
+			ResourceProvider resourceProvider) {
+
+		try {
+			return transform(parameters, config, systemId, sourceStream, resourceProvider);
+		} catch (TransformationPreparationException e) {
+			throw new InternalServerErrorException(e.getMessage());
+		} catch (TransformationException e) {
+			throw new WebApplicationException(e.getMessage(), transformationExceptionParser.parseCode(e));
+		}
 	}
 
 	/**
