@@ -10,13 +10,40 @@ import java.util.regex.Pattern;
 import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This {@link TransformationExceptionParser} implementation
+ * tries to get the HTTP status code and the error message
+ * deeply from the error stack, since {@link SaxonApiException}
+ * does not give access to the message sent by
+ * <code>xsl:message</code> or <code>xsl:assert</code>. One has
+ * to get back to the {@link XPathException} to get more
+ * information.<P/>
+ *
+ * The error code is parsed from the message. Currently, getting
+ * it from <code>xsl:assert/@error-code</code> does not work.
+ */
 @ApplicationScoped
 public class XslTransformationExceptionParser implements TransformationExceptionParser {
 
 	private static final Logger LOG = LoggerFactory.getLogger(XslTransformationExceptionParser.class);
+
+	private final boolean head;
+
+	/**
+	 * Creates a new {@link XslTransformationExceptionParser} instance.
+	 * @param head - Whether the status code should be parsed only from its head or from the full message.
+	 */
+	public XslTransformationExceptionParser(
+			@ConfigProperty(
+							name = "de.ulbms.scdh.seed.xc.xslt.XslTransformationExceptionParser.head",
+							defaultValue = "true")
+					Boolean head) {
+		this.head = head;
+	}
 
 	@Override
 	public int parseCode(TransformationException err) {
@@ -101,7 +128,11 @@ public class XslTransformationExceptionParser implements TransformationException
 		// err.getErrorObject() has the message from xsl:message and xsl:assert
 		String msg = null;
 		try {
-			msg = err.getErrorObject().materialize().getStringValue();
+			if (head) {
+				msg = err.getErrorObject().head().getStringValue();
+			} else {
+				msg = err.getErrorObject().materialize().getStringValue();
+			}
 		} catch (XPathException e) {
 		}
 		if (msg != null) return msg;

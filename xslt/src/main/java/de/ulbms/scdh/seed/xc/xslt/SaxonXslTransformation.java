@@ -340,7 +340,8 @@ public class SaxonXslTransformation implements Transformation, ExportingCompiler
 		} catch (TransformationPreparationException e) {
 			throw new InternalServerErrorException(e.getMessage());
 		} catch (TransformationException e) {
-			throw new WebApplicationException(transformationExceptionParser.message(e), transformationExceptionParser.parseCode(e));
+			throw new WebApplicationException(
+					transformationExceptionParser.message(e), transformationExceptionParser.parseCode(e));
 		}
 	}
 
