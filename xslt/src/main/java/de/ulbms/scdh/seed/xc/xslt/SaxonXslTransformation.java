@@ -1,6 +1,7 @@
 package de.ulbms.scdh.seed.xc.xslt;
 
 import de.ulbms.scdh.seed.xc.api.*;
+import de.ulbms.scdh.seed.xc.harden.ChainedUnparsedTextURIResolver;
 import de.ulbms.scdh.seed.xc.harden.RestrictiveFileOnlyResolver;
 import de.ulbms.scdh.seed.xc.harden.ServiceConfiguration;
 import de.ulbms.scdh.seed.xc.harden.ZipFileURIResolver;
@@ -18,6 +19,7 @@ import javax.xml.transform.stream.StreamSource;
 import net.sf.saxon.lib.ChainedResourceResolver;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.ResourceRequest;
+import net.sf.saxon.lib.UnparsedTextURIResolver;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.s9api.ItemType;
 import net.sf.saxon.s9api.Serializer;
@@ -55,6 +57,9 @@ public class SaxonXslTransformation implements Transformation, ExportingCompiler
 
 	@Inject
 	protected RestrictiveFileOnlyResolver compileTimeResourceResolver;
+
+	@Inject
+	protected UnparsedTextURIResolver staticAssetsUnparsedTextURIResolver;
 
 	@Inject
 	protected ZipFileURIResolver zipResourceResolver;
@@ -406,7 +411,8 @@ public class SaxonXslTransformation implements Transformation, ExportingCompiler
 
 		// 1. resource resolver for accessing XML via fn:doc() etc.
 		transformer.setResourceResolver(new ChainedResourceResolver(compileTimeResourceResolver, resourceProvider));
-		transformer.setUnparsedTextResolver(resourceProvider);
+		transformer.setUnparsedTextResolver(
+				new ChainedUnparsedTextURIResolver(staticAssetsUnparsedTextURIResolver, resourceProvider));
 
 		// calling <xsl:result-document> must always throw an error
 		transformer.setResultDocumentHandler(null);

@@ -104,7 +104,7 @@ public class SaxonXslTransformationTest {
 
 		transformation.compileTimeResourceResolver = XSLT_RESOURCE_RESOLVER;
 		// transformation.documentResourceResolver = DOCUMENT_RESOURCE_RESOLVER;
-		// transformation.unparsedTextURIResolver = UNPARSED_TEXT_RESOLVER;
+		transformation.staticAssetsUnparsedTextURIResolver = UNPARSED_TEXT_RESOLVER;
 	}
 
 	public static final TransformationInfo ID_CONFIG_ABS;
