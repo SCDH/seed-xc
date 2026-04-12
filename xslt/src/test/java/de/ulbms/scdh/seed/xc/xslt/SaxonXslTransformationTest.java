@@ -560,6 +560,7 @@ public class SaxonXslTransformationTest {
 				() -> transformation.transformF(null, null, helloXml.toString(), input, resourceProvider));
 		assertInstanceOf(WebApplicationException.class, e);
 		assertEquals(405, ((WebApplicationException) e).getResponse().getStatus());
+		assertEquals("not found 405 minus 1", ((WebApplicationException) e).getMessage());
 	}
 
 	@Disabled("Saxon throws an error on compilation!")
@@ -572,6 +573,7 @@ public class SaxonXslTransformationTest {
 				() -> transformation.transformF(null, null, helloXml.toString(), input, resourceProvider));
 		assertInstanceOf(WebApplicationException.class, e);
 		assertEquals(401, ((WebApplicationException) e).getResponse().getStatus());
+		assertEquals("bad request 401 minus 1", ((WebApplicationException) e).getMessage());
 	}
 
 	@Test
@@ -583,6 +585,7 @@ public class SaxonXslTransformationTest {
 				() -> transformation.transformF(null, null, helloXml.toString(), input, resourceProvider));
 		assertInstanceOf(WebApplicationException.class, e);
 		assertEquals(405, ((WebApplicationException) e).getResponse().getStatus());
+		assertEquals("not found 405 minus 1", ((WebApplicationException) e).getMessage());
 	}
 
 	/* source parsers */

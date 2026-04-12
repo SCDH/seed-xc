@@ -28,6 +28,20 @@ public class XslTransformationExceptionParser implements TransformationException
 		else return parseCode(cause);
 	}
 
+	/**
+	 * This dives into the traceback, since <code>getMessage()</code> does not return
+	 * messages send by xsl:message or xsl:assert.
+	 */
+	@Override
+	public String message(TransformationException err) {
+		LOG.info("getting message from TransformationException with message {}", err.getMessage());
+		Throwable cause = err.getCause();
+		if (cause == null) return err.getMessage();
+		else if (cause instanceof SaxonApiException) return message((SaxonApiException) cause);
+		else if (cause instanceof TransformationException) return message((TransformationException) cause);
+		else return message(cause);
+	}
+
 	public int parseCode(SaxonApiException err) {
 		LOG.info("parsing SaxonApiException: {}", err.getErrorCode());
 		Throwable cause = err.getCause();
@@ -49,6 +63,24 @@ public class XslTransformationExceptionParser implements TransformationException
 		}
 	}
 
+	public String message(SaxonApiException err) {
+		Throwable cause = err.getCause();
+		// XPathException is more informative than SaxonApiException.
+		// Thus, try to get it first.
+		if (err.getErrorCode() == null
+				&& !(cause instanceof UncheckedXPathException)
+				&& !(cause instanceof XPathException)) {
+			LOG.info("no information from SaxonApiException");
+			return err.getMessage();
+		} else if (cause instanceof XPathException) {
+			return message(((XPathException) cause));
+		} else if (cause instanceof UncheckedXPathException) {
+			return message(((UncheckedXPathException) cause).getXPathException());
+		} else {
+			return err.getMessage();
+		}
+	}
+
 	public int parseCode(XPathException err) {
 		// err.getErrorObject() has the message from xsl:message and xsl:assert
 		String msg = null;
@@ -65,14 +97,25 @@ public class XslTransformationExceptionParser implements TransformationException
 		return Status.INTERNAL_SERVER_ERROR.getStatusCode();
 	}
 
-	public int parseCode(UncheckedXPathException err) {
-		LOG.info("parsing UncheckedXPathException");
-		return parseXslMessage(err.getMessage());
+	public String message(XPathException err) {
+		// err.getErrorObject() has the message from xsl:message and xsl:assert
+		String msg = null;
+		try {
+			msg = err.getErrorObject().materialize().getStringValue();
+		} catch (XPathException e) {
+		}
+		if (msg != null) return msg;
+		return err.getMessage();
 	}
 
 	public int parseCode(Throwable err) {
 		LOG.info("parsing throwable");
 		return Status.BAD_REQUEST.getStatusCode();
+	}
+
+	public String message(Throwable err) {
+		LOG.info("parsing throwable");
+		return err.getMessage();
 	}
 
 	public int parseXslMessage(String msg) {
