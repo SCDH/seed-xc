@@ -47,6 +47,8 @@ public class XslTransformationExceptionParser implements TransformationException
 
 	@Override
 	public int parseCode(TransformationException err) {
+		if (err == null)
+			return Status.INTERNAL_SERVER_ERROR.getStatusCode();
 		LOG.debug("parsing TransformationException with message {}", err.getMessage());
 		Throwable cause = err.getCause();
 		if (cause == null) return Status.INTERNAL_SERVER_ERROR.getStatusCode();
@@ -61,6 +63,8 @@ public class XslTransformationExceptionParser implements TransformationException
 	 */
 	@Override
 	public String message(TransformationException err) {
+		if (err == null)
+			return "null";
 		LOG.debug("getting message from TransformationException with message {}", err.getMessage());
 		Throwable cause = err.getCause();
 		if (cause == null) return err.getMessage();
@@ -74,15 +78,15 @@ public class XslTransformationExceptionParser implements TransformationException
 		Throwable cause = err.getCause();
 		// XPathException is more informative than SaxonApiException.
 		// Thus, try to get it first.
-		if (err.getErrorCode() == null
-				&& !(cause instanceof UncheckedXPathException)
-				&& !(cause instanceof XPathException)) {
+		if (err.getErrorCode() == null) {
 			LOG.debug("no information from SaxonApiException");
 			return Status.INTERNAL_SERVER_ERROR.getStatusCode();
 		} else if (cause instanceof XPathException) {
 			return parseCode(((XPathException) cause));
 		} else if (cause instanceof UncheckedXPathException) {
 			return parseCode(((UncheckedXPathException) cause).getXPathException());
+		} else if (err.getErrorCode() == null) {
+			return Status.INTERNAL_SERVER_ERROR.getStatusCode();
 		} else if (err.getErrorCode().getLocalName().equals("XTMM9000")) {
 			return parseXslMessage(err.getMessage());
 		} else {
@@ -141,7 +145,7 @@ public class XslTransformationExceptionParser implements TransformationException
 
 	public int parseCode(Throwable err) {
 		LOG.debug("parsing throwable");
-		return Status.BAD_REQUEST.getStatusCode();
+		return Status.INTERNAL_SERVER_ERROR.getStatusCode();
 	}
 
 	public String message(Throwable err) {
