@@ -47,7 +47,7 @@ public class XslTransformationExceptionParser implements TransformationException
 
 	@Override
 	public int parseCode(TransformationException err) {
-		LOG.info("parsing TransformationException with message {}", err.getMessage());
+		LOG.debug("parsing TransformationException with message {}", err.getMessage());
 		Throwable cause = err.getCause();
 		if (cause == null) return Status.INTERNAL_SERVER_ERROR.getStatusCode();
 		else if (cause instanceof SaxonApiException) return parseCode((SaxonApiException) cause);
@@ -61,7 +61,7 @@ public class XslTransformationExceptionParser implements TransformationException
 	 */
 	@Override
 	public String message(TransformationException err) {
-		LOG.info("getting message from TransformationException with message {}", err.getMessage());
+		LOG.debug("getting message from TransformationException with message {}", err.getMessage());
 		Throwable cause = err.getCause();
 		if (cause == null) return err.getMessage();
 		else if (cause instanceof SaxonApiException) return message((SaxonApiException) cause);
@@ -70,14 +70,14 @@ public class XslTransformationExceptionParser implements TransformationException
 	}
 
 	public int parseCode(SaxonApiException err) {
-		LOG.info("parsing SaxonApiException: {}", err.getErrorCode());
+		LOG.debug("parsing SaxonApiException: {}", err.getErrorCode());
 		Throwable cause = err.getCause();
 		// XPathException is more informative than SaxonApiException.
 		// Thus, try to get it first.
 		if (err.getErrorCode() == null
 				&& !(cause instanceof UncheckedXPathException)
 				&& !(cause instanceof XPathException)) {
-			LOG.info("no information from SaxonApiException");
+			LOG.debug("no information from SaxonApiException");
 			return Status.INTERNAL_SERVER_ERROR.getStatusCode();
 		} else if (cause instanceof XPathException) {
 			return parseCode(((XPathException) cause));
@@ -97,7 +97,7 @@ public class XslTransformationExceptionParser implements TransformationException
 		if (err.getErrorCode() == null
 				&& !(cause instanceof UncheckedXPathException)
 				&& !(cause instanceof XPathException)) {
-			LOG.info("no information from SaxonApiException");
+			LOG.debug("no information from SaxonApiException");
 			return err.getMessage();
 		} else if (cause instanceof XPathException) {
 			return message(((XPathException) cause));
@@ -115,7 +115,7 @@ public class XslTransformationExceptionParser implements TransformationException
 			msg = err.getErrorObject().materialize().getStringValue();
 		} catch (XPathException e) {
 		}
-		LOG.info(
+		LOG.debug(
 				"parsing XPathException: error object '{}', error code qname '{}', show error code '{}'",
 				msg,
 				err.getErrorCodeQName(),
@@ -140,17 +140,17 @@ public class XslTransformationExceptionParser implements TransformationException
 	}
 
 	public int parseCode(Throwable err) {
-		LOG.info("parsing throwable");
+		LOG.debug("parsing throwable");
 		return Status.BAD_REQUEST.getStatusCode();
 	}
 
 	public String message(Throwable err) {
-		LOG.info("parsing throwable");
+		LOG.debug("parsing throwable");
 		return err.getMessage();
 	}
 
 	public int parseXslMessage(String msg) {
-		LOG.info("parsing xsl:message {}", msg);
+		LOG.debug("parsing xsl:message {}", msg);
 		Pattern p = Pattern.compile("([1-9][0-9][0-9])");
 		Matcher m = p.matcher(msg);
 		if (m.find()) return Integer.parseInt(m.group(1));
