@@ -106,8 +106,7 @@ public class NavigationEndpoint implements NavigationApi {
 		Uni<ResourceInContext> uniRic = Uni.createFrom().item(ric);
 
 		return uniRic.plug(resourceProvider::getResource)
-				.onItem()
-				.transform((s) -> {
+				.plug((s) -> {
 					return transformation.transformF(params, null, resource, s, resourceProvider);
 				})
 				.onItem()

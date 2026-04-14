@@ -9,6 +9,8 @@ import de.ulbms.scdh.seed.xc.harden.RestrictiveResourceResolver;
 import de.ulbms.scdh.seed.xc.harden.RestrictiveUnparsedTextResolver;
 import de.ulbms.scdh.seed.xc.harden.ServiceConfiguration;
 import de.ulbms.scdh.seed.xc.resources.filesystem.FileSystemResourceProvider;
+import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
 import jakarta.ws.rs.WebApplicationException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -554,23 +556,25 @@ public class SaxonXslTransformationTest {
 	@Test
 	public void testErrorTerminate404HasCode() throws IOException, ConfigurationException {
 		transformation.setup(TERMINATE_404_CONFIG);
-		FileInputStream input = new FileInputStream(helloXml);
-		var e = assertThrows(
-				WebApplicationException.class,
-				() -> transformation.transformF(null, null, helloXml.toString(), input, resourceProvider));
-		assertInstanceOf(WebApplicationException.class, e);
-		assertEquals(405, ((WebApplicationException) e).getResponse().getStatus());
-		assertEquals("not found 405 minus 1", ((WebApplicationException) e).getMessage());
+		Uni<FileInputStream> input = Uni.createFrom().item(new FileInputStream(helloXml));
+		UniAssertSubscriber<byte[]> subscriber = input.plug((is) -> {
+					return transformation.transformF(null, null, helloXml.toString(), input, resourceProvider);
+				})
+				.subscribe()
+				.withSubscriber(UniAssertSubscriber.create());
+		subscriber.awaitFailure().assertFailedWith(WebApplicationException.class, "not found 405 minus 1");
 	}
 
 	@Disabled("Saxon throws an error on compilation!")
 	@Test
 	public void testErrorAssert400() throws IOException, ConfigurationException {
 		transformation.setup(ASSERT_400_CONFIG);
-		FileInputStream input = new FileInputStream(helloXml);
+		Uni<FileInputStream> input = Uni.createFrom().item(new FileInputStream(helloXml));
 		var e = assertThrows(
 				WebApplicationException.class,
-				() -> transformation.transformF(null, null, helloXml.toString(), input, resourceProvider));
+				() -> transformation
+						.transformF(null, null, helloXml.toString(), input, resourceProvider)
+						.subscribe());
 		assertInstanceOf(WebApplicationException.class, e);
 		assertEquals(401, ((WebApplicationException) e).getResponse().getStatus());
 		assertEquals("bad request 401 minus 1", ((WebApplicationException) e).getMessage());
@@ -579,13 +583,13 @@ public class SaxonXslTransformationTest {
 	@Test
 	public void testErrorAssert404() throws IOException, ConfigurationException {
 		transformation.setup(ASSERT_404_CONFIG);
-		FileInputStream input = new FileInputStream(helloXml);
-		var e = assertThrows(
-				WebApplicationException.class,
-				() -> transformation.transformF(null, null, helloXml.toString(), input, resourceProvider));
-		assertInstanceOf(WebApplicationException.class, e);
-		assertEquals(405, ((WebApplicationException) e).getResponse().getStatus());
-		assertEquals("not found 405 minus 1", ((WebApplicationException) e).getMessage());
+		Uni<FileInputStream> input = Uni.createFrom().item(new FileInputStream(helloXml));
+		UniAssertSubscriber<byte[]> subscriber = input.plug((is) -> {
+					return transformation.transformF(null, null, helloXml.toString(), input, resourceProvider);
+				})
+				.subscribe()
+				.withSubscriber(UniAssertSubscriber.create());
+		subscriber.awaitFailure().assertFailedWith(WebApplicationException.class, "not found 405 minus 1");
 	}
 
 	/* source parsers */

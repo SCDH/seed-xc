@@ -5,6 +5,7 @@ import de.ulbms.scdh.seed.xc.harden.ChainedUnparsedTextURIResolver;
 import de.ulbms.scdh.seed.xc.harden.RestrictiveFileOnlyResolver;
 import de.ulbms.scdh.seed.xc.harden.ServiceConfiguration;
 import de.ulbms.scdh.seed.xc.harden.ZipFileURIResolver;
+import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.InternalServerErrorException;
@@ -336,21 +337,23 @@ public class SaxonXslTransformation implements Transformation, ExportingCompiler
 	 * {@inheritDoc}
 	 */
 	@Override
-	public byte[] transformF(
+	public Uni<byte[]> transformF(
 			RuntimeParameters parameters,
 			Config config,
 			String systemId,
-			InputStream sourceStream,
+			Uni<? extends InputStream> sourceUni,
 			ResourceProvider resourceProvider) {
 
-		try {
-			return transform(parameters, config, systemId, sourceStream, resourceProvider);
-		} catch (TransformationPreparationException e) {
-			throw new InternalServerErrorException(e.getMessage());
-		} catch (TransformationException e) {
-			throw new WebApplicationException(
-					transformationExceptionParser.message(e), transformationExceptionParser.parseCode(e));
-		}
+		return sourceUni.onItem().transform((sourceStream) -> {
+			try {
+				return transform(parameters, config, systemId, sourceStream, resourceProvider);
+			} catch (TransformationPreparationException e) {
+				throw new InternalServerErrorException(e.getMessage());
+			} catch (TransformationException e) {
+				throw new WebApplicationException(
+						transformationExceptionParser.message(e), transformationExceptionParser.parseCode(e));
+			}
+		});
 	}
 
 	/**

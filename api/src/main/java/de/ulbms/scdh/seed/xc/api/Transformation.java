@@ -1,5 +1,6 @@
 package de.ulbms.scdh.seed.xc.api;
 
+import io.smallrye.mutiny.Uni;
 import java.io.InputStream;
 
 /**
@@ -72,11 +73,11 @@ public interface Transformation {
 	 * Like <code>Transformation.transform(RuntimeParameters,Config,String,InputStream,ResourceProvider)</code>,
 	 * but throws only runtime exceptions.
 	 */
-	byte[] transformF(
+	Uni<byte[]> transformF(
 			RuntimeParameters parameters,
 			Config config,
 			String systemId,
-			InputStream source,
+			Uni<? extends InputStream> source,
 			ResourceProvider resourceProvider);
 
 	/**

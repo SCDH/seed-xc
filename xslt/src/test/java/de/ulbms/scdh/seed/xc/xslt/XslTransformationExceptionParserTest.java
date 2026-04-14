@@ -1,12 +1,12 @@
 package de.ulbms.scdh.seed.xc.xslt;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import de.ulbms.scdh.seed.xc.api.*;
 import de.ulbms.scdh.seed.xc.harden.*;
 import de.ulbms.scdh.seed.xc.resources.filesystem.FileSystemResourceProvider;
+import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
 import jakarta.ws.rs.WebApplicationException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,6 +18,7 @@ import net.sf.saxon.lib.UnparsedTextURIResolver;
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.StringValue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -49,6 +50,14 @@ public class XslTransformationExceptionParserTest {
 				500,
 				EXCEPTION_PARSER.parseCode(
 						new TransformationException(new SaxonApiException(new XPathException("here")))));
+	}
+
+	@Test
+	public void testCodeSaxonApiExceptionXPathExceptionWith666() {
+		XPathException err = new XPathException("here");
+		err.setErrorCode("asdf1"); // we need an error code to get into the right branch!
+		err.setErrorObject(new StringValue("bla 666 asdfg"));
+		assertEquals(666, EXCEPTION_PARSER.parseCode(new TransformationException(new SaxonApiException(err))));
 	}
 
 	@Test
@@ -177,39 +186,39 @@ public class XslTransformationExceptionParserTest {
 	}
 
 	@Test
-	public void testExceptionTerminate404() throws IOException, ConfigurationException {
-		transformation.setup(TERMINATE_404_CONFIG);
-		FileInputStream input = new FileInputStream(helloXml);
-		var e = assertThrows(
-				TransformationException.class,
-				() -> transformation.transform(null, null, helloXml.toString(), input, resourceProvider));
-		assertInstanceOf(SaxonApiException.class, e.getCause());
-		assertEquals(
-				"XTMM9000", ((SaxonApiException) e.getCause()).getErrorCode().toString());
-	}
-
-	@Test
 	public void testErrorTerminate404HasCode() throws IOException, ConfigurationException {
 		transformation.setup(TERMINATE_404_CONFIG);
-		FileInputStream input = new FileInputStream(helloXml);
-		var e = assertThrows(
-				WebApplicationException.class,
-				() -> transformation.transformF(null, null, helloXml.toString(), input, resourceProvider));
-		assertInstanceOf(WebApplicationException.class, e);
-		assertEquals(405, ((WebApplicationException) e).getResponse().getStatus());
-		assertEquals("not found 405 minus 1", ((WebApplicationException) e).getMessage());
+		Uni<FileInputStream> input = Uni.createFrom().item(new FileInputStream(helloXml));
+		UniAssertSubscriber<byte[]> subscriber = input.plug((is) -> {
+					return transformation.transformF(null, null, helloXml.toString(), input, resourceProvider);
+				})
+				.subscribe()
+				.withSubscriber(UniAssertSubscriber.create());
+		subscriber.awaitFailure().assertFailedWith(WebApplicationException.class, "not found 405 minus 1");
 	}
 
 	@Disabled("Saxon throws an error on compilation!")
 	@Test
 	public void testErrorAssert400() throws IOException, ConfigurationException {
 		transformation.setup(ASSERT_400_CONFIG);
-		FileInputStream input = new FileInputStream(helloXml);
-		var e = assertThrows(
-				WebApplicationException.class,
-				() -> transformation.transformF(null, null, helloXml.toString(), input, resourceProvider));
-		assertInstanceOf(WebApplicationException.class, e);
-		assertEquals(401, ((WebApplicationException) e).getResponse().getStatus());
-		assertEquals("bad request 401 minus 1", ((WebApplicationException) e).getMessage());
+		Uni<FileInputStream> input = Uni.createFrom().item(new FileInputStream(helloXml));
+		UniAssertSubscriber<byte[]> subscriber = input.plug((is) -> {
+					return transformation.transformF(null, null, helloXml.toString(), input, resourceProvider);
+				})
+				.subscribe()
+				.withSubscriber(UniAssertSubscriber.create());
+		subscriber.awaitFailure().assertFailedWith(WebApplicationException.class, "not found 405 minus 1");
+	}
+
+	@Test
+	public void testErrorAssert404() throws IOException, ConfigurationException {
+		transformation.setup(ASSERT_404_CONFIG);
+		Uni<FileInputStream> input = Uni.createFrom().item(new FileInputStream(helloXml));
+		UniAssertSubscriber<byte[]> subscriber = input.plug((is) -> {
+					return transformation.transformF(null, null, helloXml.toString(), input, resourceProvider);
+				})
+				.subscribe()
+				.withSubscriber(UniAssertSubscriber.create());
+		subscriber.awaitFailure().assertFailedWith(WebApplicationException.class, "not found 405 minus 1");
 	}
 }

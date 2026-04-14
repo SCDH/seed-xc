@@ -90,7 +90,7 @@ public class DocumentEndpoint implements DocumentApi {
 		ResourceInContext ric = new ResourceInContext(Collections.unmodifiableMap(cr), resource);
 		Uni<ResourceInContext> uniRic = Uni.createFrom().item(ric);
 
-		return uniRic.plug(resourceProvider::getResource).onItem().transform((s) -> {
+		return uniRic.plug(resourceProvider::getResource).plug((s) -> {
 			return transformation.transformF(params, null, resource, s, resourceProvider);
 		});
 	}
