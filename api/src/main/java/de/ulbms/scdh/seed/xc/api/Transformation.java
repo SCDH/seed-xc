@@ -6,7 +6,7 @@ import java.io.InputStream;
  * A {@link Transformation} is a processor that
  * can be setup (compiled) with a {@link TransformationInfo}, i.e. a
  * configuration object. And it then can be used to transform all
- * subsequent transformation requests without repeating the setup.
+ * subsequent transformation requests without repeating the setup.<P/>
  *
  * A transformation class should be annotated with the pseudo-scope
  * {@link jakarta.enterprise.context.Dependent}. It will be a managed
@@ -17,7 +17,6 @@ public interface Transformation {
 
 	/**
 	 * Returns the transformation type, e.g. <code>XSLT</code>.
-	 * @return
 	 */
 	String getType();
 
@@ -29,7 +28,7 @@ public interface Transformation {
 	 * @param transformationInfo  a {@link TransformationInfo} object used to
 	 *     configure the transformation
 	 *
-	 * @throws {@link ConfigurationException}
+	 * @throws ConfigurationException - When setup was unsuccessful.
 	 */
 	void setup(TransformationInfo transformationInfo) throws ConfigurationException;
 
@@ -86,7 +85,7 @@ public interface Transformation {
 	 * if no information is available. In this case the service will
 	 * use a default media type.
 	 *
-	 * @returns the media type of the transformation output as {@link
+	 * @return the media type of the transformation output as {@link
 	 *     java.lang.String}
 	 */
 	String getOutputMediaType();
