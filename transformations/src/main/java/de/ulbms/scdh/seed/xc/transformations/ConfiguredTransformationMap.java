@@ -7,7 +7,6 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import de.ulbms.scdh.seed.xc.api.ConfigurationException;
 import de.ulbms.scdh.seed.xc.api.Transformation;
 import de.ulbms.scdh.seed.xc.api.TransformationInfo;
-import de.ulbms.scdh.seed.xc.xslt.SaxonXslTransformation;
 import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
@@ -15,6 +14,7 @@ import jakarta.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.ServiceLoader;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
@@ -39,7 +39,7 @@ public class ConfiguredTransformationMap extends HashMap<String, Transformation>
 			defaultValue = "true")
 	boolean ignoreInvalidTransformationTypes;
 
-	private ServiceLoader<Transformation> transformationLoader = ServiceLoader.load(Transformation.class);
+	private final ServiceLoader<Transformation> transformationLoader = ServiceLoader.load(Transformation.class);
 
 	/**
 	 * {@inheritDoc}
@@ -73,14 +73,9 @@ public class ConfiguredTransformationMap extends HashMap<String, Transformation>
 					String configLocations)
 			throws IOException, ConfigurationException {
 
-		if (configLocations == null) {
-			// we don't have any transformations
-			return;
-		} else if (configLocations.isEmpty()) {
-			// we don't have any transformations
-			return;
-		} else {
-			File configFile = null;
+		// we don't have any transformations
+		if (configLocations != null && !configLocations.isEmpty()) {
+			File configFile;
 			for (String path : configLocations.split(",")) {
 				path = path.trim();
 				// config files may be placed in ~/.seed/..., so handle the
@@ -100,17 +95,14 @@ public class ConfiguredTransformationMap extends HashMap<String, Transformation>
 	void createTransformations(File configFile) throws IOException, ConfigurationException {
 		LOG.info("Creating transformations defined in config file {}", configFile);
 
-		// read the yaml config using jackson object mapper
+		// read the YAML config using jackson object mapper
 		ObjectMapper om = new ObjectMapper(new YAMLFactory());
 
 		de.ulbms.scdh.seed.xc.api.TransformationMap transformations;
 		try {
 			transformations = om.readValue(configFile, de.ulbms.scdh.seed.xc.api.TransformationMap.class);
-		} catch (JsonParseException e) {
-			LOG.error("Invalid configuration file:\n{}", e);
-			throw new ConfigurationException(e);
-		} catch (JsonMappingException e) {
-			LOG.error("Invalid configuration file:\n{}", e);
+		} catch (JsonParseException | JsonMappingException e) {
+			LOG.error("Invalid configuration file: {}", e.getMessage());
 			throw new ConfigurationException(e);
 		}
 
@@ -123,25 +115,30 @@ public class ConfiguredTransformationMap extends HashMap<String, Transformation>
 
 			String transformationType = info.getPropertyClass();
 
-			// We do not use the SPI pattern since building to native
-			// does not work well with plugins
-			// However, until version 0.5.0 the SPI pattern was used.
-
-			switch (transformationType) {
-				case SaxonXslTransformation.TRANSFORMATION_TYPE:
+			// get all transformation plugins through the SPI
+			Iterator<Transformation> transformationServices = transformationLoader.iterator();
+			boolean serviceFound = false;
+			while (transformationServices.hasNext()) {
+				Transformation service = transformationServices.next();
+				if (transformationType.equals(service.getType())) {
+					// we create a bean and therefore use Instance#select(Class) to dynamically
+					// create a transformation instance of a dynamically determined class
 					Instance<? extends Transformation> transformationInstance =
-							transformationSelector.select(SaxonXslTransformation.class);
+							transformationSelector.select(service.getClass());
 					Transformation transformation = transformationInstance.get();
 					transformation.setup(info);
 					this.put(transformationId, transformation);
+					serviceFound = true;
 					break;
-				default:
-					LOG.error("Unknown transformation type: {}", transformationType);
-					if (!ignoreInvalidTransformationTypes) {
-						throw new ConfigurationException("transformation '" + transformationId
-								+ "' has unknown transformation type: " + transformationType);
-					}
-					break;
+				}
+			}
+			if (!serviceFound) {
+				LOG.error("Unknown transformation type: {}", transformationType);
+				if (!ignoreInvalidTransformationTypes) {
+					throw new ConfigurationException("transformation '" + transformationId
+							+ "' has unknown transformation type: "
+							+ transformationType);
+				}
 			}
 		}
 	}

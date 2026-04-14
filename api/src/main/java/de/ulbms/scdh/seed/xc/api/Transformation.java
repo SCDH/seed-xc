@@ -16,6 +16,12 @@ import java.io.InputStream;
 public interface Transformation {
 
 	/**
+	 * Returns the transformation type, e.g. <code>XSLT</code>.
+	 * @return
+	 */
+	String getType();
+
+	/**
 	 * Set up (compile) the transformation from a {@link TransformationInfo}.
 	 * If the transformation is set up successfully, it then can be used for
 	 * all subsequent transformations, no need to set up again.

@@ -49,6 +49,14 @@ public class SaxonXslTransformation implements Transformation, ExportingCompiler
 
 	public static final String TRANSFORMATION_TYPE = "de.ulbms.scdh.seed.xc.xslt.SaxonXslTransformation";
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getType() {
+		return SaxonXslTransformation.TRANSFORMATION_TYPE;
+	}
+
 	public static final String FEATURE_XINCLUDE = "http://apache.org/xml/features/xinclude";
 
 	@Inject
