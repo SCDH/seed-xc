@@ -91,7 +91,7 @@ public class DocumentEndpoint implements DocumentApi {
 		Uni<ResourceInContext> uniRic = Uni.createFrom().item(ric);
 
 		return uniRic.plug(resourceProvider::getResource).plug((s) -> {
-			return transformation.transformF(params, null, resource, s, resourceProvider);
+			return transformation.transformAsync(params, null, resource, s, resourceProvider);
 		});
 	}
 }

@@ -190,7 +190,7 @@ public class XslTransformationExceptionParserTest {
 		transformation.setup(TERMINATE_404_CONFIG);
 		Uni<FileInputStream> input = Uni.createFrom().item(new FileInputStream(helloXml));
 		UniAssertSubscriber<byte[]> subscriber = input.plug((is) -> {
-					return transformation.transformF(null, null, helloXml.toString(), input, resourceProvider);
+					return transformation.transformAsync(null, null, helloXml.toString(), input, resourceProvider);
 				})
 				.subscribe()
 				.withSubscriber(UniAssertSubscriber.create());
@@ -203,7 +203,7 @@ public class XslTransformationExceptionParserTest {
 		transformation.setup(ASSERT_400_CONFIG);
 		Uni<FileInputStream> input = Uni.createFrom().item(new FileInputStream(helloXml));
 		UniAssertSubscriber<byte[]> subscriber = input.plug((is) -> {
-					return transformation.transformF(null, null, helloXml.toString(), input, resourceProvider);
+					return transformation.transformAsync(null, null, helloXml.toString(), input, resourceProvider);
 				})
 				.subscribe()
 				.withSubscriber(UniAssertSubscriber.create());
@@ -215,7 +215,7 @@ public class XslTransformationExceptionParserTest {
 		transformation.setup(ASSERT_404_CONFIG);
 		Uni<FileInputStream> input = Uni.createFrom().item(new FileInputStream(helloXml));
 		UniAssertSubscriber<byte[]> subscriber = input.plug((is) -> {
-					return transformation.transformF(null, null, helloXml.toString(), input, resourceProvider);
+					return transformation.transformAsync(null, null, helloXml.toString(), input, resourceProvider);
 				})
 				.subscribe()
 				.withSubscriber(UniAssertSubscriber.create());

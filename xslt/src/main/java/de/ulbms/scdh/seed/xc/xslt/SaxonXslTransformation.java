@@ -337,7 +337,7 @@ public class SaxonXslTransformation implements Transformation, ExportingCompiler
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Uni<byte[]> transformF(
+	public Uni<byte[]> transformAsync(
 			RuntimeParameters parameters,
 			Config config,
 			String systemId,

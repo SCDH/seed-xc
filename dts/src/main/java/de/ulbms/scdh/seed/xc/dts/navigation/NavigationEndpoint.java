@@ -107,7 +107,7 @@ public class NavigationEndpoint implements NavigationApi {
 
 		return uniRic.plug(resourceProvider::getResource)
 				.plug((s) -> {
-					return transformation.transformF(params, null, resource, s, resourceProvider);
+					return transformation.transformAsync(params, null, resource, s, resourceProvider);
 				})
 				.onItem()
 				.transform((bs) -> {

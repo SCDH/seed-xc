@@ -73,7 +73,7 @@ public interface Transformation {
 	 * Like <code>Transformation.transform(RuntimeParameters,Config,String,InputStream,ResourceProvider)</code>,
 	 * but throws only runtime exceptions.
 	 */
-	Uni<byte[]> transformF(
+	Uni<byte[]> transformAsync(
 			RuntimeParameters parameters,
 			Config config,
 			String systemId,
