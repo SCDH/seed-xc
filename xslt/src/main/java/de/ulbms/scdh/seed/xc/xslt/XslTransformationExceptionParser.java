@@ -47,8 +47,7 @@ public class XslTransformationExceptionParser implements TransformationException
 
 	@Override
 	public int parseCode(TransformationException err) {
-		if (err == null)
-			return Status.INTERNAL_SERVER_ERROR.getStatusCode();
+		if (err == null) return Status.INTERNAL_SERVER_ERROR.getStatusCode();
 		LOG.debug("parsing TransformationException with message {}", err.getMessage());
 		Throwable cause = err.getCause();
 		if (cause == null) return Status.INTERNAL_SERVER_ERROR.getStatusCode();
@@ -63,8 +62,7 @@ public class XslTransformationExceptionParser implements TransformationException
 	 */
 	@Override
 	public String message(TransformationException err) {
-		if (err == null)
-			return "null";
+		if (err == null) return "null";
 		LOG.debug("getting message from TransformationException with message {}", err.getMessage());
 		Throwable cause = err.getCause();
 		if (cause == null) return err.getMessage();
@@ -98,9 +96,7 @@ public class XslTransformationExceptionParser implements TransformationException
 		Throwable cause = err.getCause();
 		// XPathException is more informative than SaxonApiException.
 		// Thus, try to get it first.
-		if (err.getErrorCode() == null
-				&& !(cause instanceof UncheckedXPathException)
-				&& !(cause instanceof XPathException)) {
+		if (err.getErrorCode() == null) {
 			LOG.debug("no information from SaxonApiException");
 			return err.getMessage();
 		} else if (cause instanceof XPathException) {

@@ -1,6 +1,5 @@
 package de.ulbms.scdh.seed.xc.xslt;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -26,6 +25,71 @@ import org.junit.jupiter.api.Test;
 public class XslTransformationExceptionParserTest {
 
 	private final TransformationExceptionParser EXCEPTION_PARSER = new XslTransformationExceptionParser(true);
+
+	/* isolated tests */
+
+	@Test
+	public void testCodeTransformationException() {
+		assertEquals(500, EXCEPTION_PARSER.parseCode(new TransformationException("here")));
+	}
+
+	@Test
+	public void testCodeSaxonApiException() {
+		assertEquals(500, EXCEPTION_PARSER.parseCode(new TransformationException(new SaxonApiException("here"))));
+	}
+
+	@Test
+	public void testCodeXPathException() {
+		assertEquals(500, EXCEPTION_PARSER.parseCode(new TransformationException(new XPathException("here"))));
+	}
+
+	@Test
+	public void testCodeSaxonApiExceptionXPathException() {
+		assertEquals(
+				500,
+				EXCEPTION_PARSER.parseCode(
+						new TransformationException(new SaxonApiException(new XPathException("here")))));
+	}
+
+	@Test
+	public void testCodeSaxonApiExceptionException() {
+		assertEquals(500, EXCEPTION_PARSER.parseCode(new TransformationException(new Exception("here"))));
+	}
+
+	@Test
+	public void testCodeNull() {
+		assertEquals(500, EXCEPTION_PARSER.parseCode(null));
+	}
+
+	@Test
+	public void testMsgTransformationException() {
+		assertEquals("here", EXCEPTION_PARSER.message(new TransformationException("here")));
+	}
+
+	@Test
+	public void testMsgSaxonApiException() {
+		assertEquals("here", EXCEPTION_PARSER.message(new TransformationException(new SaxonApiException("here"))));
+	}
+
+	@Test
+	public void testMsgXPathException() {
+		assertEquals("here", EXCEPTION_PARSER.message(new TransformationException(new XPathException("here"))));
+	}
+
+	@Test
+	public void testMsgSaxonApiExceptionXPathException() {
+		assertEquals(
+				"here",
+				EXCEPTION_PARSER.message(
+						new TransformationException(new SaxonApiException(new XPathException("here")))));
+	}
+
+	@Test
+	public void testMsgNull() {
+		assertEquals("null", EXCEPTION_PARSER.message(null));
+	}
+
+	/* Tests with instance injected */
 
 	private static final Processor SAXON_PROCESSOR = new Processor(false);
 
@@ -76,7 +140,6 @@ public class XslTransformationExceptionParserTest {
 				new RestrictiveUnparsedTextResolver(XSL_DIR.getAbsolutePath(), CONFIG_FILE.getAbsolutePath());
 
 		transformation.compileTimeResourceResolver = XSLT_RESOURCE_RESOLVER;
-		// transformation.documentResourceResolver = DOCUMENT_RESOURCE_RESOLVER;
 		transformation.staticAssetsUnparsedTextURIResolver = UNPARSED_TEXT_RESOLVER;
 		transformation.transformationExceptionParser = EXCEPTION_PARSER;
 
@@ -148,40 +211,5 @@ public class XslTransformationExceptionParserTest {
 		assertInstanceOf(WebApplicationException.class, e);
 		assertEquals(401, ((WebApplicationException) e).getResponse().getStatus());
 		assertEquals("bad request 401 minus 1", ((WebApplicationException) e).getMessage());
-	}
-
-	/* isolated tests */
-
-	@Test
-	public void testTransformationException() {
-		assertEquals(500, EXCEPTION_PARSER.parseCode(new TransformationException("here")));
-	}
-
-	@Test
-	public void testSaxonApiException() {
-		assertEquals(500, EXCEPTION_PARSER.parseCode(new TransformationException(new SaxonApiException("here"))));
-	}
-
-	@Test
-	public void testXPathException() {
-		assertEquals(500, EXCEPTION_PARSER.parseCode(new TransformationException(new XPathException("here"))));
-	}
-
-	@Test
-	public void testSaxonApiExceptionXPathException() {
-		assertEquals(
-				500,
-				EXCEPTION_PARSER.parseCode(
-						new TransformationException(new SaxonApiException(new XPathException("here")))));
-	}
-
-	@Test
-	public void testSaxonApiExceptionException() {
-		assertEquals(500, EXCEPTION_PARSER.parseCode(new TransformationException(new Exception("here"))));
-	}
-
-	@Test
-	public void testNull() {
-		assertEquals(500, EXCEPTION_PARSER.parseCode(null));
 	}
 }
