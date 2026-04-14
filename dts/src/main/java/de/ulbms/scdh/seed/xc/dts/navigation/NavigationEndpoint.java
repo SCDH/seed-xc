@@ -8,8 +8,6 @@ import de.ulbms.scdh.seed.xc.api.ResourceInContext;
 import de.ulbms.scdh.seed.xc.api.ResourceProvider;
 import de.ulbms.scdh.seed.xc.api.RuntimeParameters;
 import de.ulbms.scdh.seed.xc.api.Transformation;
-import de.ulbms.scdh.seed.xc.api.TransformationException;
-import de.ulbms.scdh.seed.xc.api.TransformationPreparationException;
 import de.ulbms.scdh.seed.xc.api.inject.TransformTimeProvider;
 import de.ulbms.scdh.seed.xc.dts.endpoints.NavigationApi;
 import de.ulbms.scdh.seed.xc.dts.model.Navigation;
@@ -110,15 +108,7 @@ public class NavigationEndpoint implements NavigationApi {
 		return uniRic.plug(resourceProvider::getResource)
 				.onItem()
 				.transform((s) -> {
-					try {
-						return transformation.transform(params, null, resource, s, resourceProvider);
-					} catch (TransformationPreparationException e) {
-						LOG.error(e.getMessage());
-						throw new jakarta.ws.rs.InternalServerErrorException(e.getMessage());
-					} catch (TransformationException e) {
-						LOG.error(e.getMessage());
-						throw new jakarta.ws.rs.InternalServerErrorException(e.getMessage());
-					}
+					return transformation.transformF(params, null, resource, s, resourceProvider);
 				})
 				.onItem()
 				.transform((bs) -> {
