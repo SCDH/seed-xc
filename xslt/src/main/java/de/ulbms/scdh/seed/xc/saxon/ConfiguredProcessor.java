@@ -1,4 +1,4 @@
-package de.ulbms.scdh.seed.xc.xslt;
+package de.ulbms.scdh.seed.xc.saxon;
 
 import de.ulbms.scdh.seed.xc.api.ConfigurationException;
 import jakarta.enterprise.context.ApplicationScoped;

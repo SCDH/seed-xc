@@ -1,4 +1,4 @@
-package de.ulbms.scdh.seed.xc.xslt;
+package de.ulbms.scdh.seed.xc.saxon;
 
 import static jakarta.ws.rs.core.Response.Status;
 

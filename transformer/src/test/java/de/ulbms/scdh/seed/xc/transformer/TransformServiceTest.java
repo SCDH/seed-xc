@@ -4,7 +4,7 @@ import static io.restassured.RestAssured.*;
 import static org.hamcrest.CoreMatchers.*;
 
 import de.ulbms.scdh.seed.xc.api.*;
-import de.ulbms.scdh.seed.xc.xslt.SaxonXslTransformation;
+import de.ulbms.scdh.seed.xc.saxon.SaxonXslTransformation;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import java.io.File;

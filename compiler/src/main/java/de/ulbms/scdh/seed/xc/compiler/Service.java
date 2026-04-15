@@ -2,7 +2,7 @@ package de.ulbms.scdh.seed.xc.compiler;
 
 import de.ulbms.scdh.seed.xc.api.ConfigurationException;
 import de.ulbms.scdh.seed.xc.api.XslcApi;
-import de.ulbms.scdh.seed.xc.xslt.SaxonXslTransformation;
+import de.ulbms.scdh.seed.xc.saxon.SaxonXslTransformation;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;

@@ -1,4 +1,4 @@
-package de.ulbms.scdh.seed.xc.xslt;
+package de.ulbms.scdh.seed.xc.saxon;
 
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import net.sf.saxon.Configuration;

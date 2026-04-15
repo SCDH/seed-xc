@@ -1,4 +1,4 @@
-package de.ulbms.scdh.seed.xc.xslt;
+package de.ulbms.scdh.seed.xc.saxon;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

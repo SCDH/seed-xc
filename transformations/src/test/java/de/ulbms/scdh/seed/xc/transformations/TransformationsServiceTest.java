@@ -2,9 +2,8 @@ package de.ulbms.scdh.seed.xc.transformations;
 
 import static io.restassured.RestAssured.*;
 import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.collection.ArrayMatching.*;
 
-import de.ulbms.scdh.seed.xc.xslt.SaxonXslTransformation;
+import de.ulbms.scdh.seed.xc.saxon.SaxonXslTransformation;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
