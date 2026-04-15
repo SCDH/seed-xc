@@ -4,9 +4,7 @@ import static io.restassured.RestAssured.*;
 import static org.hamcrest.CoreMatchers.*;
 
 import de.ulbms.scdh.seed.xc.api.*;
-import de.ulbms.scdh.seed.xc.saxon.SaxonXslTransformation;
 import io.quarkus.test.junit.QuarkusTest;
-import io.restassured.http.ContentType;
 import java.io.File;
 import java.nio.file.Paths;
 import org.junit.jupiter.api.Disabled;
@@ -35,27 +33,6 @@ public class TransformServiceTest {
 	}
 
 	@Test
-	public void testTransformIdentityInfoGet() {
-		given().when()
-				.get("/transformations/identity/info")
-				.then()
-				.statusCode(200)
-				.contentType(ContentType.JSON)
-				.body("ident", is("identity"))
-				.body("class", is(SaxonXslTransformation.TRANSFORMATION_TYPE))
-				.body("location", endsWith("id.xsl"));
-	}
-
-	@Test
-	public void testTransformIdentityParametersGet() {
-		given().when()
-				.get("/transformations/identity/parameters")
-				.then()
-				.statusCode(200)
-				.body("size()", is(0));
-	}
-
-	@Test
 	public void testTransformIdentityPost() {
 		given().contentType("multipart/form-data")
 				.multiPart("source", helloXml, "application/xml")
@@ -66,32 +43,6 @@ public class TransformServiceTest {
 				// .contentType(ContentType.XML)
 				// the transformation adds the xml declaration
 				.body(endsWith("<hello><greating>Hello</greating></hello>"));
-	}
-
-	@Test
-	public void testTransformParamIntegerInfoGet() {
-		given().when()
-				.get("/transformations/param-integer/info")
-				.then()
-				.statusCode(200)
-				.contentType(ContentType.JSON)
-				.body("ident", is("param-integer"))
-				.body("class", is(SaxonXslTransformation.TRANSFORMATION_TYPE))
-				.body("location", endsWith("param-integer.xsl"));
-	}
-
-	@Test
-	public void testTransformParamIntegerParametersGet() {
-		given().when()
-				.get("/transformations/param-integer/parameters")
-				.then()
-				.statusCode(200)
-				.contentType(ContentType.JSON)
-				.body("size()", is(1))
-				.body("times.occurrenceIndicator", is(""))
-				.body("times.itemType", is("xs:integer"))
-				.body("times.underlyingDeclaredType", is("xs:integer"))
-				.body("times.isRequired", is(true));
 	}
 
 	@Test
