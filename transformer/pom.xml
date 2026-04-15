@@ -31,6 +31,18 @@
       <version>${revision}${changelist}</version>
     </dependency>
     <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>seed-xc-saxon</artifactId>
+      <version>${revision}${changelist}</version>
+      <scope>${plugins.scope}</scope>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>seed-resource-providers</artifactId>
+      <version>${revision}${changelist}</version>
+      <scope>${plugins.scope}</scope>
+    </dependency>
+    <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-rest</artifactId>
     </dependency>

@@ -33,11 +33,11 @@
 
   <modules>
     <module>api</module>
-    <module>harden</module>
-    <module>xslt</module>
+    <module>plugins</module>
     <module>compiler</module>
     <module>transformations</module>
     <module>transformer</module>
+    <module>dts</module>
   </modules>
 
   <scm>
@@ -77,6 +77,7 @@
     <smallrye-jandex-plugin.version>3.5.3</smallrye-jandex-plugin.version>
     <spotless.version>3.4.0</spotless.version>
     <palantir-java-format.version>2.90.0</palantir-java-format.version>
+    <assertj.version>3.27.7</assertj.version>
 
     <!-- service specific -->
     <xmlresolver.version>4.5.1</xmlresolver.version>
@@ -84,11 +85,23 @@
     <saxon.version>12.9</saxon.version>
     <saxon.artifactId>Saxon-HE</saxon.artifactId>
 
+    <!-- service specific -->
+    <xmlresolver.version>4.5.1</xmlresolver.version>
+    <slf4j.version>2.0.6</slf4j.version>
+    <saxon.version>12.9</saxon.version>
+    <saxon.artifactId>Saxon-HE</saxon.artifactId>
+    <openapitools.version>7.19.0</openapitools.version>
+    <dts-transformations.version>0.4.9</dts-transformations.version>
+    <dts-transformations.url>https://github.com/SCDH/dts-transformations/releases/download/${dts-transformations.version}/dts-transformations-${dts-transformations.version}-seed-resources.tar.gz</dts-transformations.url>
+
     <quarkus.native.native-image-xmx>8192m</quarkus.native.native-image-xmx>
     <!-- enable docker layers with additional dependencies,
-             cf. https://quarkus.io/guides/container-image#multi-module-projects-and-layering
-        -->
+         cf. https://quarkus.io/guides/container-image#multi-module-projects-and-layering
+    -->
     <quarkus.bootstrap.workspace-discovery>true</quarkus.bootstrap.workspace-discovery>
+
+    <!-- change to 'test' if you do not want the low level plugins in your app -->
+    <plugins.scope>runtime</plugins.scope>
 
     <saxon-config.file>${session.executionRootDirectory}/service/src/main/resources/saxon-config-he.xml</saxon-config.file>
     <file-uri-resolver.path>${session.executionRootDirectory}</file-uri-resolver.path>

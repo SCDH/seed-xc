@@ -33,7 +33,8 @@ verify:
   stage: test
   image: $JAVA_DOCKER_IMAGE
   script:
-    - ./mvnw $MAVEN_CLI_OPTS -Popenapi generate-sources verify
+    - ./mvnw $MAVEN_CLI_OPTS -Pdownload-openapi generate-sources
+    - ./mvnw $MAVEN_CLI_OPTS verify
 
 
 formatting:
@@ -47,7 +48,7 @@ push packages:
   image: $JAVA_DOCKER_IMAGE
   script:
     - ./mvnw -Drevision=$CI_COMMIT_REF_NAME -Dchangelist="" $MAVEN_CLI_OPTS clean
-    - ./mvnw -Drevision=$CI_COMMIT_REF_NAME -Dchangelist="" $MAVEN_CLI_OPTS -Popenapi generate-sources
+    - ./mvnw -Drevision=$CI_COMMIT_REF_NAME -Dchangelist="" $MAVEN_CLI_OPTS -Pdownload-openapi generate-sources
     - ./mvnw -Drevision=$CI_COMMIT_REF_NAME -Dchangelist="" $MAVEN_CLI_OPTS -s .gitlab/settings.xml deploy
   rules:
     - !reference [ .release_tag, rules ]

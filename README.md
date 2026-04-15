@@ -42,8 +42,16 @@ SCDH DSE until you got the letters in right order.
 
 Build:
 
+Once after cloning and after each cleanup:
+
 ```shell
-./mvnw generate-sources package
+ ./mvnw -Pdownload-openapi generate-sources
+```
+
+Then building all components:
+
+```shell
+./mvnw package
 ```
 
 To run one of the services in dev mode, use `-P` switch to select a

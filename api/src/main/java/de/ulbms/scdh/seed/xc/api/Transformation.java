@@ -1,30 +1,35 @@
 package de.ulbms.scdh.seed.xc.api;
 
+import io.smallrye.mutiny.Uni;
 import java.io.InputStream;
 
 /**
- * A interface for transformation. A transformation is a process that
+ * A {@link Transformation} is a processor that
  * can be setup (compiled) with a {@link TransformationInfo}, i.e. a
  * configuration object. And it then can be used to transform all
- * subsequent transformation requests without repeating the setup.
+ * subsequent transformation requests without repeating the setup.<P/>
  *
  * A transformation class should be annotated with the pseudo-scope
  * {@link jakarta.enterprise.context.Dependent}. It will be a managed
- * bean and can use {@link jakarta.inject.Inject} fields for optaining
+ * bean and can use {@link jakarta.inject.Inject} fields for obtaining
  * arbitrary service-wide configurations.
  */
 public interface Transformation {
 
 	/**
-	 * Setup the transformation from a {@link TransformationInfo}. If
-	 * the transformation can be compiled and the compliled executable
-	 * can used then used for all subsequent transformations, then the
-	 * compilation should happen here.
+	 * Returns the transformation type, e.g. <code>XSLT</code>.
+	 */
+	String getType();
+
+	/**
+	 * Set up (compile) the transformation from a {@link TransformationInfo}.
+	 * If the transformation is set up successfully, it then can be used for
+	 * all subsequent transformations, no need to set up again.
 	 *
 	 * @param transformationInfo  a {@link TransformationInfo} object used to
 	 *     configure the transformation
 	 *
-	 * @throws {@link ConfigurationException}
+	 * @throws ConfigurationException - When setup was unsuccessful.
 	 */
 	void setup(TransformationInfo transformationInfo) throws ConfigurationException;
 
@@ -41,21 +46,6 @@ public interface Transformation {
 	 */
 	XsltParameterDetails getTransformationParameters();
 
-	/**
-	 * Returns a representation of the compiled stylesheet, in XML
-	 * form, suitable for distribution and reloading.
-	 */
-	byte[] export() throws UnsupportedOperationException;
-
-	/**
-	 * Returns a representation of the compiled stylesheet for a
-	 * particular target environment, in XML form, suitable for
-	 * distribution and reloading.
-	 * @param target the target environment (for example "EE" or "JS")
-	 * @see net.sf.saxon.s9api.XsltExecutable@export
-	 */
-	byte[] export(String target) throws UnsupportedOperationException;
-
 	/*
 	 * Transform the document given as {@param source}. Its String can be
 	 * set in order to get XML base property right. <code>null</code>
@@ -63,49 +53,32 @@ public interface Transformation {
 	 * XML base property is not set for the document node.
 	 *
 	 *
-	 * @param parameters {@link RuntimeParameters} to apply on the
-	 *     transformation
-	 * @param config     per-request {@link Config} for the transformation
-	 * @param systemId   {@link String} pointing a the source documents location
-	 *     and set as XML base property
-	 * @param source     {@link InputStream} with the XML document to be
-	 *     transformed
+	 * @param parameters - {@link RuntimeParameters} to apply on the transformation
+	 * @param config - per-request {@link Config} for the transformation
+	 * @param systemId - {@link String} pointing to the source documents location and set as XML base property
+	 * @param source - {@link InputStream} with the XML document to be transformed
+	 * @param resourceProvider - {@link ResourceProvider} used for getting secondary documents
 	 *
 	 * @return This returns the transformed XML as a byte array.
 	 */
-	byte[] transform(RuntimeParameters parameters, Config config, String systemId, InputStream source)
+	byte[] transform(
+			RuntimeParameters parameters,
+			Config config,
+			String systemId,
+			InputStream source,
+			ResourceProvider resourceProvider)
 			throws TransformationPreparationException, TransformationException;
 
 	/**
-	 * Transform the document given as {@param systemId}, which is
-	 * an {@link String}. The document is fetched by the transformer.
-	 *
-	 *
-	 * @param parameters {@link RuntimeParameters} to apply on the
-	 *     transformation
-	 * @param config     per-request {@link Config} for the transformation
-	 * @param systemId   {@link String} pointing a the source documents location
-	 *     and set as XML base property
-	 *
-	 * @return This returns the transformed XML as a byte array.
+	 * Like <code>Transformation.transform(RuntimeParameters,Config,String,InputStream,ResourceProvider)</code>,
+	 * but throws only runtime exceptions.
 	 */
-	byte[] transform(RuntimeParameters parameters, Config config, String systemId)
-			throws TransformationPreparationException, TransformationException;
-
-	/**
-	 * Run a transform with {@link RuntimeParameters} only. This will
-	 * need a start template or start function be set in the
-	 * parameters object.
-	 *
-	 *
-	 * @param parameters {@link RuntimeParameters} to apply on the
-	 *     transformation
-	 * @param config     per-request {@link Config} for the transformation
-	 *
-	 * @return This returns the transformed XML as a byte array.
-	 */
-	byte[] transform(RuntimeParameters parameters, Config config)
-			throws TransformationPreparationException, TransformationException;
+	Uni<byte[]> transformAsync(
+			RuntimeParameters parameters,
+			Config config,
+			String systemId,
+			Uni<? extends InputStream> source,
+			ResourceProvider resourceProvider);
 
 	/**
 	 * Returns the media type. This is used in the response header. So
@@ -113,7 +86,7 @@ public interface Transformation {
 	 * if no information is available. In this case the service will
 	 * use a default media type.
 	 *
-	 * @returns the media type of the transformation output as {@link
+	 * @return the media type of the transformation output as {@link
 	 *     java.lang.String}
 	 */
 	String getOutputMediaType();
