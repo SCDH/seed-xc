@@ -1,4 +1,4 @@
-package de.ulbms.scdh.seed.xc.dts.navigation;
+package de.ulbms.scdh.seed.xc.dts.document;
 
 import static io.restassured.RestAssured.given;
 
