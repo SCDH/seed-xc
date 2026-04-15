@@ -120,14 +120,14 @@ public class RestrictiveResourceResolverTest {
 	public void delegateHttpRequest() throws XPathException {
 		ResourceRequest request = new ResourceRequest();
 		request.uri = "http://example.com/some/transform.xsl";
-		assertNull(resolver.resolve(request));
+		assertThrows(XPathException.class, () -> resolver.resolve(request));
 	}
 
 	@Test
 	public void delegateHttpsRequest() throws XPathException {
 		ResourceRequest request = new ResourceRequest();
 		request.uri = "https://example.com/some/transform.xsl";
-		assertNull(resolver.resolve(request));
+		assertThrows(XPathException.class, () -> resolver.resolve(request));
 	}
 
 	@Test

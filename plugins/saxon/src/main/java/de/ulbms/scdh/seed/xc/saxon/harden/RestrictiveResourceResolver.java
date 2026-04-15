@@ -147,8 +147,8 @@ public class RestrictiveResourceResolver implements ResourceResolver {
 					throw new XPathException("illegal file URI: " + uri.toString());
 				}
 			} else {
-				// delegate to the next resolver in the chain
-				return null;
+				LOG.error("illegal file URI: {}", uri.toString());
+				throw new XPathException("illegal URI: " + uri.toString());
 			}
 		} catch (NullPointerException | IllegalArgumentException | URISyntaxException e) {
 			LOG.error("illegal URI {}: {}", request.uri, e.getMessage());
