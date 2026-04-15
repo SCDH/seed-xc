@@ -147,7 +147,7 @@ public class RestrictiveUnparsedTextResolver implements UnparsedTextURIResolver 
 			}
 
 		} catch (NullPointerException | IllegalArgumentException | URISyntaxException e) {
-			LOG.error("illegal URI {}: {}", absoluteURI.toString(), e.getMessage());
+			LOG.error("illegal URI {}: {}", absoluteURI, e.getMessage());
 			throw new XPathException(e);
 		}
 	}

@@ -56,7 +56,7 @@ public class RestrictiveUnparsedTextResolverTest {
 	}
 
 	@Test
-	public void emptyPath() throws ConfigurationException, XPathException {
+	public void emptyPath() {
 		assertThrows(ConfigurationException.class, () -> new RestrictiveUnparsedTextResolver("", "/etc/passwd"));
 	}
 
@@ -72,14 +72,14 @@ public class RestrictiveUnparsedTextResolverTest {
 
 	@Test
 	public void validPathIdentityXSL() throws XPathException, URISyntaxException, IOException {
-		URI request = new URI(ID_XSL.getAbsolutePath().toString());
+		URI request = new URI(ID_XSL.getAbsolutePath());
 		Reader resource = resolver.resolve(request, encoding, config);
 		assertEquals(0x3c, resource.read()); // 0x3c == '<'
 	}
 
 	@Test
 	public void validPathFileIdentityXSL() throws XPathException, URISyntaxException, IOException {
-		URI request = new URI("file:" + ID_XSL.getAbsolutePath().toString());
+		URI request = new URI("file:" + ID_XSL.getAbsolutePath());
 		Reader resource = resolver.resolve(request, encoding, config);
 		assertEquals(0x3c, resource.read()); // 0x3c == '<'
 	}
@@ -92,8 +92,8 @@ public class RestrictiveUnparsedTextResolverTest {
 	}
 
 	@Test
-	public void validPathUnknownXSL() throws XPathException, URISyntaxException {
-		URI request = new URI(UNKNOWN_XSL.getAbsolutePath().toString());
+	public void validPathUnknownXSL() throws URISyntaxException {
+		URI request = new URI(UNKNOWN_XSL.getAbsolutePath());
 		// the resource does not exist, so trying to make a FileReader from it
 		// fails
 		assertThrows(XPathException.class, () -> resolver.resolve(request, encoding, config));
@@ -129,13 +129,13 @@ public class RestrictiveUnparsedTextResolverTest {
 
 	@Test
 	public void illegalPathHelloXML() throws URISyntaxException {
-		URI request = new URI(HELLO_XML.getAbsolutePath().toString());
+		URI request = new URI(HELLO_XML.getAbsolutePath());
 		assertThrows(XPathException.class, () -> resolver.resolve(request, encoding, config));
 	}
 
 	@Test
 	public void normalizationWorksForHelloXMLViaDots() throws URISyntaxException {
-		URI request = new URI(HELLO_XML_VIA_DOTS.getAbsolutePath().toString());
+		URI request = new URI(HELLO_XML_VIA_DOTS.getAbsolutePath());
 		assertThrows(XPathException.class, () -> resolver.resolve(request, encoding, config));
 	}
 }

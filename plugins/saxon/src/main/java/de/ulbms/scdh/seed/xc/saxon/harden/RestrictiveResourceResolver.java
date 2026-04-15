@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
  * specific path given by configuration. Requests to URI schemes other
  * than <code>file</code> will be delegated to the next resource
  * resolver. URIs without a specified scheme will be treated as in the
- * file scheme.
+ * file scheme.<P/>
  *
  * Relative paths will be resolved to the resolved against the
  * <code>baseUri</code> argument given to the constructor. In the
@@ -96,9 +96,8 @@ public class RestrictiveResourceResolver implements ResourceResolver {
 		LOG.info("allowed path of FileURIResolver set to '{}'", this.path);
 
 		try {
-			String normalizedFile = baseUri;
 			// make absolute
-			this.baseUri = new File(normalizedFile).getAbsoluteFile().toURI().normalize();
+			this.baseUri = new File(baseUri).getAbsoluteFile().toURI().normalize();
 		} catch (SecurityException e) {
 			LOG.error("invalid configuration file: {}, {}", baseUri, e.getMessage());
 			throw new ConfigurationException("invalid configuration file: " + baseUri, e);
@@ -120,7 +119,7 @@ public class RestrictiveResourceResolver implements ResourceResolver {
 			// 2. resolve relative URIs against the configured path
 			if (!uri.isAbsolute()) {
 				uri = this.baseUri.resolve(uri);
-				LOG.debug("resolved {} on the base of {} to {}", request.uri, this.path, uri.toString());
+				LOG.debug("resolved {} on the base of {} to {}", request.uri, this.path, uri);
 				// System.out.println("resolved " + request.uri + " on the base
 				// of " + this.path + " to " + uri.toString());
 			}
@@ -143,11 +142,11 @@ public class RestrictiveResourceResolver implements ResourceResolver {
 					File location = new File(uri);
 					return new StreamSource(location);
 				} else {
-					LOG.error("illegal file URI: {}", uri.toString());
+					LOG.error("illegal file URI: {}", uri);
 					throw new XPathException("illegal file URI: " + uri.toString());
 				}
 			} else {
-				LOG.error("illegal file URI: {}", uri.toString());
+				LOG.error("illegal URI: {}", uri);
 				throw new XPathException("illegal URI: " + uri.toString());
 			}
 		} catch (NullPointerException | IllegalArgumentException | URISyntaxException e) {

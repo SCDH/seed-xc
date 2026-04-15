@@ -98,7 +98,7 @@ public class SaxonXslTransformationTest {
 	ResourceProvider resourceProvider;
 
 	@BeforeEach
-	public void setup() throws IOException, ConfigurationException {
+	public void setup() throws ConfigurationException {
 		// set up a new transformation
 		transformation = new SaxonXslTransformation();
 		transformation.processor = SAXON_PROCESSOR;
@@ -249,7 +249,6 @@ public class SaxonXslTransformationTest {
 		TypedParameter p1 = new TypedParameter("times", "3");
 		p1.setType("integer");
 		List<TypedParameter> ctimeParams = List.of(p1);
-		;
 		info.setCompileTimeParameters(ctimeParams);
 		PARAM_INTEGER_STATIC_CONFIG = info;
 	}
@@ -273,8 +272,8 @@ public class SaxonXslTransformationTest {
 	}
 
 	@Test
-	public void testTransformationInstance() throws ConfigurationException {
-		assertTrue(transformation instanceof Transformation);
+	public void testTransformationInstance() {
+		assertInstanceOf(Transformation.class, transformation);
 	}
 
 	@Test
@@ -304,8 +303,7 @@ public class SaxonXslTransformationTest {
 	}
 
 	@Test
-	public void testUnparsedTextSecret()
-			throws IOException, ConfigurationException, TransformationPreparationException, TransformationException {
+	public void testUnparsedTextSecret() throws IOException, ConfigurationException {
 		transformation.setup(UNPARSED_TEXT_CONFIG);
 		FileInputStream helloStream = new FileInputStream(helloXml);
 		assertThrows(
@@ -325,8 +323,7 @@ public class SaxonXslTransformationTest {
 
 	@Disabled("nothing thrown anymore")
 	@Test
-	public void testReadDocForbidden()
-			throws IOException, ConfigurationException, TransformationPreparationException, TransformationException {
+	public void testReadDocForbidden() throws IOException, ConfigurationException {
 		transformation.setup(READ_DOC_CONFIG);
 		FileInputStream inputStream = new FileInputStream(helloXml);
 		assertThrows(
@@ -351,20 +348,20 @@ public class SaxonXslTransformationTest {
 	@Test
 	public void testParamIntegerGetInfo() throws ConfigurationException {
 		transformation.setup(PARAM_INTEGER_CONFIG);
-		assertTrue(transformation.getTransformationInfo() instanceof TransformationInfo);
-		assertTrue(transformation.getTransformationInfo().equals(PARAM_INTEGER_CONFIG));
+		assertInstanceOf(TransformationInfo.class, transformation.getTransformationInfo());
+		assertEquals(PARAM_INTEGER_CONFIG, transformation.getTransformationInfo());
 	}
 
 	@Test
 	public void testParamIntegerGetParameters() throws ConfigurationException {
 		transformation.setup(PARAM_INTEGER_CONFIG);
-		assertTrue(transformation.getTransformationParameters() instanceof XsltParameterDetails);
+		assertInstanceOf(XsltParameterDetails.class, transformation.getTransformationParameters());
 		XsltParameterDetails parameters = transformation.getTransformationParameters();
-		assertEquals(parameters.size(), 1);
-		assertEquals(parameters.get("times").getOccurrenceIndicator(), "");
-		assertEquals(parameters.get("times").getItemType(), "xs:integer");
-		assertEquals(parameters.get("times").getUnderlyingDeclaredType(), "xs:integer");
-		assertEquals(parameters.get("times").getIsRequired(), true);
+		assertEquals(1, parameters.size());
+		assertEquals("", parameters.get("times").getOccurrenceIndicator());
+		assertEquals("xs:integer", parameters.get("times").getItemType());
+		assertEquals("xs:integer", parameters.get("times").getUnderlyingDeclaredType());
+		assertEquals(true, parameters.get("times").getIsRequired());
 	}
 
 	@Test
@@ -375,14 +372,13 @@ public class SaxonXslTransformationTest {
 				PARAM_INTEGER_PARAMS,
 				null,
 				helloXml.toString(),
-				helloXml.toURL().openStream(),
+				helloXml.toURI().toURL().openStream(),
 				resourceProvider);
 		assertEquals(TIMES_3, outputToString(output));
 	}
 
 	@Test
-	public void testTransformParamIntegerTransform3ParamsNull()
-			throws IOException, ConfigurationException, TransformationPreparationException {
+	public void testTransformParamIntegerTransform3ParamsNull() throws ConfigurationException {
 		transformation.setup(PARAM_INTEGER_CONFIG);
 		assertThrows(
 				TransformationException.class,
@@ -398,8 +394,7 @@ public class SaxonXslTransformationTest {
 
 	@Disabled("old")
 	@Test
-	public void testTransformParamIntegerTransform3SystemIdNull()
-			throws IOException, ConfigurationException, TransformationPreparationException {
+	public void testTransformParamIntegerTransform3SystemIdNull() throws ConfigurationException {
 		transformation.setup(PARAM_INTEGER_CONFIG);
 		// assertThrows(TransformationException.class, () -> transformation.transform(PARAM_INTEGER_PARAMS, null,
 		// null));
@@ -426,8 +421,7 @@ public class SaxonXslTransformationTest {
 	}
 
 	@Test
-	public void testTransformParamIntegerTransform4ParamsNull()
-			throws IOException, ConfigurationException, TransformationPreparationException {
+	public void testTransformParamIntegerTransform4ParamsNull() throws IOException, ConfigurationException {
 		transformation.setup(PARAM_INTEGER_CONFIG);
 		FileInputStream helloStream = new FileInputStream(helloXml);
 		assertThrows(
@@ -446,9 +440,8 @@ public class SaxonXslTransformationTest {
 
 	@Test
 	public void testTransformParamIntegerTransform4InputStreamNull()
-			throws IOException, ConfigurationException, TransformationPreparationException, TransformationException {
+			throws ConfigurationException, TransformationPreparationException, TransformationException {
 		transformation.setup(PARAM_INTEGER_CONFIG);
-		FileInputStream helloStream = new FileInputStream(helloXml);
 		output = transformation.transform(PARAM_INTEGER_PARAMS, null, helloXml.toString(), null, resourceProvider);
 		assertEquals(TIMES_3, outputToString(output));
 	}
@@ -466,8 +459,7 @@ public class SaxonXslTransformationTest {
 
 	@Disabled("old")
 	@Test
-	public void testTransformParamIntegerTransform4SystemIdNullInputStreamNull()
-			throws IOException, ConfigurationException, TransformationPreparationException, TransformationException {
+	public void testTransformParamIntegerTransform4SystemIdNullInputStreamNull() throws ConfigurationException {
 		transformation.setup(PARAM_INTEGER_CONFIG);
 		// assertThrows(TransformationException.class, () -> transformation.transform(PARAM_INTEGER_PARAMS, null, null,
 		// null, resourceProvider));
@@ -475,9 +467,8 @@ public class SaxonXslTransformationTest {
 
 	@Test
 	public void testTransformParamIntegerStaticTransform()
-			throws IOException, ConfigurationException, TransformationPreparationException, TransformationException {
+			throws ConfigurationException, TransformationPreparationException, TransformationException {
 		transformation.setup(PARAM_INTEGER_STATIC_CONFIG);
-		FileInputStream helloStream = new FileInputStream(helloXml);
 		output = transformation.transform(null, null, helloXml.toString(), null, resourceProvider);
 		assertEquals(TIMES_3, outputToString(output));
 	}
@@ -502,19 +493,13 @@ public class SaxonXslTransformationTest {
 			throws IOException, ConfigurationException, TransformationPreparationException, TransformationException {
 		transformation.setup(ID_CONFIG_ABS);
 		FileInputStream input = new FileInputStream(unparsedEntityXml);
-		output = transformation.transform(
-				null,
-				null,
-				unparsedEntityXml.toString(),
-				unparsedEntityXml.toURI().toURL().openStream(),
-				resourceProvider);
+		output = transformation.transform(null, null, unparsedEntityXml.toString(), input, resourceProvider);
 		assertEquals(
 				"<?xml version=\"1.0\" encoding=\"UTF-8\"?><test " + "source=\"passwd\"/>", outputToString(output));
 	}
 
 	@Test
-	public void testResultDoc()
-			throws IOException, ConfigurationException, TransformationPreparationException, TransformationException {
+	public void testResultDoc() throws IOException, ConfigurationException {
 		transformation.setup(RESULT_DOC_CONFIG);
 		FileInputStream input = new FileInputStream(helloXml);
 		assertThrows(
@@ -523,8 +508,7 @@ public class SaxonXslTransformationTest {
 	}
 
 	@Test
-	public void testResultDocWithOutput()
-			throws IOException, ConfigurationException, TransformationPreparationException, TransformationException {
+	public void testResultDocWithOutput() throws IOException, ConfigurationException {
 		transformation.setup(RESULT_DOC_CONFIG);
 		FileInputStream input = new FileInputStream(helloXml);
 		assertThrows(
@@ -629,8 +613,7 @@ public class SaxonXslTransformationTest {
 	}
 
 	@Test
-	public void testTagSoup1WithDefaultParser()
-			throws IOException, ConfigurationException, TransformationPreparationException, TransformationException {
+	public void testTagSoup1WithDefaultParser() throws IOException, ConfigurationException {
 		transformation.setup(ID_CONFIG_ABS);
 		FileInputStream input = new FileInputStream(tagSoup1);
 		assertThrows(
@@ -665,8 +648,7 @@ public class SaxonXslTransformationTest {
 	}
 
 	@Test
-	public void testTagSoup1WithUnknownParser()
-			throws IOException, ConfigurationException, TransformationPreparationException, TransformationException {
+	public void testTagSoup1WithUnknownParser() throws IOException, ConfigurationException {
 		transformation.setup(ID_CONFIG_ABS);
 		FileInputStream input = new FileInputStream(tagSoup1);
 		assertThrows(
@@ -676,8 +658,7 @@ public class SaxonXslTransformationTest {
 	}
 
 	@Test
-	public void testTagSoup1WithBadParser()
-			throws IOException, ConfigurationException, TransformationPreparationException, TransformationException {
+	public void testTagSoup1WithBadParser() throws IOException, ConfigurationException {
 		transformation.setup(ID_CONFIG_ABS);
 		FileInputStream input = new FileInputStream(tagSoup1);
 		assertThrows(

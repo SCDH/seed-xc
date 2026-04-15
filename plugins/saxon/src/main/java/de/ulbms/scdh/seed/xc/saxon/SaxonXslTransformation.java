@@ -425,11 +425,8 @@ public class SaxonXslTransformation implements Transformation, ExportingCompiler
 
 	/**
 	 * Internal method that does the transformation job.
-	 *
-	 * This sets {@link Processor} features and thus must be made
-	 * thread safe by the <code>synchronized</code> keyword.
 	 */
-	protected synchronized void transform(
+	protected void transform(
 			RuntimeParameters parameters,
 			Config config,
 			Source source,
@@ -486,7 +483,7 @@ public class SaxonXslTransformation implements Transformation, ExportingCompiler
 	 */
 	protected Map<QName, XdmValue> makeStylesheetParameters(RuntimeParameters parameters)
 			throws TransformationPreparationException, TransformationException {
-		Map<QName, XdmValue> stylesheetParameters = new HashMap<QName, XdmValue>();
+		Map<QName, XdmValue> stylesheetParameters = new HashMap<>();
 		if (parameters == null) {
 			return stylesheetParameters;
 		}
@@ -506,15 +503,11 @@ public class SaxonXslTransformation implements Transformation, ExportingCompiler
 				ItemType itemType = parameterDetails.getDeclaredItemType();
 				try {
 					LOG.debug(
-							"converting parameter '{}' ('{}') to {}",
-							nameString,
-							stringValue.toString(),
-							itemType.getTypeName());
-					// ConversionRules conversionRules2 =
-					// itemType.getConversionRules();
+							"converting parameter '{}' ('{}') to {}", nameString, stringValue, itemType.getTypeName());
+					// ConversionRules conversionRules2 = itemType.getConversionRules();
 					AtomicType atomicType =
-							(AtomicType) itemType.getUnderlyingItemType().getPrimitiveItemType(); // FIXME: what about
-					// sequence types
+							(AtomicType) itemType.getUnderlyingItemType().getPrimitiveItemType();
+					// FIXME: what about sequence types
 					StringConverter converter = conversionRules.makeStringConverter(atomicType);
 					AtomicValue atomicValue = converter
 							.convertString(StringView.of(parametersMap.get(nameString)))

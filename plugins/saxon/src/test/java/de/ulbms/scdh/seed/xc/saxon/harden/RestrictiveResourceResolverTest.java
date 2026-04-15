@@ -47,7 +47,7 @@ public class RestrictiveResourceResolverTest {
 	}
 
 	@Test
-	public void emptyPath() throws ConfigurationException, XPathException {
+	public void emptyPath() {
 		assertThrows(ConfigurationException.class, () -> new RestrictiveResourceResolver("", "/etc/passwd"));
 	}
 
@@ -64,7 +64,7 @@ public class RestrictiveResourceResolverTest {
 	@Test
 	public void validPathIdentityXSL() throws XPathException {
 		ResourceRequest request = new ResourceRequest();
-		request.uri = ID_XSL.getAbsolutePath().toString();
+		request.uri = ID_XSL.getAbsolutePath();
 		System.out.println(request.uri);
 		Source resource = resolver.resolve(request);
 		System.out.println(resource.getSystemId());
@@ -75,7 +75,7 @@ public class RestrictiveResourceResolverTest {
 	@Test
 	public void validPathFileIdentityXSL() throws XPathException {
 		ResourceRequest request = new ResourceRequest();
-		request.uri = "file:" + ID_XSL.getAbsolutePath().toString();
+		request.uri = "file:" + ID_XSL.getAbsolutePath();
 		Source resource = resolver.resolve(request);
 		assertTrue(resource.getSystemId().startsWith("file:"));
 		assertTrue(resource.getSystemId().endsWith("xsl/id.xsl"));
@@ -93,7 +93,7 @@ public class RestrictiveResourceResolverTest {
 	@Test
 	public void validPathUnknownXSL() throws XPathException {
 		ResourceRequest request = new ResourceRequest();
-		request.uri = UNKNOWN_XSL.getAbsolutePath().toString();
+		request.uri = UNKNOWN_XSL.getAbsolutePath();
 		// neither the resolver nor the source asserts that the resource really
 		// exists
 		Source resource = resolver.resolve(request);
@@ -117,14 +117,14 @@ public class RestrictiveResourceResolverTest {
 	}
 
 	@Test
-	public void delegateHttpRequest() throws XPathException {
+	public void delegateHttpRequest() {
 		ResourceRequest request = new ResourceRequest();
 		request.uri = "http://example.com/some/transform.xsl";
 		assertThrows(XPathException.class, () -> resolver.resolve(request));
 	}
 
 	@Test
-	public void delegateHttpsRequest() throws XPathException {
+	public void delegateHttpsRequest() {
 		ResourceRequest request = new ResourceRequest();
 		request.uri = "https://example.com/some/transform.xsl";
 		assertThrows(XPathException.class, () -> resolver.resolve(request));
@@ -133,14 +133,14 @@ public class RestrictiveResourceResolverTest {
 	@Test
 	public void illegalPathHelloXML() {
 		ResourceRequest request = new ResourceRequest();
-		request.uri = HELLO_XML.getAbsolutePath().toString();
+		request.uri = HELLO_XML.getAbsolutePath();
 		assertThrows(XPathException.class, () -> resolver.resolve(request));
 	}
 
 	@Test
 	public void normalizationWorksForHelloXMLViaDots() {
 		ResourceRequest request = new ResourceRequest();
-		request.uri = HELLO_XML_VIA_DOTS.getAbsolutePath().toString();
+		request.uri = HELLO_XML_VIA_DOTS.getAbsolutePath();
 		assertThrows(XPathException.class, () -> resolver.resolve(request));
 	}
 }
