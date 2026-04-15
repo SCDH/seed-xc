@@ -12,7 +12,7 @@ import net.sf.saxon.trans.XPathException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class FileURIResolverTest {
+public class RestrictiveResourceResolverTest {
 
 	private static final File XSL_DIR =
 			Paths.get("src", "test", "resources", "xsl").toFile();
@@ -28,32 +28,32 @@ public class FileURIResolverTest {
 					"src", "test", "resources", "xsl", "..", "samples", "hello.xml")
 			.toFile();
 
-	FileURIResolver resolver;
+	RestrictiveResourceResolver resolver;
 
 	@BeforeEach
 	public void setupResolver() throws ConfigurationException {
-		resolver = new FileURIResolver(
+		resolver = new RestrictiveResourceResolver(
 				XSL_DIR.getAbsoluteFile().toString(), ID_XSL.getAbsoluteFile().toString());
 	}
 
 	@Test
 	public void nullPath() {
-		assertThrows(ConfigurationException.class, () -> new FileURIResolver(null, null));
+		assertThrows(ConfigurationException.class, () -> new RestrictiveResourceResolver(null, null));
 	}
 
 	@Test
 	public void nullFilePath() {
-		assertThrows(ConfigurationException.class, () -> new FileURIResolver("file:/etc", "/etc/passwd"));
+		assertThrows(ConfigurationException.class, () -> new RestrictiveResourceResolver("file:/etc", "/etc/passwd"));
 	}
 
 	@Test
 	public void emptyPath() throws ConfigurationException, XPathException {
-		assertThrows(ConfigurationException.class, () -> new FileURIResolver("", "/etc/passwd"));
+		assertThrows(ConfigurationException.class, () -> new RestrictiveResourceResolver("", "/etc/passwd"));
 	}
 
 	@Test
 	public void rootPath() throws ConfigurationException, XPathException {
-		ResourceResolver resolver = new FileURIResolver("/", "/gnu-herd-2.1");
+		ResourceResolver resolver = new RestrictiveResourceResolver("/", "/gnu-herd-2.1");
 		ResourceRequest request = new ResourceRequest();
 		request.uri = "/etc/passwd";
 		Source resource = resolver.resolve(request);

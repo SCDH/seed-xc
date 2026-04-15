@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  * transformer's configuration file, so that relative paths in there
  * will be resolved relative to the file.<P>
  *
- * See also: {@link FileURIResolver}
+ * See also: {@link RestrictiveResourceResolver}
  */
 @ApplicationScoped
 public class RestrictiveUnparsedTextResolver implements UnparsedTextURIResolver {

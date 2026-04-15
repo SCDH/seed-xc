@@ -139,16 +139,12 @@ public class XslTransformationExceptionParserTest {
 		transformation.serviceConfig = SERVICE_CONFIG;
 		resourceProvider = new FileSystemResourceProvider(XSL_DIR.getAbsolutePath());
 
-		final FileURIResolver FILE_RESOURCE_RESOLVER =
-				new FileURIResolver(XSL_DIR.getAbsolutePath(), CONFIG_FILE.getAbsolutePath());
-		final RestrictiveFileOnlyResolver XSLT_RESOURCE_RESOLVER =
-				new RestrictiveFileOnlyResolver(FILE_RESOURCE_RESOLVER);
-		final RestrictiveResourceResolver DOCUMENT_RESOURCE_RESOLVER =
-				new RestrictiveResourceResolver(FILE_RESOURCE_RESOLVER, SAXON_PROCESSOR);
+		final RestrictiveResourceResolver FILE_RESOURCE_RESOLVER =
+				new RestrictiveResourceResolver(XSL_DIR.getAbsolutePath(), CONFIG_FILE.getAbsolutePath());
 		final UnparsedTextURIResolver UNPARSED_TEXT_RESOLVER =
 				new RestrictiveUnparsedTextResolver(XSL_DIR.getAbsolutePath(), CONFIG_FILE.getAbsolutePath());
 
-		transformation.compileTimeResourceResolver = XSLT_RESOURCE_RESOLVER;
+		transformation.compileTimeResourceResolver = FILE_RESOURCE_RESOLVER;
 		transformation.staticAssetsUnparsedTextURIResolver = UNPARSED_TEXT_RESOLVER;
 		transformation.transformationExceptionParser = EXCEPTION_PARSER;
 

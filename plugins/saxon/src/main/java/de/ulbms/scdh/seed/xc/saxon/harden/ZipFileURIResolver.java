@@ -44,7 +44,7 @@ public class ZipFileURIResolver implements ResourceResolver {
 	private URI baseUri;
 
 	/**
-	 * Make a new {@link FileURIResolver}.
+	 * Make a new {@link RestrictiveResourceResolver}.
 	 */
 	public ZipFileURIResolver() {}
 

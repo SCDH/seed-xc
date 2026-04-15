@@ -1,35 +1,158 @@
 package de.ulbms.scdh.seed.xc.saxon.harden;
 
+import de.ulbms.scdh.seed.xc.api.ConfigurationException;
+import de.ulbms.scdh.seed.xc.api.inject.CompileTime;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.core.Context;
-import net.sf.saxon.lib.ChainedResourceResolver;
-import net.sf.saxon.lib.Feature;
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
+import net.sf.saxon.lib.ResourceRequest;
 import net.sf.saxon.lib.ResourceResolver;
-import net.sf.saxon.s9api.Processor;
+import net.sf.saxon.trans.XPathException;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * A resource resolver that chains together the FileURIResolver and
- * the ResourceResolver declared in the Saxon configuration. The
- * resulting resolver adds restriction to file system access on top of
- * the resolver declared in the configuration.
+ * A resource resolver that restricts access to the file system to a
+ * specific path given by configuration. Requests to URI schemes other
+ * than <code>file</code> will be delegated to the next resource
+ * resolver. URIs without a specified scheme will be treated as in the
+ * file scheme.
+ *
+ * Relative paths will be resolved to the resolved against the
+ * <code>baseUri</code> argument given to the constructor. In the
+ * managed bean container this will be set to the transformer's
+ * configuration file, so that relative paths in there will be
+ * resolved relative to the file.
  */
+@CompileTime
 @ApplicationScoped
-public class RestrictiveResourceResolver extends ChainedResourceResolver {
+public class RestrictiveResourceResolver implements ResourceResolver {
+
+	private static final Logger LOG = LoggerFactory.getLogger(RestrictiveResourceResolver.class);
 
 	/**
-	 * A dummy constructor needed for CDI. It must be present, but
-	 * does not get called.
+	 * Only paths under this path will be accessible through this resource
+	 * resolver.
 	 */
-	public RestrictiveResourceResolver() {
-		super(new DenyingResourceResolver(), new DenyingResourceResolver());
+	private final String path;
+
+	/**
+	 * URI derived from <code>path</code>path. It is used to resolve relative URIs.
+	 */
+	private final URI baseUri;
+
+	/**
+	 * Make a new {@link RestrictiveResourceResolver}.
+	 *
+	 * @param path only the file system under this path {@link String} will be
+	 *     accessible
+	 * @param baseUri  path against which relative URIs will be resolved
+	 */
+	public RestrictiveResourceResolver(
+			@ConfigProperty(name = "de.ulbms.scdh.seed.xc.saxon.harden.FileURIResolver.path", defaultValue = "/")
+					String path,
+			@ConfigProperty(name = "de.ulbms.scdh.seed.xc.saxon.harden.FileURIResolver.baseUri", defaultValue = "/")
+					String baseUri)
+			throws ConfigurationException {
+
+		// check preconditions
+		if (path == null) {
+			LOG.error("configuration error: path of FileURIResolver may not " + "be null.");
+			throw new ConfigurationException("configuration error: path of FileURIResolver may not be " + "null.");
+		} else if (path.startsWith("file:")) {
+			LOG.error("configuration error: path of FileURIResolver may not start " + "with 'file:'");
+			throw new ConfigurationException(
+					"configuration error: path of FileURIResolver may not start " + "with " + "'file:'");
+		} else if (path.isEmpty()) {
+			LOG.error("configuration error: path of FileURIResolver may not be the " + "empty string");
+			throw new ConfigurationException(
+					"configuration error: path of FileURIResolver may not be the " + "empty " + "string");
+		}
+
+		try {
+			String normalizedPath = path;
+			// make absolute
+			normalizedPath = new File(normalizedPath).getAbsolutePath();
+			// assert path separator (/) at end
+			if (!normalizedPath.endsWith("/") && !normalizedPath.endsWith(File.separator)) {
+				// if path does not end with a path separator,
+				// resolving against it will interpret the last path
+				// segment as a file
+				normalizedPath = normalizedPath + File.separator;
+			}
+			// normalize
+			URI uri = new URI("file", normalizedPath, "").normalize();
+			// store to field
+			this.path = uri.getSchemeSpecificPart();
+		} catch (URISyntaxException e) {
+			LOG.error("invalid path configured for FileURIResolver: {}", e.getMessage());
+			throw new ConfigurationException("invalid path configured for FileURIResolver: " + e.getMessage());
+		}
+		LOG.info("allowed path of FileURIResolver configured to '{}'", path);
+		LOG.info("allowed path of FileURIResolver set to '{}'", this.path);
+
+		try {
+			String normalizedFile = baseUri;
+			// make absolute
+			this.baseUri = new File(normalizedFile).getAbsoluteFile().toURI().normalize();
+		} catch (SecurityException e) {
+			LOG.error("invalid configuration file: {}, {}", baseUri, e.getMessage());
+			throw new ConfigurationException("invalid configuration file: " + baseUri, e);
+		}
 	}
 
 	/**
-	 * The constructor to use for this resolver.
+	 * {@inheritDoc}
 	 */
-	@Inject
-	public RestrictiveResourceResolver(@Context FileURIResolver fileResourceResolver, @Context Processor processor) {
-		super(fileResourceResolver, (ResourceResolver) processor.getConfigurationProperty(Feature.RESOURCE_RESOLVER));
+	@Override
+	public Source resolve(ResourceRequest request) throws XPathException {
+		LOG.debug("resolving {} URI {} ", request.nature, request.uri);
+		// System.out.println(request.uri);
+
+		try {
+			// 1. parse to URI instance
+			URI uri = new URI(request.uri);
+
+			// 2. resolve relative URIs against the configured path
+			if (!uri.isAbsolute()) {
+				uri = this.baseUri.resolve(uri);
+				LOG.debug("resolved {} on the base of {} to {}", request.uri, this.path, uri.toString());
+				// System.out.println("resolved " + request.uri + " on the base
+				// of " + this.path + " to " + uri.toString());
+			}
+
+			// 3. normalize URI, i.e. process '.' and '..'
+			uri = uri.normalize();
+
+			// 4. add "file:" scheme if no scheme specified
+			if (uri.getScheme() == null) {
+				// uri = new URI("file:" + uri.toString());
+				uri = new URI("file", uri.getSchemeSpecificPart(), uri.getFragment());
+			}
+
+			// check URI
+			if (uri.getScheme().equals("file")) {
+				if (uri.getPath() == null) {
+					LOG.error("illegal file URI: null path");
+					throw new XPathException("illegal file URI: null path");
+				} else if (uri.getPath().startsWith(this.path)) {
+					File location = new File(uri);
+					return new StreamSource(location);
+				} else {
+					LOG.error("illegal file URI: {}", uri.toString());
+					throw new XPathException("illegal file URI: " + uri.toString());
+				}
+			} else {
+				// delegate to the next resolver in the chain
+				return null;
+			}
+		} catch (NullPointerException | IllegalArgumentException | URISyntaxException e) {
+			LOG.error("illegal URI {}: {}", request.uri, e.getMessage());
+			throw new XPathException(e);
+		}
 	}
 }

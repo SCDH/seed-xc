@@ -1,8 +1,8 @@
 package de.ulbms.scdh.seed.xc.saxon;
 
 import de.ulbms.scdh.seed.xc.api.*;
+import de.ulbms.scdh.seed.xc.api.inject.CompileTime;
 import de.ulbms.scdh.seed.xc.saxon.harden.ChainedUnparsedTextURIResolver;
-import de.ulbms.scdh.seed.xc.saxon.harden.RestrictiveFileOnlyResolver;
 import de.ulbms.scdh.seed.xc.saxon.harden.ServiceConfiguration;
 import de.ulbms.scdh.seed.xc.saxon.harden.ZipFileURIResolver;
 import io.smallrye.mutiny.Uni;
@@ -19,10 +19,7 @@ import java.util.zip.ZipFile;
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
-import net.sf.saxon.lib.ChainedResourceResolver;
-import net.sf.saxon.lib.ConversionRules;
-import net.sf.saxon.lib.ResourceRequest;
-import net.sf.saxon.lib.UnparsedTextURIResolver;
+import net.sf.saxon.lib.*;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.s9api.ItemType;
 import net.sf.saxon.s9api.Serializer;
@@ -66,8 +63,9 @@ public class SaxonXslTransformation implements Transformation, ExportingCompiler
 	@Inject
 	protected ServiceConfiguration serviceConfig;
 
+	@CompileTime
 	@Inject
-	protected RestrictiveFileOnlyResolver compileTimeResourceResolver;
+	protected ResourceResolver compileTimeResourceResolver;
 
 	@Inject
 	protected UnparsedTextURIResolver staticAssetsUnparsedTextURIResolver;
