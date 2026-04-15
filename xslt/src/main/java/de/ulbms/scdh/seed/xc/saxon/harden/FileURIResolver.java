@@ -1,4 +1,4 @@
-package de.ulbms.scdh.seed.xc.harden;
+package de.ulbms.scdh.seed.xc.saxon.harden;
 
 import de.ulbms.scdh.seed.xc.api.ConfigurationException;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -39,7 +39,7 @@ public class FileURIResolver implements ResourceResolver {
 	private final String path;
 
 	/**
-	 * URI derived from {@link path}. It is used to resolve relative URIs.
+	 * URI derived from <code>path</code>path. It is used to resolve relative URIs.
 	 */
 	private final URI baseUri;
 
@@ -51,8 +51,9 @@ public class FileURIResolver implements ResourceResolver {
 	 * @param baseUri  path against which relative URIs will be resolved
 	 */
 	public FileURIResolver(
-			@ConfigProperty(name = "de.ulbms.scdh.seed.xc.harden.FileURIResolver.path", defaultValue = "/") String path,
-			@ConfigProperty(name = "de.ulbms.scdh.seed.xc.harden.FileURIResolver.baseUri", defaultValue = "/")
+			@ConfigProperty(name = "de.ulbms.scdh.seed.xc.saxon.harden.FileURIResolver.path", defaultValue = "/")
+					String path,
+			@ConfigProperty(name = "de.ulbms.scdh.seed.xc.saxon.harden.FileURIResolver.baseUri", defaultValue = "/")
 					String baseUri)
 			throws ConfigurationException {
 

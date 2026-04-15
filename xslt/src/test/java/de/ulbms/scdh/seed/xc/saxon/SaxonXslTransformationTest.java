@@ -3,12 +3,12 @@ package de.ulbms.scdh.seed.xc.saxon;
 import static org.junit.jupiter.api.Assertions.*;
 
 import de.ulbms.scdh.seed.xc.api.*;
-import de.ulbms.scdh.seed.xc.harden.FileURIResolver;
-import de.ulbms.scdh.seed.xc.harden.RestrictiveFileOnlyResolver;
-import de.ulbms.scdh.seed.xc.harden.RestrictiveResourceResolver;
-import de.ulbms.scdh.seed.xc.harden.RestrictiveUnparsedTextResolver;
-import de.ulbms.scdh.seed.xc.harden.ServiceConfiguration;
 import de.ulbms.scdh.seed.xc.resources.filesystem.FileSystemResourceProvider;
+import de.ulbms.scdh.seed.xc.saxon.harden.FileURIResolver;
+import de.ulbms.scdh.seed.xc.saxon.harden.RestrictiveFileOnlyResolver;
+import de.ulbms.scdh.seed.xc.saxon.harden.RestrictiveResourceResolver;
+import de.ulbms.scdh.seed.xc.saxon.harden.RestrictiveUnparsedTextResolver;
+import de.ulbms.scdh.seed.xc.saxon.harden.ServiceConfiguration;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
 import jakarta.ws.rs.WebApplicationException;

@@ -33,7 +33,6 @@
 
   <modules>
     <module>api</module>
-    <module>harden</module>
     <module>xslt</module>
     <module>compiler</module>
     <module>transformations</module>

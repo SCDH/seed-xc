@@ -1,4 +1,4 @@
-package de.ulbms.scdh.seed.xc.harden;
+package de.ulbms.scdh.seed.xc.saxon.harden;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

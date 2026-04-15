@@ -1,4 +1,4 @@
-package de.ulbms.scdh.seed.xc.harden;
+package de.ulbms.scdh.seed.xc.saxon.harden;
 
 import de.ulbms.scdh.seed.xc.api.ConfigurationException;
 import jakarta.enterprise.context.Dependent;

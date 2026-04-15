@@ -1,4 +1,4 @@
-package de.ulbms.scdh.seed.xc.harden;
+package de.ulbms.scdh.seed.xc.saxon.harden;
 
 import java.io.Reader;
 import java.net.URI;

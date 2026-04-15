@@ -1,4 +1,4 @@
-package de.ulbms.scdh.seed.xc.harden;
+package de.ulbms.scdh.seed.xc.saxon.harden;
 
 import javax.xml.transform.Source;
 import net.sf.saxon.lib.ResourceRequest;

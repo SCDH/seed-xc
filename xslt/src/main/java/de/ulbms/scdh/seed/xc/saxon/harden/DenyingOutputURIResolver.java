@@ -1,4 +1,4 @@
-package de.ulbms.scdh.seed.xc.harden;
+package de.ulbms.scdh.seed.xc.saxon.harden;
 
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import javax.xml.transform.Result;

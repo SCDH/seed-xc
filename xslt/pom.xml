@@ -20,11 +20,6 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>seed-xc-harden</artifactId>
-      <version>${revision}${changelist}</version>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
       <artifactId>seed-resource-providers</artifactId>
       <version>${revision}${changelist}</version>
       <scope>test</scope>

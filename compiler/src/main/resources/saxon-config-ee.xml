@@ -16,7 +16,7 @@
     />
 
   <xslt
-    outputUriResolver="de.ulbms.scdh.seed.xc.harden.DenyingOutputURIResolver"
+    outputUriResolver="de.ulbms.scdh.seed.xc.saxon.harden.DenyingOutputURIResolver"
     />
 
 </configuration>

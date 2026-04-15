@@ -1,10 +1,10 @@
 package de.ulbms.scdh.seed.xc.saxon;
 
 import de.ulbms.scdh.seed.xc.api.*;
-import de.ulbms.scdh.seed.xc.harden.ChainedUnparsedTextURIResolver;
-import de.ulbms.scdh.seed.xc.harden.RestrictiveFileOnlyResolver;
-import de.ulbms.scdh.seed.xc.harden.ServiceConfiguration;
-import de.ulbms.scdh.seed.xc.harden.ZipFileURIResolver;
+import de.ulbms.scdh.seed.xc.saxon.harden.ChainedUnparsedTextURIResolver;
+import de.ulbms.scdh.seed.xc.saxon.harden.RestrictiveFileOnlyResolver;
+import de.ulbms.scdh.seed.xc.saxon.harden.ServiceConfiguration;
+import de.ulbms.scdh.seed.xc.saxon.harden.ZipFileURIResolver;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;

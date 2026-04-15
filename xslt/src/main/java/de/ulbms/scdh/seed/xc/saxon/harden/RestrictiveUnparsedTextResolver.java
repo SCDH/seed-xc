@@ -1,4 +1,4 @@
-package de.ulbms.scdh.seed.xc.harden;
+package de.ulbms.scdh.seed.xc.saxon.harden;
 
 import de.ulbms.scdh.seed.xc.api.ConfigurationException;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -49,8 +49,9 @@ public class RestrictiveUnparsedTextResolver implements UnparsedTextURIResolver 
 	private final URI baseUri;
 
 	public RestrictiveUnparsedTextResolver(
-			@ConfigProperty(name = "de.ulbms.scdh.seed.xc.harden.FileURIResolver.path", defaultValue = "/") String path,
-			@ConfigProperty(name = "de.ulbms.scdh.seed.xc.harden.FileURIResolver.baseUri", defaultValue = "/")
+			@ConfigProperty(name = "de.ulbms.scdh.seed.xc.saxon.harden.FileURIResolver.path", defaultValue = "/")
+					String path,
+			@ConfigProperty(name = "de.ulbms.scdh.seed.xc.saxon.harden.FileURIResolver.baseUri", defaultValue = "/")
 					String baseUri)
 			throws ConfigurationException {
 

@@ -3,8 +3,8 @@ package de.ulbms.scdh.seed.xc.saxon;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import de.ulbms.scdh.seed.xc.api.*;
-import de.ulbms.scdh.seed.xc.harden.*;
 import de.ulbms.scdh.seed.xc.resources.filesystem.FileSystemResourceProvider;
+import de.ulbms.scdh.seed.xc.saxon.harden.*;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
 import jakarta.ws.rs.WebApplicationException;

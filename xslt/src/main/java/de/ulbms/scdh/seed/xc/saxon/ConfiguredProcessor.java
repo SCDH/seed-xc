@@ -17,7 +17,7 @@ import org.xml.sax.InputSource;
  * This class is a managed bean and produces a Saxon {@link Processor}
  * from a configuration file provided in one of the lookup locations
  * declared the app config using
- * <code>de.ulbms.scdh.seed.xc.xslt.ConfiguredProcessor.saxonConfigLocations</code>.
+ * <code>de.ulbms.scdh.seed.xc.saxon.ConfiguredProcessor.saxonConfigLocations</code>.
  */
 @ApplicationScoped
 public class ConfiguredProcessor {
@@ -28,12 +28,12 @@ public class ConfiguredProcessor {
 	 * This static method produces a {@link Processor} when the
 	 * container needs it for injection. It looks up all locations for
 	 * Saxon configuration files declared in
-	 * <code>de.ulbms.scdh.seed.xc.xslt.ConfiguredProcessor.saxonConfigLocations</code>.
+	 * <code>de.ulbms.scdh.seed.xc.saxon.ConfiguredProcessor.saxonConfigLocations</code>.
 	 */
 	@Produces
 	public static Processor createConfiguredProcessor(
 			@ConfigProperty(
-							name = "de.ulbms.scdh.seed.xc.xslt." + "ConfiguredProcessor.saxonConfigLocations",
+							name = "de.ulbms.scdh.seed.xc.saxon.ConfiguredProcessor.saxonConfigLocations",
 							defaultValue = "")
 					String saxonConfigLocations)
 			throws ConfigurationException {

@@ -39,7 +39,7 @@ public class XslTransformationExceptionParser implements TransformationException
 	 */
 	public XslTransformationExceptionParser(
 			@ConfigProperty(
-							name = "de.ulbms.scdh.seed.xc.xslt.XslTransformationExceptionParser.head",
+							name = "de.ulbms.scdh.seed.xc.saxon.XslTransformationExceptionParser.head",
 							defaultValue = "true")
 					Boolean head) {
 		this.head = head;
