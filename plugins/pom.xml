@@ -12,9 +12,11 @@
 
   <packaging>pom</packaging>
   <name>SEED XC Plugins</name>
+  <description>Low level components</description>
 
   <modules>
     <module>resource-providers</module>
+    <module>saxon</module>
   </modules>
 
   <build>

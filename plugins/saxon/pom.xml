@@ -4,13 +4,13 @@
 
   <parent>
     <groupId>de.ulbms.scdh.seed.xc</groupId>
-    <artifactId>seed-xc</artifactId>
+    <artifactId>seed-xc-plugins</artifactId>
     <version>${revision}${changelist}</version>
   </parent>
 
-  <artifactId>seed-xc-xslt</artifactId>
-  <name>SEED XC XSLT Compiler</name>
-  <description>This package provides the SEED XC XSLT compiler</description>
+  <artifactId>seed-xc-saxon</artifactId>
+  <name>SEED XC Saxon</name>
+  <description>This package provides transformations based on Saxon XSLT Processor</description>
 
   <dependencies>
     <dependency>

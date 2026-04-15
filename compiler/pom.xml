@@ -20,7 +20,7 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>seed-xc-xslt</artifactId>
+      <artifactId>seed-xc-saxon</artifactId>
       <version>${revision}${changelist}</version>
     </dependency>
     <dependency>

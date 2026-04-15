@@ -33,12 +33,11 @@
 
   <modules>
     <module>api</module>
-    <module>xslt</module>
+    <module>plugins</module>
     <module>compiler</module>
     <module>transformations</module>
     <module>transformer</module>
     <module>dts</module>
-    <module>plugins</module>
   </modules>
 
   <scm>
@@ -101,6 +100,7 @@
     -->
     <quarkus.bootstrap.workspace-discovery>true</quarkus.bootstrap.workspace-discovery>
 
+    <plugins.scope>runtime</plugins.scope>
     <saxon-config.file>${session.executionRootDirectory}/service/src/main/resources/saxon-config-he.xml</saxon-config.file>
     <file-uri-resolver.path>${session.executionRootDirectory}</file-uri-resolver.path>
     <file-uri-resolver.baseUri>${session.executionRootDirectory}</file-uri-resolver.baseUri>

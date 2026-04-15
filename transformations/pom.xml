@@ -20,8 +20,9 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>seed-xc-xslt</artifactId>
+      <artifactId>seed-xc-saxon</artifactId>
       <version>${revision}${changelist}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
