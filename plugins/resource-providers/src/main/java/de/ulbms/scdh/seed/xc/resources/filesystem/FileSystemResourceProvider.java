@@ -128,7 +128,7 @@ public class FileSystemResourceProvider implements ResourceProvider {
 			} catch (MalformedURLException e) {
 				throw new jakarta.ws.rs.BadRequestException(e);
 			} catch (IOException e) {
-				throw new jakarta.ws.rs.InternalServerErrorException(e);
+				throw new jakarta.ws.rs.NotFoundException(e);
 			}
 		});
 	}

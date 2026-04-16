@@ -84,11 +84,14 @@ public class DocumentEndpoint implements DocumentApi {
 		// all cf (= Context Follow ups) parameters are passed to the stylesheet
 		if (cf != null) map.putAll(cf);
 		params.globalParameters(map);
+		LOG.info("parameters: {}", map);
 
 		// Create ResourceInContext from resource parameter and additional parameters
 		if (cr == null) cr = Map.of();
 		ResourceInContext ric = new ResourceInContext(Collections.unmodifiableMap(cr), resource);
 		Uni<ResourceInContext> uniRic = Uni.createFrom().item(ric);
+
+		LOG.info("here");
 
 		return uniRic.plug(resourceProvider::getResource).plug((s) -> {
 			return transformation.transformAsync(params, null, resource, s, resourceProvider);
