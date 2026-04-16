@@ -52,6 +52,32 @@ public class DocumentEndpointTest {
 		given().when().get("/document?resource=john.xml&start=eins").then().statusCode(400);
 	}
 
+	@Test
+	public void testStartWithoutEnd() {
+		given().when().get("/document?resource=john.xml&start=John:1:1").then().statusCode(400);
+	}
+
+	@Test
+	public void testEndWithoutStart() {
+		given().when().get("/document?resource=john.xml&end=John:1:1").then().statusCode(400);
+	}
+
+	@Test
+	public void testStartEndWithRef() {
+		given().when()
+				.get("/document?resource=john.xml&start=John:1:1&end=John:1:2&ref=John:1")
+				.then()
+				.statusCode(400);
+	}
+
+	@Test
+	public void testStartWithoutEndButRef() {
+		given().when()
+				.get("/document?resource=john.xml&start=John:1:1&ref=John:1")
+				.then()
+				.statusCode(400);
+	}
+
 	// Testing returned contents: For robustness against changes in the XSLT,
 	// just assert the presence or absence of significant parts!
 
