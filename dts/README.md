@@ -7,7 +7,7 @@ for [distributed text services](https://dtsapi.org/specifications/)
 - ✅ navigation 
 - ✅ document
 - 🚧 collection
-- ❗entry: [Must be placed somewhere else!](Entry)
+- ❗entry: [Must be placed somewhere else!](#what-happend-to-the-entry-endpoint)
 
 [OpenAPI specs](https://zivgitlab.uni-muenster.de/SCDH/apis/dts-openapi-specs/-/blob/main/facade-openapi.yaml?ref_type=heads)
 
