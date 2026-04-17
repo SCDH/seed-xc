@@ -25,16 +25,13 @@ public class NavigationEndpointTest {
 
 	@Test
 	public void testJohnXml200() {
-		given().when()
-				.get("/navigation?collection=file%3A%2F%2Fasdfasd%2F&down=0&" + "resource=john.xml")
-				.then()
-				.statusCode(200);
+		given().when().get("/navigation?resource=john.xml").then().statusCode(200);
 	}
 
 	@Test
 	public void testJohnXmlResponseBodyHasLODContext() {
 		given().when()
-				.get("/navigation?collection=file%3A%2F%2Fasdfasd%2F&down=0&resource=john.xml")
+				.get("/navigation?resource=john.xml")
 				.then()
 				.statusCode(200)
 				.body("@context", notNullValue());
@@ -43,7 +40,7 @@ public class NavigationEndpointTest {
 	@Test
 	public void testJohnXmlResponseBodyIsNavigationObject() {
 		given().when()
-				.get("/navigation?collection=file%3A%2F%2Fasdfasd%2F&down=0&resource=john.xml")
+				.get("/navigation?resource=john.xml")
 				.then()
 				.extract()
 				.body()
@@ -53,7 +50,7 @@ public class NavigationEndpointTest {
 	@Test
 	public void testJohnXmlResponseBodyHasCitationTrees() {
 		Navigation body = given().when()
-				.get("/navigation?collection=file%3A%2F%2Fasdfasd%2F&down=0&resource=john.xml")
+				.get("/navigation?resource=john.xml")
 				.then()
 				.statusCode(200)
 				.extract()
@@ -68,7 +65,7 @@ public class NavigationEndpointTest {
 	@Test
 	public void testJohnXmlResponseBodyDefaultTreeMembers() {
 		Navigation body = given().when()
-				.get("/navigation?collection=file%3A%2F%2Fasdfasd%2F&resource=john.xml")
+				.get("/navigation?resource=john.xml")
 				.then()
 				.statusCode(200)
 				.extract()
@@ -81,9 +78,14 @@ public class NavigationEndpointTest {
 	}
 
 	@Test
-	public void testJohnXmlResponseBodyDown0Members() {
+	public void testJohnXmlDown0() {
+		given().when().get("/navigation?resource=john.xml&down=0").then().statusCode(400);
+	}
+
+	@Test
+	public void testJohnXmlResponseBodyDown0WithRefMembers() {
 		Navigation body = given().when()
-				.get("/navigation?collection=file%3A%2F%2Fasdfasd%2F&resource=john.xml&down=0")
+				.get("/navigation?resource=john.xml&down=0&ref=John")
 				.then()
 				.statusCode(200)
 				.extract()
@@ -96,9 +98,17 @@ public class NavigationEndpointTest {
 	}
 
 	@Test
+	public void testJohnXmlDown0WithStartEnd() {
+		given().when()
+				.get("/navigation?resource=john.xml&down=0&start=John:1:2&end=John:1:4")
+				.then()
+				.statusCode(400);
+	}
+
+	@Test
 	public void testJohnXmlResponseBodyDown1Members() {
 		Navigation body = given().when()
-				.get("/navigation?collection=file%3A%2F%2Fasdfasd%2F&resource=john.xml&down=1")
+				.get("/navigation?resource=john.xml&down=1")
 				.then()
 				.statusCode(200)
 				.extract()
@@ -113,7 +123,7 @@ public class NavigationEndpointTest {
 	@Test
 	public void testJohnXmlResponseBodyDown2Members() {
 		Navigation body = given().when()
-				.get("/navigation?collection=file%3A%2F%2Fasdfasd%2F&resource=john.xml&down=2")
+				.get("/navigation?resource=john.xml&down=2")
 				.then()
 				.statusCode(200)
 				.extract()
