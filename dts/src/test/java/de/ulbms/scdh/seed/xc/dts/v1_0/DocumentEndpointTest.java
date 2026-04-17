@@ -1,4 +1,4 @@
-package de.ulbms.scdh.seed.xc.dts.document;
+package de.ulbms.scdh.seed.xc.dts.v1_0;
 
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertFalse;

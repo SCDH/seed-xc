@@ -1,4 +1,4 @@
-package de.ulbms.scdh.seed.xc.dts.navigation;
+package de.ulbms.scdh.seed.xc.dts.v1_0;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.exc.StreamReadException;

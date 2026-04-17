@@ -1,4 +1,4 @@
-package de.ulbms.scdh.seed.xc.dts.document;
+package de.ulbms.scdh.seed.xc.dts.v1_0;
 
 import de.ulbms.scdh.seed.xc.api.*;
 import de.ulbms.scdh.seed.xc.api.inject.TransformTimeProvider;
