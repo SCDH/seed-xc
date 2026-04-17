@@ -115,6 +115,13 @@ Yes. XSLT comes just as a low level plugin amongst other. So you're
 not forced to it. There are [multiple types of
 transformations](../plugins/).
 
+#### I don't have TEI-XML. Can I use this DTS implementation nevertheless?
+
+Yes. XML processing is just a detail of the currently existing low
+level [transformation plugins](../plugins). Transformers for other
+data formats may be plugged in as well. XML is not part of the
+high-level components of SEED XC (albeit the X in XC).
+
 #### Why SPARQL for the Collections Endpoint?
 
 That's just a default. You can bind a [transformation of any other
@@ -130,8 +137,12 @@ Yes. That's the point of this project's approach!
 
 #### What's your Plans?
 
-An endpoint that recalculates Web Annotation Selectors into parts of
-parts of a documents to selectors into the base document (and vice
-versa) and from media type to the base format (and vice versa). It
-will be based on [Selene](https://github.com/scdh/selene). That's why
-we go along with XSLT for DTS processing and this whole SEED XC thing.
+An endpoint that recalculates [Web Annotation
+Selectors](https://www.w3.org/TR/annotation-model/#selectors) into
+parts of parts of a documents to selectors into the base document (and
+vice versa) and from media type to the base format (and vice
+versa). It will be based on
+[Selene](https://github.com/scdh/selene). That's why we go along with
+XSLT for DTS processing and this whole SEED XC thing. We currently
+need the declarative paradigm of XSLT for providing this at a generic
+level.
