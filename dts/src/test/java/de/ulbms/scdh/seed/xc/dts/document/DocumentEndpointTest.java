@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 @QuarkusTest
@@ -38,18 +37,16 @@ public class DocumentEndpointTest {
 	}
 
 	@Test
-	public void testJohnXmlStartEnd() {
+	public void testJohnXmlStartEndMembersNotFound() {
 		given().when()
 				.get("/document?resource=john.xml&start=eins&end=zwei")
 				.then()
-				.statusCode(500);
+				.statusCode(404);
 	}
 
-	// TODO
-	@Disabled
 	@Test
-	public void testJohnXmlRef() {
-		given().when().get("/document?resource=john.xml&start=eins").then().statusCode(400);
+	public void testJohnXmlRefMembersNotFound() {
+		given().when().get("/document?resource=john.xml&ref=eins").then().statusCode(404);
 	}
 
 	@Test
