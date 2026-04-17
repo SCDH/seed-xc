@@ -45,7 +45,7 @@ public class SaxonXslTransformation implements Transformation, ExportingCompiler
 
 	private static final Logger LOG = LoggerFactory.getLogger(SaxonXslTransformation.class);
 
-	public static final String TRANSFORMATION_TYPE = "de.ulbms.scdh.seed.xc.xslt.SaxonXslTransformation";
+	public static final String TRANSFORMATION_TYPE = "xslt";
 
 	/**
 	 * {@inheritDoc}

@@ -1,6 +1,6 @@
 identity:
   description: The identity transformation.
-  class: de.ulbms.scdh.seed.xc.xslt.SaxonXslTransformation
+  class: xslt
   location: xsl/id.xsl
   requiresSource: true
   mediaType: text/xml
@@ -8,14 +8,14 @@ identity:
 
 param-integer:
   description: a template with a required integer parameter
-  class: de.ulbms.scdh.seed.xc.xslt.SaxonXslTransformation
+  class: xslt
   location: xsl/param-integer.xsl
   requiresSource: true
   mediaType: text/xml
 
 tagsoup:
   description: The identity transformation, but with a tag soup parser per default.
-  class: de.ulbms.scdh.seed.xc.xslt.SaxonXslTransformation
+  class: xslt
   location: xsl/id.xsl
   requiresSource: true
   mediaType: text/html
