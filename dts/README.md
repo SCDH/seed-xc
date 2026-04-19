@@ -4,10 +4,10 @@ This is an implementation of the API endpoints specified
 for [distributed text services](https://dtsapi.org/specifications/)
 (DTS):
 
+- ❗entry: [Must be placed somewhere else!](#what-happend-to-the-entry-endpoint)
+- 🚧 collection
 - ✅ navigation 
 - ✅ document
-- 🚧 collection
-- ❗entry: [Must be placed somewhere else!](#what-happend-to-the-entry-endpoint)
 
 [OpenAPI specs](https://zivgitlab.uni-muenster.de/SCDH/apis/dts-openapi-specs/-/blob/main/facade-openapi.yaml?ref_type=heads)
 
