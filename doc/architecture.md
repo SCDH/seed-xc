@@ -59,7 +59,7 @@ A `TransformationInfo` has information, which transformation plugin to
 use for the `Transformation` instance. The record also knows which
 primary resource to use (e.g. a XSLT stylesheet) and which other
 library resources (e.g. XSLT packages) it depends on. It also defines
-which parameters compile-time parameters to set during the setup
+which compile-time parameters to set during the setup
 phase. You can compile the same XSLT stylesheet with different
 compile-time parameters and make different transformations out of it;
 each would require its own `TransformationInfo` record.
@@ -70,7 +70,7 @@ a given XSLT stylesheet or package.
 There's no way to pass in additional transformations during the uptime
 of the service. The set of available transformations is determined at
 start time and the transformation resources (stylesheets etc.) can be
-read from the file system (configMap an Kubernetes) only. That's a
+read from the file system (configMap on Kubernetes) only. That's a
 feature: A [security](../security) feature as well as an operational
 feature: It results in a service that scales horizontally.
 
@@ -82,27 +82,29 @@ methods.
 
 When a request comes in at a REST API endpoint (north-east in
 diagram), the underlying framework (Quarkus and its bean manager)
-creates endpoint bean which knows how to process the
-request. Typically, it is request-scoped, i.g., its lifecycle starts
+creates an endpoint bean which knows how to process the
+request. Typically, it is request-scoped, i.e., its lifecycle starts
 with the incoming request and ends when it was successfully processed
-or was interrupted with a failure. Each endpoint has it's own bean
-class; but the diagram only has only one prototype. The endpoint bean
+or interrupted with a failure. Each endpoint has it's own bean
+class; but the diagram shows only one prototype. The endpoint bean
 gets two other beans injected:
 
-1. a `ResourceProvider`, which implementation is actually defined by a
-   application property, which may be request- or application-scoped
+1. a `ResourceProvider`. Which implementation is actually used is
+   defined by an application property. The bean may be request- or
+   application-scoped.
 2. a `TransformationMap`, actually the `ConfiguredTransformationMap`
    with access to all the compiled transformations available on the
    service
 
-Processing the request by the endpoint bean typically involves to steps:
+Processing the request by the endpoint bean typically involves the
+following steps:
 
 1. get the resource to be processed by calling the `getRequest(...)`
    method of the injected resource provider as a input stream
 2. get the requested (or configured) `Transformation` by
    transformation ID from the injected transformation map and pass the
-   input stream over to its transform method `transform(...)` or
-   `transformAsyn(...)`
+   input stream over to its transform method (`transform(...)` or
+   `transformAsync(...)`)
 3. send the byte stream returned by the transform method back to the
    wire
 
