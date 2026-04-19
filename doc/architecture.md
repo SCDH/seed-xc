@@ -92,7 +92,7 @@ gets two other beans injected:
 1. a `ResourceProvider`, which implementation is actually defined by a
    application property, which may be request- or application-scoped
 2. a `TransformationMap`, actually the `ConfiguredTransformationMap`
-   withe access to all the compiled transformations available on the
+   with access to all the compiled transformations available on the
    service
 
 Processing the request by the endpoint bean typically involves to steps:
