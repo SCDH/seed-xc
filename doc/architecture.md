@@ -39,18 +39,21 @@ The `ConfiguredTransformationMap` sets up all transformations
 available on the service at startup, and makes them available for
 requests. For transformations based on compiled languages such as XSLT
 and XQuery, this means, that compilation is done only once and the
-compiled transformation is used for all request coming in during the
+compiled transformation is used for all requests coming in during the
 uptime of the service. Observation of the server logs show, that 4/5
 of the time for compiling the stylesheet, when processing a short XML
-file with a complicated stylesheet. Thus, this architecture that
-compiles once, turns out to perform very well.
+file with a complicated stylesheet. Thus, this compile-once
+architecture turns out to perform very well.
 
 The `ConfiguredTransformationMap` has a `configLocation` attribute,
-which may be set as a configuration property and which is a path to a
-YAML configuration file defining all available transformations. The
+which which is a configurable path to a YAML configuration file
+defining all transformations available on the service. The
 configuration is an key-value map, mapping transformation IDs to
-`TransformationInfo` records. So there's one `Transformation` instance
-per `TransformationInfo` record given in the service configuration.
+`TransformationInfo` records. So there will be one `Transformation`
+instance per `TransformationInfo` record given in the service
+configuration. And each `Transformation` instance is stored in a
+key-value store of the `ConfiguredTransformationMap` bean and
+accessible per ID.
 
 A `TransformationInfo` has information, which transformation plugin to
 use for the `Transformation` instance. The record also knows which
@@ -60,6 +63,9 @@ which parameters compile-time parameters to set during the setup
 phase. You can compile the same XSLT stylesheet with different
 compile-time parameters and make different transformations out of it;
 each would require its own `TransformationInfo` record.
+
+There's a [XSLT stylesheet](../utils) for generating YAML records for
+a given XSLT stylesheet or package.
 
 There's no way to pass in additional transformations during the uptime
 of the service. The set of available transformations is determined at
