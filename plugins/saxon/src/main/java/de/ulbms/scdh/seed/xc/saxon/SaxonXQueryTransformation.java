@@ -153,46 +153,48 @@ public class SaxonXQueryTransformation extends TransformationBase implements Tra
 		StringConverter stringToStringConverter = new StringConverter.StringToString();
 
 		try {
-			for (String name : parameters.getGlobalParameters().keySet()) {
-				QName qname = QName.fromClarkName(name);
-				XdmValue value;
-				Optional<TypedParameter> declared = Optional.empty();
-				for (TypedParameter p : getTransformationInfo().getCompileTimeParameters()) {
-					if (p.getName().equals(name)) {
-						declared = Optional.of(p);
-						break;
+			if (parameters != null) {
+				for (String name : parameters.getGlobalParameters().keySet()) {
+					QName qname = QName.fromClarkName(name);
+					XdmValue value;
+					Optional<TypedParameter> declared = Optional.empty();
+					for (TypedParameter p : getTransformationInfo().getCompileTimeParameters()) {
+						if (p.getName().equals(name)) {
+							declared = Optional.of(p);
+							break;
+						}
 					}
-				}
-				if (declared.isEmpty()) {
-					// TODO: try to get type from default value: XdmValue defaultValue =
-					// evaluator.getExternalVariable(qname);
-					// assume xs:string
-					value = XdmAtomicValue.makeAtomicValue(stringToStringConverter.convertString(
-							StringView.of(parameters.getGlobalParameters().get(name))));
-					evaluator.setExternalVariable(qname, value);
-				} else {
-					SchemaType schemaType =
-							BuiltInType.getSchemaTypeByLocalName(declared.get().getType());
-					if (schemaType == null) {
-						// try xs:string
-						setAtomicParameter(evaluator, declared.get(), stringToStringConverter);
-					} else if (schemaType.isAtomicType()) {
-						BuiltInAtomicType atomicType = (BuiltInAtomicType) schemaType;
-						StringConverter converter = atomicType.getStringConverter(conversionRules);
-						if (converter == null) {
-							LOG.error(
-									"failed to get converter for external variable {} of type {}",
+					if (declared.isEmpty()) {
+						// TODO: try to get type from default value: XdmValue defaultValue =
+						// evaluator.getExternalVariable(qname);
+						// assume xs:string
+						value = XdmAtomicValue.makeAtomicValue(stringToStringConverter.convertString(
+								StringView.of(parameters.getGlobalParameters().get(name))));
+						evaluator.setExternalVariable(qname, value);
+					} else {
+						SchemaType schemaType = BuiltInType.getSchemaTypeByLocalName(
+								declared.get().getType());
+						if (schemaType == null) {
+							// try xs:string
+							setAtomicParameter(evaluator, declared.get(), stringToStringConverter);
+						} else if (schemaType.isAtomicType()) {
+							BuiltInAtomicType atomicType = (BuiltInAtomicType) schemaType;
+							StringConverter converter = atomicType.getStringConverter(conversionRules);
+							if (converter == null) {
+								LOG.error(
+										"failed to get converter for external variable {} of type {}",
+										name,
+										declared.get().getType());
+							} else {
+								this.setAtomicParameter(evaluator, declared.get(), converter);
+							}
+						} else {
+							LOG.warn(
+									"not implemented: failed to convert external variable {} of type {}",
 									name,
 									declared.get().getType());
-						} else {
-							this.setAtomicParameter(evaluator, declared.get(), converter);
+							// TODO: convert BuildinListType
 						}
-					} else {
-						LOG.warn(
-								"not implemented: failed to convert external variable {} of type {}",
-								name,
-								declared.get().getType());
-						// TODO: convert BuildinListType
 					}
 				}
 			}
@@ -205,7 +207,9 @@ public class SaxonXQueryTransformation extends TransformationBase implements Tra
 		// TODO: evaluate evaluate initialTemplate and initialFunction from
 		// runtime parameters
 		try {
-			evaluator.setSource(source);
+			if (getTransformationInfo().getRequiresSource()) {
+				evaluator.setSource(source);
+			}
 			// transform
 			evaluator.run(serializer);
 		} catch (NullPointerException e) {
