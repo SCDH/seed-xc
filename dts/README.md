@@ -44,11 +44,31 @@ The dev server will be available on
 [http://localhost:8080](http://localhost:8080). (See third-last line
 of output about the "Quarkus Main Thread".)
 
+Swagger UI is available under
+[http://localhost:8080/q/dev-ui/quarkus-smallrye-openapi/swagger-ui](http://localhost:8080/q/dev-ui/quarkus-smallrye-openapi/swagger-ui).
+
+Per default, the service serves files from the [`samples`](../samples)
+directory, which currently has only a single document, `john.xml`.
+
+To serve TEI files from an other local directory, use the
+`seed-dts.filesystem` property like so, where `PATH` must be an
+absolute path.
+
+```shell
+./mvnw -Dseed-dts.filesystem=PATH -Pdts quarkus:dev
+
+```
+
+Have a look at
+[`src/main/resources/application.properties`](src/main/resources/application.properties)
+for more config options.
+
+
 ### Testing with cURL
 
 ```shell
 curl -X 'GET' \
-  'http://localhost:8080/navigation?resource=hello.xml' \
+  'http://localhost:8080/navigation?resource=john.xml' \
   -H 'accept: application/ld+json'
 ```
 

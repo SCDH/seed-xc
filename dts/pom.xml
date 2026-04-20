@@ -19,7 +19,7 @@
     <seed-dts.config>${project.build.directory}/dependencies/dts-transformations.yaml</seed-dts.config>
     <seed-dts.saxon-config>${project.build.directory}/dependencies/dts-transformations/saxon.he.xml</seed-dts.saxon-config>
     <seed-dts.accessible-path>${project.basedir}/../</seed-dts.accessible-path>
-    <seed-dts.filesystem>${project.basedir}/../test/</seed-dts.filesystem>
+    <seed-dts.filesystem>${project.basedir}/../samples/</seed-dts.filesystem>
   </properties>
 
   <dependencies>
