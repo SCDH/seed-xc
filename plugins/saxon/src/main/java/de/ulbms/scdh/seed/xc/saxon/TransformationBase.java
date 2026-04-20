@@ -1,17 +1,31 @@
 package de.ulbms.scdh.seed.xc.saxon;
 
-import de.ulbms.scdh.seed.xc.api.Config;
-import de.ulbms.scdh.seed.xc.api.Transformation;
-import de.ulbms.scdh.seed.xc.api.TransformationInfo;
-import de.ulbms.scdh.seed.xc.api.TransformationPreparationException;
+import de.ulbms.scdh.seed.xc.api.*;
+import de.ulbms.scdh.seed.xc.api.inject.CompileTime;
+import io.smallrye.mutiny.Uni;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.WebApplicationException;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import javax.xml.transform.Source;
+import javax.xml.transform.sax.SAXSource;
+import net.sf.saxon.lib.ResourceResolver;
+import net.sf.saxon.lib.UnparsedTextURIResolver;
 import net.sf.saxon.s9api.DocumentBuilder;
+import net.sf.saxon.s9api.Processor;
+import net.sf.saxon.s9api.Serializer;
 import org.apache.xerces.parsers.SAXParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 
+/**
+ * {@link TransformationBase} is abstract base class for Saxon-based transformation classes.
+ * It provides common attributes and methods.
+ */
 public abstract class TransformationBase implements Transformation {
 
 	Logger LOG = LoggerFactory.getLogger(TransformationBase.class);
@@ -19,6 +33,19 @@ public abstract class TransformationBase implements Transformation {
 	public static final String FEATURE_XINCLUDE = "http://apache.org/xml/features/xinclude";
 
 	protected TransformationInfo transformationInfo;
+
+	@Inject
+	protected Processor processor;
+
+	@CompileTime
+	@Inject
+	protected ResourceResolver compileTimeResourceResolver;
+
+	@Inject
+	protected UnparsedTextURIResolver staticAssetsUnparsedTextURIResolver;
+
+	@Inject
+	protected TransformationExceptionParser transformationExceptionParser;
 
 	/**
 	 * {@inheritDoc}
@@ -34,6 +61,68 @@ public abstract class TransformationBase implements Transformation {
 	@Override
 	public String getOutputMediaType() {
 		return transformationInfo.getMediaType();
+	}
+
+	/**
+	 * Internal method that does the transformation job.
+	 */
+	protected abstract void transform(
+			RuntimeParameters parameters,
+			Config config,
+			Source source,
+			Serializer serializer,
+			ResourceProvider resourceProvider)
+			throws TransformationPreparationException, TransformationException;
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public byte[] transform(
+			RuntimeParameters parameters,
+			Config config,
+			String systemId,
+			InputStream sourceStream,
+			ResourceProvider resourceProvider)
+			throws TransformationPreparationException, TransformationException {
+
+		LOG.debug("Transforming `{}` ... (3)", systemId);
+		ByteArrayOutputStream output = new ByteArrayOutputStream();
+		Serializer out = processor.newSerializer(output);
+
+		XMLReader reader = getParser(config);
+		Source source = new SAXSource(reader, new InputSource(sourceStream));
+
+		// setting the systemId is needed for the XML base property
+		source.setSystemId(systemId);
+
+		// hand over to implementation of abstract method
+		transform(parameters, config, source, out, resourceProvider);
+		return output.toByteArray();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Uni<byte[]> transformAsync(
+			RuntimeParameters parameters,
+			Config config,
+			String systemId,
+			Uni<? extends InputStream> sourceUni,
+			ResourceProvider resourceProvider) {
+
+		// calls abstract method
+		return sourceUni.onItem().transform((sourceStream) -> {
+			try {
+				return transform(parameters, config, systemId, sourceStream, resourceProvider);
+			} catch (TransformationPreparationException e) {
+				throw new InternalServerErrorException(e.getMessage());
+			} catch (TransformationException e) {
+				throw new WebApplicationException(
+						transformationExceptionParser.message(e), transformationExceptionParser.parseCode(e));
+			}
+		});
 	}
 
 	/**

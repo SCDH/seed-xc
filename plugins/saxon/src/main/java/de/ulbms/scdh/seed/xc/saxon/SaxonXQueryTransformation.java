@@ -1,22 +1,15 @@
 package de.ulbms.scdh.seed.xc.saxon;
 
 import de.ulbms.scdh.seed.xc.api.*;
-import de.ulbms.scdh.seed.xc.api.inject.CompileTime;
 import de.ulbms.scdh.seed.xc.saxon.harden.ChainedUnparsedTextURIResolver;
-import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.InternalServerErrorException;
-import jakarta.ws.rs.WebApplicationException;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Optional;
 import javax.xml.transform.Source;
-import javax.xml.transform.sax.SAXSource;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.s9api.Serializer;
@@ -26,8 +19,6 @@ import net.sf.saxon.value.AtomicValue;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xml.sax.InputSource;
-import org.xml.sax.XMLReader;
 
 /**
  * A transformation using the Saxon XQuery processor. The query is
@@ -56,24 +47,9 @@ public class SaxonXQueryTransformation extends TransformationBase implements Tra
 	String configLocations;
 
 	@Inject
-	protected Processor processor;
-
-	@Inject
 	protected ModuleURIResolver compileTimeModuleResolver;
 
-	@CompileTime
-	@Inject
-	protected ResourceResolver compileTimeResourceResolver;
-
-	@Inject
-	protected UnparsedTextURIResolver staticAssetsUnparsedTextURIResolver;
-
-	@Inject
-	protected TransformationExceptionParser transformationExceptionParser;
-
 	private XQueryExecutable executable;
-
-	protected TransformationInfo transformationInfo;
 
 	/**
 	 * Make a {@link ResourceRequest} from a URI given as string.
@@ -176,57 +152,9 @@ public class SaxonXQueryTransformation extends TransformationBase implements Tra
 	}
 
 	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public byte[] transform(
-			RuntimeParameters parameters,
-			Config config,
-			String systemId,
-			InputStream sourceStream,
-			ResourceProvider resourceProvider)
-			throws TransformationPreparationException, TransformationException {
-
-		LOG.debug("Transforming `{}` ... (3)", systemId);
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
-		Serializer out = processor.newSerializer(output);
-
-		XMLReader reader = getParser(config);
-		Source source = new SAXSource(reader, new InputSource(sourceStream));
-
-		// setting the systemId is needed for the XML base property
-		source.setSystemId(systemId);
-
-		transform(parameters, config, source, out, resourceProvider);
-		return output.toByteArray();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Uni<byte[]> transformAsync(
-			RuntimeParameters parameters,
-			Config config,
-			String systemId,
-			Uni<? extends InputStream> sourceUni,
-			ResourceProvider resourceProvider) {
-
-		return sourceUni.onItem().transform((sourceStream) -> {
-			try {
-				return transform(parameters, config, systemId, sourceStream, resourceProvider);
-			} catch (TransformationPreparationException e) {
-				throw new InternalServerErrorException(e.getMessage());
-			} catch (TransformationException e) {
-				throw new WebApplicationException(
-						transformationExceptionParser.message(e), transformationExceptionParser.parseCode(e));
-			}
-		});
-	}
-
-	/**
 	 * Internal method that does the transformation job.
 	 */
+	@Override
 	protected synchronized void transform(
 			RuntimeParameters parameters,
 			Config config,
