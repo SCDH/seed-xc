@@ -17,6 +17,7 @@
     <seed-xml-transformer.config>${session.executionRootDirectory}/security/sample-xml-transformer-config.yaml</seed-xml-transformer.config>
     <seed-xml-transformer.saxon-config>${session.executionRootDirectory}/security/hardened-saxon-config.xml</seed-xml-transformer.saxon-config>
     <seed-xml-transformer.accessible-path>${session.executionRootDirectory}</seed-xml-transformer.accessible-path>
+    <seed-xml-transformer.filesystem>${session.executionRootDirectory}/samples/</seed-xml-transformer.filesystem>
   </properties>
 
   <dependencies>
