@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Optional;
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
 import net.sf.saxon.lib.*;
@@ -164,14 +165,16 @@ public class SaxonXQueryTransformation implements Transformation {
 		LOG.debug("Done setting up SaxonXslTransformation with identifier '{}'.", transformationInfo.getIdent());
 	}
 
-	private void setAtomicParameter(XsltCompiler compiler, TypedParameter parameter, StringConverter converter) {
+	private void setAtomicParameter(XQueryEvaluator evaluator, TypedParameter parameter, StringConverter converter) {
 		try {
 			AtomicValue atomicValue =
 					converter.convertString(StringView.of(parameter.getValue())).asAtomic();
 			XdmAtomicValue value = XdmAtomicValue.makeAtomicValue(atomicValue);
-			compiler.setParameter(QName.fromClarkName(parameter.getName()), value);
+			evaluator.setExternalVariable(QName.fromClarkName(parameter.getName()), value);
 		} catch (ValidationException e) {
-			LOG.error("failed to convert compile time parameter {}: {}", parameter.getName(), e.getMessage());
+			LOG.error("failed to convert external variable {}: {}", parameter.getName(), e.getMessage());
+		} catch (SaxonApiUncheckedException e) {
+			LOG.error("failed to set external {}: {}", parameter.getName(), e.getMessage());
 		}
 	}
 
@@ -317,7 +320,7 @@ public class SaxonXQueryTransformation implements Transformation {
 			ResourceProvider resourceProvider)
 			throws TransformationPreparationException, TransformationException {
 
-		XQueryEvaluator transformer = executable.load();
+		XQueryEvaluator evaluator = executable.load();
 
 		// add file system restriction: access to the compiled
 		// resources (with fn:static-base-uri()) is allowed as
@@ -325,16 +328,45 @@ public class SaxonXQueryTransformation implements Transformation {
 		// XInclude.
 
 		// 1. resource resolver for accessing XML via fn:doc() etc.
-		transformer.setResourceResolver(new ChainedResourceResolver(compileTimeResourceResolver, resourceProvider));
-		transformer.setUnparsedTextResolver(
+		evaluator.setResourceResolver(new ChainedResourceResolver(compileTimeResourceResolver, resourceProvider));
+		evaluator.setUnparsedTextResolver(
 				new ChainedUnparsedTextURIResolver(staticAssetsUnparsedTextURIResolver, resourceProvider));
+
+		ConversionRules conversionRules =
+				processor.getUnderlyingConfiguration().getConversionRules();
+		StringConverter stringToStringConverter = new StringConverter.StringToString();
 
 		try {
 			for (String name : parameters.getGlobalParameters().keySet()) {
-				QName qname = new QName(name);
-				XdmValue defaultValue = transformer.getExternalVariable(qname);
+				QName qname = QName.fromClarkName(name);
 				XdmValue value = null; // TODO: set using type information of default value
-				transformer.setExternalVariable(qname, value);
+				XdmValue defaultValue = evaluator.getExternalVariable(qname);
+				Optional<TypedParameter> declared = getTransformationInfo().getCompileTimeParameters().stream().filter((TypedParameter p) -> { return p.getName().equals(name); } ).findFirst();
+				if (declared.isEmpty()) {
+					// assume xs:string
+					value = XdmAtomicValue.makeAtomicValue(stringToStringConverter.convertString(StringView.of(parameters.getGlobalParameters().get(name))));
+					evaluator.setExternalVariable(qname, value);
+				} else {
+					SchemaType schemaType = BuiltInType.getSchemaTypeByLocalName(declared.get().getType());
+					if (schemaType == null) {
+						// try xs:string
+						setAtomicParameter(evaluator, declared.get(), stringToStringConverter);
+					} else if (schemaType.isAtomicType()) {
+						BuiltInAtomicType atomicType = (BuiltInAtomicType) schemaType;
+						StringConverter converter = atomicType.getStringConverter(conversionRules);
+						if (converter == null) {
+							LOG.error(
+									"failed to get converter for external variable {} of type {}",
+									name,
+									declared.get().getType());
+						} else {
+							this.setAtomicParameter(evaluator, declared.get(), converter);
+						}
+					} else {
+						LOG.warn("not implemented: failed to convert external variable {} of type {}", name, declared.get().getType());
+						// TODO: convert BuildinListType
+					}
+				}
 			}
 		} catch (SaxonApiUncheckedException e) {
 			LOG.error("failed to set stylesheet parameters: {}", e.getMessage());
@@ -345,9 +377,9 @@ public class SaxonXQueryTransformation implements Transformation {
 		// TODO: evaluate evaluate initialTemplate and initialFunction from
 		// runtime parameters
 		try {
-			transformer.setSource(source);
+			evaluator.setSource(source);
 			// transform
-			transformer.run(serializer);
+			evaluator.run(serializer);
 		} catch (NullPointerException e) {
 			LOG.error("no source defined, {}", e.getMessage());
 			throw new TransformationException("no source defined", e);
