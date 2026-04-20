@@ -3,7 +3,6 @@ package de.ulbms.scdh.seed.xc.saxon;
 import de.ulbms.scdh.seed.xc.api.*;
 import de.ulbms.scdh.seed.xc.api.inject.CompileTime;
 import de.ulbms.scdh.seed.xc.saxon.harden.ChainedUnparsedTextURIResolver;
-import de.ulbms.scdh.seed.xc.saxon.harden.ServiceConfiguration;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -13,7 +12,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Constructor;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Optional;
@@ -25,7 +23,6 @@ import net.sf.saxon.s9api.Serializer;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
-import org.apache.xerces.parsers.SAXParser;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +36,7 @@ import org.xml.sax.XMLReader;
  * class must be application scoped.
  */
 @Dependent
-public class SaxonXQueryTransformation implements Transformation {
+public class SaxonXQueryTransformation extends TransformationBase implements Transformation {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SaxonXQueryTransformation.class);
 
@@ -53,8 +50,6 @@ public class SaxonXQueryTransformation implements Transformation {
 		return SaxonXQueryTransformation.TRANSFORMATION_TYPE;
 	}
 
-	public static final String FEATURE_XINCLUDE = "http://apache.org/xml/features/xinclude";
-
 	@ConfigProperty(
 			name = "de.ulbms.scdh.seed.xc.transformations.ConfiguredTransformationMap.configLocations",
 			defaultValue = "")
@@ -62,9 +57,6 @@ public class SaxonXQueryTransformation implements Transformation {
 
 	@Inject
 	protected Processor processor;
-
-	@Inject
-	protected ServiceConfiguration serviceConfig;
 
 	@Inject
 	protected ModuleURIResolver compileTimeModuleResolver;
@@ -178,14 +170,6 @@ public class SaxonXQueryTransformation implements Transformation {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public TransformationInfo getTransformationInfo() {
-		return transformationInfo;
-	}
-
 	@Override
 	public XsltParameterDetails getTransformationParameters() {
 		return null; // TODO: How to get an iterator over external variables?
@@ -241,75 +225,6 @@ public class SaxonXQueryTransformation implements Transformation {
 	}
 
 	/**
-	 * Returns an instance of the {@link XMLReader} SAX parser given
-	 * in the per-request {@link Config}. If no parser is requested,
-	 * Xerces {@link SAXParser} is returned. Parser features and
-	 * properties are set from {@link Config}.
-	 *
-	 * @param config  {@link Config} REST API parameters
-	 * @return {@link XMLReader}
-	 * @see DocumentBuilder#build(Source)
-	 */
-	protected XMLReader getParser(Config config) throws TransformationPreparationException {
-		XMLReader parser;
-		if (config != null && config.getParser() != null && config.getParser().getPropertyClass() != null) {
-			// use parser defined in per-request config
-			String className = config.getParser().getPropertyClass();
-			try {
-				Class<?> clas = Class.forName(className);
-				if (XMLReader.class.isAssignableFrom(clas)) {
-					Constructor<XMLReader> constr = (Constructor<XMLReader>) clas.getConstructor();
-					parser = constr.newInstance();
-				} else {
-					LOG.error("{} is not an XMLReader", className);
-					throw new TransformationPreparationException(className + " is not an XMLReader");
-				}
-			} catch (Exception e) {
-				LOG.error("error setting up parser: {}", e.getMessage());
-				throw new TransformationPreparationException(e.getMessage());
-			}
-		} else if (transformationInfo.getParser() != null
-				&& transformationInfo.getParser().getPropertyClass() != null) {
-			// use parser defined for the transformation
-			String className = transformationInfo.getParser().getPropertyClass();
-			try {
-				Class<?> clas = Class.forName(className);
-				if (XMLReader.class.isAssignableFrom(clas)) {
-					Constructor<XMLReader> constr = (Constructor<XMLReader>) clas.getConstructor();
-					parser = constr.newInstance();
-				} else {
-					LOG.error("{} is not an XMLReader", className);
-					throw new TransformationPreparationException(className + " is not an XMLReader");
-				}
-			} catch (Exception e) {
-				LOG.error("error setting up parser: {}", e.getMessage());
-				throw new TransformationPreparationException(e.getMessage());
-			}
-		} else {
-			// use Xerces as default parser
-			parser = new SAXParser();
-		}
-
-		LOG.debug("parsing with {}", parser.getClass().getCanonicalName());
-		if (config != null && config.getParser() != null && config.getParser().getXinclude() != null) {
-			boolean xincludeAware = config.getParser().getXinclude();
-			try {
-				parser.setFeature(FEATURE_XINCLUDE, xincludeAware);
-				LOG.debug("feature {} set to {}", FEATURE_XINCLUDE, xincludeAware);
-			} catch (Exception e) {
-				LOG.error(
-						"xinclude-aware parsing not supported by {}",
-						parser.getClass().getCanonicalName());
-				// throw new TransformationPreparationException("xinclude-aware
-				// parsing not supported by " +
-				// parser.getClass().getCanonicalName());
-			}
-		}
-
-		return parser;
-	}
-
-	/**
 	 * Internal method that does the transformation job.
 	 */
 	protected synchronized void transform(
@@ -332,8 +247,7 @@ public class SaxonXQueryTransformation implements Transformation {
 		evaluator.setUnparsedTextResolver(
 				new ChainedUnparsedTextURIResolver(staticAssetsUnparsedTextURIResolver, resourceProvider));
 
-		ConversionRules conversionRules =
-				processor.getUnderlyingConfiguration().getConversionRules();
+		ConversionRules conversionRules = processor.getUnderlyingConfiguration().getConversionRules();
 		StringConverter stringToStringConverter = new StringConverter.StringToString();
 
 		try {
@@ -341,13 +255,19 @@ public class SaxonXQueryTransformation implements Transformation {
 				QName qname = QName.fromClarkName(name);
 				XdmValue value = null; // TODO: set using type information of default value
 				XdmValue defaultValue = evaluator.getExternalVariable(qname);
-				Optional<TypedParameter> declared = getTransformationInfo().getCompileTimeParameters().stream().filter((TypedParameter p) -> { return p.getName().equals(name); } ).findFirst();
+				Optional<TypedParameter> declared = getTransformationInfo().getCompileTimeParameters().stream()
+						.filter((TypedParameter p) -> {
+							return p.getName().equals(name);
+						})
+						.findFirst();
 				if (declared.isEmpty()) {
 					// assume xs:string
-					value = XdmAtomicValue.makeAtomicValue(stringToStringConverter.convertString(StringView.of(parameters.getGlobalParameters().get(name))));
+					value = XdmAtomicValue.makeAtomicValue(stringToStringConverter.convertString(
+							StringView.of(parameters.getGlobalParameters().get(name))));
 					evaluator.setExternalVariable(qname, value);
 				} else {
-					SchemaType schemaType = BuiltInType.getSchemaTypeByLocalName(declared.get().getType());
+					SchemaType schemaType =
+							BuiltInType.getSchemaTypeByLocalName(declared.get().getType());
 					if (schemaType == null) {
 						// try xs:string
 						setAtomicParameter(evaluator, declared.get(), stringToStringConverter);
@@ -363,7 +283,10 @@ public class SaxonXQueryTransformation implements Transformation {
 							this.setAtomicParameter(evaluator, declared.get(), converter);
 						}
 					} else {
-						LOG.warn("not implemented: failed to convert external variable {} of type {}", name, declared.get().getType());
+						LOG.warn(
+								"not implemented: failed to convert external variable {} of type {}",
+								name,
+								declared.get().getType());
 						// TODO: convert BuildinListType
 					}
 				}
@@ -387,13 +310,5 @@ public class SaxonXQueryTransformation implements Transformation {
 			LOG.error("transformation failed: {}", e.getMessage());
 			throw new TransformationException("transformation failed: " + e.getMessage(), e);
 		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public String getOutputMediaType() {
-		return transformationInfo.getMediaType();
 	}
 }

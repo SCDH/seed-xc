@@ -12,7 +12,6 @@ import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.WebApplicationException;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipFile;
@@ -28,7 +27,6 @@ import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
-import org.apache.xerces.parsers.SAXParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
@@ -41,7 +39,7 @@ import org.xml.sax.XMLReader;
  * class must be application scoped.
  */
 @Dependent
-public class SaxonXslTransformation implements Transformation, ExportingCompiler {
+public class SaxonXslTransformation extends TransformationBase implements Transformation, ExportingCompiler {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SaxonXslTransformation.class);
 
@@ -54,8 +52,6 @@ public class SaxonXslTransformation implements Transformation, ExportingCompiler
 	public String getType() {
 		return SaxonXslTransformation.TRANSFORMATION_TYPE;
 	}
-
-	public static final String FEATURE_XINCLUDE = "http://apache.org/xml/features/xinclude";
 
 	@Inject
 	protected Processor processor;
@@ -77,8 +73,6 @@ public class SaxonXslTransformation implements Transformation, ExportingCompiler
 	protected TransformationExceptionParser transformationExceptionParser;
 
 	private XsltExecutable executable;
-
-	protected TransformationInfo transformationInfo;
 
 	/**
 	 * Make a {@link ResourceRequest} from a URI given as string.
@@ -169,7 +163,10 @@ public class SaxonXslTransformation implements Transformation, ExportingCompiler
 								this.setAtomicParameter(compiler, compileTimeParam, converter);
 							}
 						} else {
-							LOG.error("not implemented: failed to set compile time parameter {}: {}", compileTimeParam.getName(), compileTimeParam.getType());
+							LOG.error(
+									"not implemented: failed to set compile time parameter {}: {}",
+									compileTimeParam.getName(),
+									compileTimeParam.getType());
 							// TODO: convert BuildinListType
 						}
 					}
@@ -218,14 +215,6 @@ public class SaxonXslTransformation implements Transformation, ExportingCompiler
 		} catch (ValidationException e) {
 			LOG.error("failed to convert compile time parameter {}: {}", parameter.getName(), e.getMessage());
 		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public TransformationInfo getTransformationInfo() {
-		return transformationInfo;
 	}
 
 	/**
@@ -356,75 +345,6 @@ public class SaxonXslTransformation implements Transformation, ExportingCompiler
 	}
 
 	/**
-	 * Returns an instance of the {@link XMLReader} SAX parser given
-	 * in the per-request {@link Config}. If no parser is requested,
-	 * Xerces {@link SAXParser} is returned. Parser features and
-	 * properties are set from {@link Config}.
-	 *
-	 * @param config  {@link Config} REST API parameters
-	 * @return {@link XMLReader}
-	 * @see net.sf.saxon.s9api.DocumentBuilder#build(Source)
-	 */
-	protected XMLReader getParser(Config config) throws TransformationPreparationException {
-		XMLReader parser;
-		if (config != null && config.getParser() != null && config.getParser().getPropertyClass() != null) {
-			// use parser defined in per-request config
-			String className = config.getParser().getPropertyClass();
-			try {
-				Class<?> clas = Class.forName(className);
-				if (XMLReader.class.isAssignableFrom(clas)) {
-					Constructor<XMLReader> constr = (Constructor<XMLReader>) clas.getConstructor();
-					parser = constr.newInstance();
-				} else {
-					LOG.error("{} is not an XMLReader", className);
-					throw new TransformationPreparationException(className + " is not an XMLReader");
-				}
-			} catch (Exception e) {
-				LOG.error("error setting up parser: {}", e.getMessage());
-				throw new TransformationPreparationException(e.getMessage());
-			}
-		} else if (transformationInfo.getParser() != null
-				&& transformationInfo.getParser().getPropertyClass() != null) {
-			// use parser defined for the transformation
-			String className = transformationInfo.getParser().getPropertyClass();
-			try {
-				Class<?> clas = Class.forName(className);
-				if (XMLReader.class.isAssignableFrom(clas)) {
-					Constructor<XMLReader> constr = (Constructor<XMLReader>) clas.getConstructor();
-					parser = constr.newInstance();
-				} else {
-					LOG.error("{} is not an XMLReader", className);
-					throw new TransformationPreparationException(className + " is not an XMLReader");
-				}
-			} catch (Exception e) {
-				LOG.error("error setting up parser: {}", e.getMessage());
-				throw new TransformationPreparationException(e.getMessage());
-			}
-		} else {
-			// use Xerces as default parser
-			parser = new SAXParser();
-		}
-
-		LOG.debug("parsing with {}", parser.getClass().getCanonicalName());
-		if (config != null && config.getParser() != null && config.getParser().getXinclude() != null) {
-			boolean xincludeAware = config.getParser().getXinclude();
-			try {
-				parser.setFeature(FEATURE_XINCLUDE, xincludeAware);
-				LOG.debug("feature {} set to {}", FEATURE_XINCLUDE, xincludeAware);
-			} catch (Exception e) {
-				LOG.error(
-						"xinclude-aware parsing not supported by {}",
-						parser.getClass().getCanonicalName());
-				// throw new TransformationPreparationException("xinclude-aware
-				// parsing not supported by " +
-				// parser.getClass().getCanonicalName());
-			}
-		}
-
-		return parser;
-	}
-
-	/**
 	 * Internal method that does the transformation job.
 	 */
 	protected void transform(
@@ -542,13 +462,5 @@ public class SaxonXslTransformation implements Transformation, ExportingCompiler
 		}
 		LOG.debug("made stylesheet parameters '{}'", stylesheetParameters);
 		return stylesheetParameters;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public String getOutputMediaType() {
-		return transformationInfo.getMediaType();
 	}
 }
