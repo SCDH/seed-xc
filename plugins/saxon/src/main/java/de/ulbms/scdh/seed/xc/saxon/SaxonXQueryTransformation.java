@@ -1,8 +1,8 @@
 package de.ulbms.scdh.seed.xc.saxon;
 
 import de.ulbms.scdh.seed.xc.api.*;
+import de.ulbms.scdh.seed.xc.api.inject.CompileTime;
 import de.ulbms.scdh.seed.xc.saxon.harden.ChainedUnparsedTextURIResolver;
-import de.ulbms.scdh.seed.xc.saxon.harden.RestrictiveFileOnlyResolver;
 import de.ulbms.scdh.seed.xc.saxon.harden.ServiceConfiguration;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.Dependent;
@@ -68,8 +68,9 @@ public class SaxonXQueryTransformation implements Transformation {
 	@Inject
 	protected ModuleURIResolver compileTimeModuleResolver;
 
+	@CompileTime
 	@Inject
-	protected RestrictiveFileOnlyResolver compileTimeResourceResolver;
+	protected ResourceResolver compileTimeResourceResolver;
 
 	@Inject
 	protected UnparsedTextURIResolver staticAssetsUnparsedTextURIResolver;
@@ -124,7 +125,7 @@ public class SaxonXQueryTransformation implements Transformation {
 				StringConverter stringToStringConverter = new StringConverter.StringToString();
 				for (TypedParameter compileTimeParam : transformationInfo.getCompileTimeParameters()) {
 					LOG.error(
-							"There are no compile parameters for Saxon's XQuery Processor. Cannot set {}={}",
+							"There are no compile-time parameters for Saxon's XQuery Processor. Cannot set {}={}",
 							compileTimeParam.getName(),
 							compileTimeParam.getValue());
 				}
@@ -307,9 +308,6 @@ public class SaxonXQueryTransformation implements Transformation {
 
 	/**
 	 * Internal method that does the transformation job.
-	 *
-	 * This sets {@link Processor} features and thus must be made
-	 * thread safe by the <code>synchronized</code> keyword.
 	 */
 	protected synchronized void transform(
 			RuntimeParameters parameters,
