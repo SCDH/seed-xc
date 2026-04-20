@@ -169,6 +169,7 @@ public class SaxonXslTransformation implements Transformation, ExportingCompiler
 								this.setAtomicParameter(compiler, compileTimeParam, converter);
 							}
 						} else {
+							LOG.error("not implemented: failed to set compile time parameter {}: {}", compileTimeParam.getName(), compileTimeParam.getType());
 							// TODO: convert BuildinListType
 						}
 					}
