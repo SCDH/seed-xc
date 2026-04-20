@@ -102,6 +102,8 @@ public class XslTransformationExceptionParserTest {
 
 	private static final Processor SAXON_PROCESSOR = new Processor(false);
 
+	private static final File BASE_DIR = Paths.get("").toFile();
+
 	private static final File XSL_DIR =
 			Paths.get("src", "test", "resources", "xsl").toFile();
 
@@ -183,7 +185,7 @@ public class XslTransformationExceptionParserTest {
 
 	@Test
 	public void testErrorTerminate404HasCode() throws IOException, ConfigurationException {
-		transformation.setup(TERMINATE_404_CONFIG);
+		transformation.setup(TERMINATE_404_CONFIG, BASE_DIR);
 		Uni<FileInputStream> input = Uni.createFrom().item(new FileInputStream(helloXml));
 		UniAssertSubscriber<byte[]> subscriber = input.plug((is) -> {
 					return transformation.transformAsync(null, null, helloXml.toString(), input, resourceProvider);
@@ -196,7 +198,7 @@ public class XslTransformationExceptionParserTest {
 	@Disabled("Saxon throws an error on compilation!")
 	@Test
 	public void testErrorAssert400() throws IOException, ConfigurationException {
-		transformation.setup(ASSERT_400_CONFIG);
+		transformation.setup(ASSERT_400_CONFIG, BASE_DIR);
 		Uni<FileInputStream> input = Uni.createFrom().item(new FileInputStream(helloXml));
 		UniAssertSubscriber<byte[]> subscriber = input.plug((is) -> {
 					return transformation.transformAsync(null, null, helloXml.toString(), input, resourceProvider);
@@ -208,7 +210,7 @@ public class XslTransformationExceptionParserTest {
 
 	@Test
 	public void testErrorAssert404() throws IOException, ConfigurationException {
-		transformation.setup(ASSERT_404_CONFIG);
+		transformation.setup(ASSERT_404_CONFIG, BASE_DIR);
 		Uni<FileInputStream> input = Uni.createFrom().item(new FileInputStream(helloXml));
 		UniAssertSubscriber<byte[]> subscriber = input.plug((is) -> {
 					return transformation.transformAsync(null, null, helloXml.toString(), input, resourceProvider);

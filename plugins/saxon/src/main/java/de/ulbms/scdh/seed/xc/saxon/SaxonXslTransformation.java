@@ -7,6 +7,7 @@ import de.ulbms.scdh.seed.xc.saxon.harden.ZipFileURIResolver;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -97,7 +98,7 @@ public class SaxonXslTransformation extends TransformationBase implements Transf
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void setup(TransformationInfo transformationInfo) throws ConfigurationException {
+	public void setup(TransformationInfo transformationInfo, File configFile) throws ConfigurationException {
 		LOG.debug("Setting up new SaxonXslTransformation with identifier '{}' ...", transformationInfo.getIdent());
 		this.transformationInfo = transformationInfo;
 		try {

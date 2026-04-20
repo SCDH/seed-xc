@@ -6,8 +6,8 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Optional;
 import javax.xml.transform.Source;
 import net.sf.saxon.lib.*;
@@ -16,7 +16,6 @@ import net.sf.saxon.s9api.Serializer;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,11 +40,6 @@ public class SaxonXQueryTransformation extends TransformationBase implements Tra
 		return SaxonXQueryTransformation.TRANSFORMATION_TYPE;
 	}
 
-	@ConfigProperty(
-			name = "de.ulbms.scdh.seed.xc.transformations.ConfiguredTransformationMap.configLocations",
-			defaultValue = "")
-	String configLocations;
-
 	@Inject
 	protected ModuleURIResolver compileTimeModuleResolver;
 
@@ -55,17 +49,12 @@ public class SaxonXQueryTransformation extends TransformationBase implements Tra
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void setup(TransformationInfo transformationInfo) throws ConfigurationException {
+	public void setup(TransformationInfo transformationInfo, File configFile) throws ConfigurationException {
 		LOG.debug("Setting up new SaxonXQueryTransformation with identifier '{}' ...", transformationInfo.getIdent());
 		this.transformationInfo = transformationInfo;
 		try {
-			// fetch the stylesheet over the web
-			// TODO: only try the first config location?
-			String configBase =
-					Arrays.stream(configLocations.split(",")).findFirst().get().trim();
-			File query = Paths.get(configBase)
-					.resolve(transformationInfo.getLocation())
-					.toFile();
+			Path config = Paths.get(configFile.toURI());
+			File query = config.resolve(transformationInfo.getLocation()).toFile();
 
 			// Setting the systemId sets the static context (XML Base). It
 			// is important for relative imports, but already done by the
@@ -91,9 +80,7 @@ public class SaxonXQueryTransformation extends TransformationBase implements Tra
 				for (TransformationInfoLibrariesInner library : transformationInfo.getLibraries()) {
 					LOG.debug("Compiling package {}", library.getLocation());
 					try {
-						File lib = Paths.get(configBase)
-								.resolve(library.getLocation())
-								.toFile();
+						File lib = config.resolve(library.getLocation()).toFile();
 						compiler.compileLibrary(lib);
 						// TODO: import required?
 					} catch (SaxonApiException e) {

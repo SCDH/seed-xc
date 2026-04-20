@@ -1,6 +1,7 @@
 package de.ulbms.scdh.seed.xc.api;
 
 import io.smallrye.mutiny.Uni;
+import java.io.File;
 import java.io.InputStream;
 
 /**
@@ -26,12 +27,12 @@ public interface Transformation {
 	 * If the transformation is set up successfully, it then can be used for
 	 * all subsequent transformations, no need to set up again.
 	 *
-	 * @param transformationInfo  a {@link TransformationInfo} object used to
-	 *     configure the transformation
+	 * @param transformationInfo  a {@link TransformationInfo} object used to configure the transformation
+	 * @param path  a {@link File} pointing to the config file. This can be used to resolve relative paths in the transformation info.
 	 *
 	 * @throws ConfigurationException - When setup was unsuccessful.
 	 */
-	void setup(TransformationInfo transformationInfo) throws ConfigurationException;
+	void setup(TransformationInfo transformationInfo, File path) throws ConfigurationException;
 
 	/**
 	 * Returns a description of the transformation.
