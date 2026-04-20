@@ -1,5 +1,8 @@
 # SEED XC - XML Processing with Composable REST Services
 
+[![Tests](https://github.com/SCDH/seed-xc/actions/workflows/test.yaml/badge.svg)](https://github.com/SCDH/seed-xc/actions/workflows/test.yaml)
+[![Formatting](https://github.com/SCDH/seed-xc/actions/workflows/formatting.yaml/badge.svg)](https://github.com/SCDH/seed-xc/actions/workflows/formatting.yaml)
+
 This project provides high-level components for XML-processing REST
 services and different services built from them.
 

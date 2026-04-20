@@ -4,6 +4,7 @@ on:
     paths-ignore:
       - 'README.md'
       - 'CONTRIBUTING.md'
+      - 'CHANGES.md'
       - 'doc'
       - 'samples'
     pull_request:
