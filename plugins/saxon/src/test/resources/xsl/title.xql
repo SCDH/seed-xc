@@ -8,7 +8,7 @@ declare variable $resources as xs:string external := '../samples/?select=*.tei.x
 
 declare variable $collection as document-node()* := collection($resources);
 
-declare function tei:titles ($file as document-node()) as element(tei:title)* {
+declare function tei:titles ($file as document-node()*) as element(tei:title)* {
     for $title in $file//tei:title
     return $title
 };
