@@ -52,16 +52,6 @@ public class SaxonXQueryTransformation extends TransformationBase implements Tra
 	private XQueryExecutable executable;
 
 	/**
-	 * Make a {@link ResourceRequest} from a URI given as string.
-	 */
-	protected ResourceRequest mkXQueryRequest(String uri) {
-		ResourceRequest request = new ResourceRequest();
-		request.uri = uri;
-		request.nature = ResourceRequest.XQUERY_NATURE;
-		return request;
-	}
-
-	/**
 	 * {@inheritDoc}
 	 */
 	@Override
@@ -81,7 +71,7 @@ public class SaxonXQueryTransformation extends TransformationBase implements Tra
 			// is important for relative imports, but already done by the
 			// resolver!
 
-			// compile stylesheet to an executable that can be used
+			// compile query to an executable that can be used
 			// for an arbitrary number of transformations
 			LOG.debug("Compiling from transformation info '{}' ...", query);
 			XQueryCompiler compiler = processor.newXQueryCompiler();
@@ -89,9 +79,6 @@ public class SaxonXQueryTransformation extends TransformationBase implements Tra
 			compiler.setModuleURIResolver(compileTimeModuleResolver);
 			// set compile time parameters
 			if (transformationInfo.getCompileTimeParameters() != null) {
-				ConversionRules conversionRules =
-						processor.getUnderlyingConfiguration().getConversionRules();
-				StringConverter stringToStringConverter = new StringConverter.StringToString();
 				for (TypedParameter compileTimeParam : transformationInfo.getCompileTimeParameters()) {
 					LOG.error(
 							"There are no compile-time parameters for Saxon's XQuery Processor. Cannot set {}={}",
@@ -181,14 +168,17 @@ public class SaxonXQueryTransformation extends TransformationBase implements Tra
 		try {
 			for (String name : parameters.getGlobalParameters().keySet()) {
 				QName qname = QName.fromClarkName(name);
-				XdmValue value = null; // TODO: set using type information of default value
-				XdmValue defaultValue = evaluator.getExternalVariable(qname);
-				Optional<TypedParameter> declared = getTransformationInfo().getCompileTimeParameters().stream()
-						.filter((TypedParameter p) -> {
-							return p.getName().equals(name);
-						})
-						.findFirst();
+				XdmValue value;
+				Optional<TypedParameter> declared = Optional.empty();
+				for (TypedParameter p : getTransformationInfo().getCompileTimeParameters()) {
+					if (p.getName().equals(name)) {
+						declared = Optional.of(p);
+						break;
+					}
+				}
 				if (declared.isEmpty()) {
+					// TODO: try to get type from default value: XdmValue defaultValue =
+					// evaluator.getExternalVariable(qname);
 					// assume xs:string
 					value = XdmAtomicValue.makeAtomicValue(stringToStringConverter.convertString(
 							StringView.of(parameters.getGlobalParameters().get(name))));
