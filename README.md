@@ -6,7 +6,7 @@
 This project provides micro services for XML processing and high-level
 components for building them.
 
-Services
+**Services:**
 
 - [SEED XML Transformer](transformer): A RESTful webservice for
   transforming XML (and even HTML tag soup) with XSLT, XQuery, etc.
@@ -17,7 +17,7 @@ Services
   [SEF](https://www.saxonica.com/saxonjs/documentation3/index.html)
   (needs a license for the Saxon entreprise edition)
 
-Components
+**Components:**
 
 - [SEED API](api): [OpenAPI
   specs](api/src/main/resources/openapi/seed-xc-openapi.yaml) and
@@ -28,14 +28,20 @@ Components
   processing subsequent transformation request instantly
 - [XSLT](plugins/saxon): a plugin to the SEED XC Transformation Map
   that provides transformation by XSLT
-- [XQuery
-  (branch)](https://github.com/SCDH/seed-xc/blob/xquery/plugins/saxon/src/main/java/de/ulbms/scdh/seed/xc/saxon/SaxonXQueryTransformation.java):
-  a plugin similar to the XSLT plugin, but for XQuery . SPARQL
-  (planned): a plugin similar to XSLT, but for running a SPARQL query
-  against a serialized RDF graph
-- [ResourceProviders](plugins/resource-providers): Plugins for
-  accessing source documents from different storage types by ID: URL,
-  URN, DOI, local filesystem, Solr, OpenSearch, DBMSs
+- [XQuery](plugins/saxon):
+  a plugin similar to the XSLT plugin, but for XQuery
+- SPARQL (planned): a plugin similar to XSLT, but for running a SPARQL
+  query against a serialized RDF graph
+- ResourceProviders: Plugins for accessing resources (source
+  documents) from different storage types
+  - [local filesystem](plugins/resource-providers): activated per default in dev mode
+  - URL (planned)
+  - URN (planned)
+  - InvenioRDM by DOI (planned)
+  - RDBMS (planned)
+- [transformation-info.xsl](utils): XSLT stylesheet for generating
+  configuration files for an XSLT stylesheet or package that is used
+  in an transformation. See [documentation](doc/configuration.md).
 
 
 This project is part of the SEED, which is--choose one--either a
