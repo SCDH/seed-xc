@@ -17,6 +17,7 @@
   <modules>
     <module>resource-providers</module>
     <module>saxon</module>
+    <module>seed-xc-sparql</module>
   </modules>
 
   <build>
