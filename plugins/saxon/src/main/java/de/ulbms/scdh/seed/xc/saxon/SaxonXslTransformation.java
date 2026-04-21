@@ -1,23 +1,18 @@
 package de.ulbms.scdh.seed.xc.saxon;
 
 import de.ulbms.scdh.seed.xc.api.*;
-import de.ulbms.scdh.seed.xc.api.inject.CompileTime;
 import de.ulbms.scdh.seed.xc.saxon.harden.ChainedUnparsedTextURIResolver;
 import de.ulbms.scdh.seed.xc.saxon.harden.ServiceConfiguration;
 import de.ulbms.scdh.seed.xc.saxon.harden.ZipFileURIResolver;
-import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.InternalServerErrorException;
-import jakarta.ws.rs.WebApplicationException;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.InputStream;
-import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipFile;
 import javax.xml.transform.Source;
-import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.s9api.*;
@@ -28,11 +23,8 @@ import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
-import org.apache.xerces.parsers.SAXParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xml.sax.InputSource;
-import org.xml.sax.XMLReader;
 
 /**
  * A transformation using the Saxon XSLT processor. The stylesheet is
@@ -41,7 +33,7 @@ import org.xml.sax.XMLReader;
  * class must be application scoped.
  */
 @Dependent
-public class SaxonXslTransformation implements Transformation, ExportingCompiler {
+public class SaxonXslTransformation extends TransformationBase implements Transformation, ExportingCompiler {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SaxonXslTransformation.class);
 
@@ -55,30 +47,13 @@ public class SaxonXslTransformation implements Transformation, ExportingCompiler
 		return SaxonXslTransformation.TRANSFORMATION_TYPE;
 	}
 
-	public static final String FEATURE_XINCLUDE = "http://apache.org/xml/features/xinclude";
-
-	@Inject
-	protected Processor processor;
-
 	@Inject
 	protected ServiceConfiguration serviceConfig;
-
-	@CompileTime
-	@Inject
-	protected ResourceResolver compileTimeResourceResolver;
-
-	@Inject
-	protected UnparsedTextURIResolver staticAssetsUnparsedTextURIResolver;
 
 	@Inject
 	protected ZipFileURIResolver zipResourceResolver;
 
-	@Inject
-	protected TransformationExceptionParser transformationExceptionParser;
-
 	private XsltExecutable executable;
-
-	protected TransformationInfo transformationInfo;
 
 	/**
 	 * Make a {@link ResourceRequest} from a URI given as string.
@@ -123,7 +98,7 @@ public class SaxonXslTransformation implements Transformation, ExportingCompiler
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void setup(TransformationInfo transformationInfo) throws ConfigurationException {
+	public void setup(TransformationInfo transformationInfo, File configFile) throws ConfigurationException {
 		LOG.debug("Setting up new SaxonXslTransformation with identifier '{}' ...", transformationInfo.getIdent());
 		this.transformationInfo = transformationInfo;
 		try {
@@ -169,6 +144,10 @@ public class SaxonXslTransformation implements Transformation, ExportingCompiler
 								this.setAtomicParameter(compiler, compileTimeParam, converter);
 							}
 						} else {
+							LOG.error(
+									"not implemented: failed to set compile time parameter {}: {}",
+									compileTimeParam.getName(),
+									compileTimeParam.getType());
 							// TODO: convert BuildinListType
 						}
 					}
@@ -217,14 +196,6 @@ public class SaxonXslTransformation implements Transformation, ExportingCompiler
 		} catch (ValidationException e) {
 			LOG.error("failed to convert compile time parameter {}: {}", parameter.getName(), e.getMessage());
 		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public TransformationInfo getTransformationInfo() {
-		return transformationInfo;
 	}
 
 	/**
@@ -306,126 +277,9 @@ public class SaxonXslTransformation implements Transformation, ExportingCompiler
 	}
 
 	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public byte[] transform(
-			RuntimeParameters parameters,
-			Config config,
-			String systemId,
-			InputStream sourceStream,
-			ResourceProvider resourceProvider)
-			throws TransformationPreparationException, TransformationException {
-
-		LOG.debug("Transforming `{}` ... (3)", systemId);
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
-		Serializer out = processor.newSerializer(output);
-
-		XMLReader reader = getParser(config);
-		Source source = new SAXSource(reader, new InputSource(sourceStream));
-
-		// setting the systemId is needed for the XML base property
-		source.setSystemId(systemId);
-
-		transform(parameters, config, source, out, resourceProvider);
-		return output.toByteArray();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Uni<byte[]> transformAsync(
-			RuntimeParameters parameters,
-			Config config,
-			String systemId,
-			Uni<? extends InputStream> sourceUni,
-			ResourceProvider resourceProvider) {
-
-		return sourceUni.onItem().transform((sourceStream) -> {
-			try {
-				return transform(parameters, config, systemId, sourceStream, resourceProvider);
-			} catch (TransformationPreparationException e) {
-				throw new InternalServerErrorException(e.getMessage());
-			} catch (TransformationException e) {
-				throw new WebApplicationException(
-						transformationExceptionParser.message(e), transformationExceptionParser.parseCode(e));
-			}
-		});
-	}
-
-	/**
-	 * Returns an instance of the {@link XMLReader} SAX parser given
-	 * in the per-request {@link Config}. If no parser is requested,
-	 * Xerces {@link SAXParser} is returned. Parser features and
-	 * properties are set from {@link Config}.
-	 *
-	 * @param config  {@link Config} REST API parameters
-	 * @return {@link XMLReader}
-	 * @see net.sf.saxon.s9api.DocumentBuilder#build(Source)
-	 */
-	protected XMLReader getParser(Config config) throws TransformationPreparationException {
-		XMLReader parser;
-		if (config != null && config.getParser() != null && config.getParser().getPropertyClass() != null) {
-			// use parser defined in per-request config
-			String className = config.getParser().getPropertyClass();
-			try {
-				Class<?> clas = Class.forName(className);
-				if (XMLReader.class.isAssignableFrom(clas)) {
-					Constructor<XMLReader> constr = (Constructor<XMLReader>) clas.getConstructor();
-					parser = constr.newInstance();
-				} else {
-					LOG.error("{} is not an XMLReader", className);
-					throw new TransformationPreparationException(className + " is not an XMLReader");
-				}
-			} catch (Exception e) {
-				LOG.error("error setting up parser: {}", e.getMessage());
-				throw new TransformationPreparationException(e.getMessage());
-			}
-		} else if (transformationInfo.getParser() != null
-				&& transformationInfo.getParser().getPropertyClass() != null) {
-			// use parser defined for the transformation
-			String className = transformationInfo.getParser().getPropertyClass();
-			try {
-				Class<?> clas = Class.forName(className);
-				if (XMLReader.class.isAssignableFrom(clas)) {
-					Constructor<XMLReader> constr = (Constructor<XMLReader>) clas.getConstructor();
-					parser = constr.newInstance();
-				} else {
-					LOG.error("{} is not an XMLReader", className);
-					throw new TransformationPreparationException(className + " is not an XMLReader");
-				}
-			} catch (Exception e) {
-				LOG.error("error setting up parser: {}", e.getMessage());
-				throw new TransformationPreparationException(e.getMessage());
-			}
-		} else {
-			// use Xerces as default parser
-			parser = new SAXParser();
-		}
-
-		LOG.debug("parsing with {}", parser.getClass().getCanonicalName());
-		if (config != null && config.getParser() != null && config.getParser().getXinclude() != null) {
-			boolean xincludeAware = config.getParser().getXinclude();
-			try {
-				parser.setFeature(FEATURE_XINCLUDE, xincludeAware);
-				LOG.debug("feature {} set to {}", FEATURE_XINCLUDE, xincludeAware);
-			} catch (Exception e) {
-				LOG.error(
-						"xinclude-aware parsing not supported by {}",
-						parser.getClass().getCanonicalName());
-				// throw new TransformationPreparationException("xinclude-aware
-				// parsing not supported by " +
-				// parser.getClass().getCanonicalName());
-			}
-		}
-
-		return parser;
-	}
-
-	/**
 	 * Internal method that does the transformation job.
 	 */
+	@Override
 	protected void transform(
 			RuntimeParameters parameters,
 			Config config,
@@ -541,13 +395,5 @@ public class SaxonXslTransformation implements Transformation, ExportingCompiler
 		}
 		LOG.debug("made stylesheet parameters '{}'", stylesheetParameters);
 		return stylesheetParameters;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public String getOutputMediaType() {
-		return transformationInfo.getMediaType();
 	}
 }

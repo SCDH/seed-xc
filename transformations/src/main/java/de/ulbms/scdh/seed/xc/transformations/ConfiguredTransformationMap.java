@@ -126,7 +126,7 @@ public class ConfiguredTransformationMap extends HashMap<String, Transformation>
 					Instance<? extends Transformation> transformationInstance =
 							transformationSelector.select(service.getClass());
 					Transformation transformation = transformationInstance.get();
-					transformation.setup(info);
+					transformation.setup(info, configFile);
 					this.put(transformationId, transformation);
 					serviceFound = true;
 					break;
