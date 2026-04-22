@@ -8,6 +8,7 @@ import de.ulbms.scdh.seed.xc.api.ResourceProviderConfigurationException;
 import de.ulbms.scdh.seed.xc.api.inject.TransformTimeProvider;
 import io.quarkus.arc.lookup.LookupIfProperty;
 import io.smallrye.mutiny.Uni;
+import io.vertx.core.http.HttpServerRequest;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.io.IOException;
@@ -112,7 +113,7 @@ public class FileSystemResourceProvider implements ResourceProvider {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Uni<InputStream> getResource(Uni<ResourceInContext> resourceInContext) {
+	public Uni<InputStream> getResource(Uni<ResourceInContext> resourceInContext, HttpServerRequest request) {
 		if (error != null) {
 			return resourceInContext.replaceWith(Uni.createFrom().failure(error));
 		}

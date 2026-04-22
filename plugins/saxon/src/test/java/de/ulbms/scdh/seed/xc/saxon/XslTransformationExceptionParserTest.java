@@ -7,6 +7,7 @@ import de.ulbms.scdh.seed.xc.resources.filesystem.FileSystemResourceProvider;
 import de.ulbms.scdh.seed.xc.saxon.harden.*;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
+import io.vertx.core.http.HttpServerRequest;
 import jakarta.ws.rs.WebApplicationException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,6 +27,8 @@ import org.junit.jupiter.api.Test;
 public class XslTransformationExceptionParserTest {
 
 	private final TransformationExceptionParser EXCEPTION_PARSER = new XslTransformationExceptionParser(true);
+
+	HttpServerRequest request = null;
 
 	/* isolated tests */
 
@@ -188,7 +191,8 @@ public class XslTransformationExceptionParserTest {
 		transformation.setup(TERMINATE_404_CONFIG, BASE_DIR);
 		Uni<FileInputStream> input = Uni.createFrom().item(new FileInputStream(helloXml));
 		UniAssertSubscriber<byte[]> subscriber = input.plug((is) -> {
-					return transformation.transformAsync(null, null, helloXml.toString(), input, resourceProvider);
+					return transformation.transformAsync(
+							null, null, helloXml.toString(), input, resourceProvider, request);
 				})
 				.subscribe()
 				.withSubscriber(UniAssertSubscriber.create());
@@ -201,7 +205,8 @@ public class XslTransformationExceptionParserTest {
 		transformation.setup(ASSERT_400_CONFIG, BASE_DIR);
 		Uni<FileInputStream> input = Uni.createFrom().item(new FileInputStream(helloXml));
 		UniAssertSubscriber<byte[]> subscriber = input.plug((is) -> {
-					return transformation.transformAsync(null, null, helloXml.toString(), input, resourceProvider);
+					return transformation.transformAsync(
+							null, null, helloXml.toString(), input, resourceProvider, request);
 				})
 				.subscribe()
 				.withSubscriber(UniAssertSubscriber.create());
@@ -213,7 +218,8 @@ public class XslTransformationExceptionParserTest {
 		transformation.setup(ASSERT_404_CONFIG, BASE_DIR);
 		Uni<FileInputStream> input = Uni.createFrom().item(new FileInputStream(helloXml));
 		UniAssertSubscriber<byte[]> subscriber = input.plug((is) -> {
-					return transformation.transformAsync(null, null, helloXml.toString(), input, resourceProvider);
+					return transformation.transformAsync(
+							null, null, helloXml.toString(), input, resourceProvider, request);
 				})
 				.subscribe()
 				.withSubscriber(UniAssertSubscriber.create());
