@@ -6,6 +6,7 @@ import de.ulbms.scdh.seed.xc.api.*;
 import de.ulbms.scdh.seed.xc.resources.filesystem.FileSystemResourceProvider;
 import de.ulbms.scdh.seed.xc.saxon.harden.RestrictiveResourceResolver;
 import de.ulbms.scdh.seed.xc.saxon.harden.RestrictiveUnparsedTextResolver;
+import io.vertx.core.http.HttpServerRequest;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -30,6 +31,8 @@ public class SaxonXQueryTransformationTest {
 			Paths.get("src", "test", "resources", "samples", "hello.xml").toFile();
 
 	ResourceProvider resourceProvider;
+
+	HttpServerRequest request = null;
 
 	SaxonXQueryTransformation transformation;
 
@@ -91,7 +94,12 @@ public class SaxonXQueryTransformationTest {
 					MalformedURLException, IOException {
 		transformation.setup(TITLE_CONFIG, BASE_DIR);
 		output = transformation.transform(
-				null, null, helloXml.getAbsolutePath(), helloXml.toURI().toURL().openStream(), resourceProvider);
+				null,
+				null,
+				helloXml.getAbsolutePath(),
+				helloXml.toURI().toURL().openStream(),
+				resourceProvider,
+				request);
 		assertEquals(
 				"<?xml version=\"1.0\" encoding=\"UTF-8\"?><titles xmlns=\"http://www.tei-c.org/ns/1.0\"><title>Books</title><title>Didascalicon</title><title>Etymologiae</title></titles>",
 				outputToString(output));
@@ -103,7 +111,12 @@ public class SaxonXQueryTransformationTest {
 					MalformedURLException, IOException {
 		transformation.setup(TITLE_WITH_SOURCE_CONFIG, BASE_DIR);
 		output = transformation.transform(
-				null, null, helloXml.getAbsolutePath(), helloXml.toURI().toURL().openStream(), resourceProvider);
+				null,
+				null,
+				helloXml.getAbsolutePath(),
+				helloXml.toURI().toURL().openStream(),
+				resourceProvider,
+				request);
 		assertEquals(
 				"<?xml version=\"1.0\" encoding=\"UTF-8\"?><titles xmlns=\"http://www.tei-c.org/ns/1.0\"><title>Books</title><title>Didascalicon</title><title>Etymologiae</title></titles>",
 				outputToString(output));
@@ -119,7 +132,8 @@ public class SaxonXQueryTransformationTest {
 				null,
 				helloXml.getAbsolutePath(),
 				helloXml.toURI().toURL().openStream(),
-				resourceProvider);
+				resourceProvider,
+				request);
 		assertEquals(
 				"<?xml version=\"1.0\" encoding=\"UTF-8\"?><titles xmlns=\"http://www.tei-c.org/ns/1.0\"/>",
 				outputToString(output));
@@ -135,7 +149,8 @@ public class SaxonXQueryTransformationTest {
 				null,
 				helloXml.getAbsolutePath(),
 				helloXml.toURI().toURL().openStream(),
-				resourceProvider);
+				resourceProvider,
+				request);
 		assertEquals(
 				"<?xml version=\"1.0\" encoding=\"UTF-8\"?><titles xmlns=\"http://www.tei-c.org/ns/1.0\"/>",
 				outputToString(output));

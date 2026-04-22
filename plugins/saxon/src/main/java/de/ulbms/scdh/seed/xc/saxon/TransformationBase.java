@@ -3,6 +3,7 @@ package de.ulbms.scdh.seed.xc.saxon;
 import de.ulbms.scdh.seed.xc.api.*;
 import de.ulbms.scdh.seed.xc.api.inject.CompileTime;
 import io.smallrye.mutiny.Uni;
+import io.vertx.core.http.HttpServerRequest;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.WebApplicationException;
@@ -83,7 +84,8 @@ public abstract class TransformationBase implements Transformation {
 			Config config,
 			String systemId,
 			InputStream sourceStream,
-			ResourceProvider resourceProvider)
+			ResourceProvider resourceProvider,
+			HttpServerRequest request)
 			throws TransformationPreparationException, TransformationException {
 
 		LOG.debug("Transforming `{}` ... (3)", systemId);
@@ -110,12 +112,13 @@ public abstract class TransformationBase implements Transformation {
 			Config config,
 			String systemId,
 			Uni<? extends InputStream> sourceUni,
-			ResourceProvider resourceProvider) {
+			ResourceProvider resourceProvider,
+			HttpServerRequest request) {
 
 		// calls abstract method
 		return sourceUni.onItem().transform((sourceStream) -> {
 			try {
-				return transform(parameters, config, systemId, sourceStream, resourceProvider);
+				return transform(parameters, config, systemId, sourceStream, resourceProvider, request);
 			} catch (TransformationPreparationException e) {
 				throw new InternalServerErrorException(e.getMessage());
 			} catch (TransformationException e) {

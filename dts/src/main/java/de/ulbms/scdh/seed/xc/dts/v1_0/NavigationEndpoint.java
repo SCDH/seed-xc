@@ -13,6 +13,7 @@ import de.ulbms.scdh.seed.xc.dts.endpoints.NavigationApi;
 import de.ulbms.scdh.seed.xc.dts.model.Navigation;
 import de.ulbms.scdh.seed.xc.transformations.TransformationMap;
 import io.smallrye.mutiny.Uni;
+import io.vertx.core.http.HttpServerRequest;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import java.io.IOException;
@@ -24,7 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This implementation of the DTS {@link NavigationAPI} endpoint uses
+ * This implementation of the DTS {@link NavigationApi} endpoint uses
  * a {@link ResourceProvider} plugin to get the resource from a
  * resource storage. Then, it transforms it to a {@link Navigation}
  * object using a configured and pre-compiled transformation. These
@@ -50,6 +51,9 @@ public class NavigationEndpoint implements NavigationApi {
 	@TransformTimeProvider
 	@Inject
 	ResourceProvider resourceProvider;
+
+	@Inject
+	HttpServerRequest request;
 
 	/**
 	 * <P>Implementation of the DTS Navigation endpoint.</P>
@@ -105,9 +109,11 @@ public class NavigationEndpoint implements NavigationApi {
 		ResourceInContext ric = new ResourceInContext(Collections.unmodifiableMap(cr), resource);
 		Uni<ResourceInContext> uniRic = Uni.createFrom().item(ric);
 
-		return uniRic.plug(resourceProvider::getResource)
+		return uniRic.plug((r) -> {
+					return resourceProvider.getResource(r, request);
+				})
 				.plug((s) -> {
-					return transformation.transformAsync(params, null, resource, s, resourceProvider);
+					return transformation.transformAsync(params, null, resource, s, resourceProvider, request);
 				})
 				.onItem()
 				.transform((bs) -> {

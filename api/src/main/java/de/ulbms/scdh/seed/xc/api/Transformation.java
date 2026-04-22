@@ -1,6 +1,7 @@
 package de.ulbms.scdh.seed.xc.api;
 
 import io.smallrye.mutiny.Uni;
+import io.vertx.core.http.HttpServerRequest;
 import java.io.File;
 import java.io.InputStream;
 
@@ -59,6 +60,7 @@ public interface Transformation {
 	 * @param systemId - {@link String} pointing to the source documents location and set as XML base property
 	 * @param source - {@link InputStream} with the XML document to be transformed
 	 * @param resourceProvider - {@link ResourceProvider} used for getting secondary documents
+	 * @param request - provides access to the incoming HTTP request
 	 *
 	 * @return This returns the transformed XML as a byte array.
 	 */
@@ -67,11 +69,12 @@ public interface Transformation {
 			Config config,
 			String systemId,
 			InputStream source,
-			ResourceProvider resourceProvider)
+			ResourceProvider resourceProvider,
+			HttpServerRequest request)
 			throws TransformationPreparationException, TransformationException;
 
 	/**
-	 * Like <code>Transformation.transform(RuntimeParameters,Config,String,InputStream,ResourceProvider)</code>,
+	 * Like {@link Transformation#transform(RuntimeParameters,Config,String,InputStream,ResourceProvider,HttpServerRequest)},
 	 * but throws only runtime exceptions.
 	 */
 	Uni<byte[]> transformAsync(
@@ -79,7 +82,8 @@ public interface Transformation {
 			Config config,
 			String systemId,
 			Uni<? extends InputStream> source,
-			ResourceProvider resourceProvider);
+			ResourceProvider resourceProvider,
+			HttpServerRequest request);
 
 	/**
 	 * Returns the media type. This is used in the response header. So

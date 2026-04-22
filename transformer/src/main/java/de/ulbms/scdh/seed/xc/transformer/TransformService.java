@@ -4,6 +4,7 @@ import de.ulbms.scdh.seed.xc.api.*;
 import de.ulbms.scdh.seed.xc.api.inject.TransformTimeProvider;
 import de.ulbms.scdh.seed.xc.transformations.TransformationMap;
 import io.smallrye.mutiny.Uni;
+import io.vertx.core.http.HttpServerRequest;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
@@ -28,6 +29,9 @@ public class TransformService implements TransformApi {
 	@Inject
 	ResourceProvider resourceProvider;
 
+	@Inject
+	HttpServerRequest request;
+
 	@Override
 	public Uni<byte[]> transformTransformationUrlPost(
 			String transformationId, String url, RuntimeParameters parameters, Config config) {
@@ -40,17 +44,21 @@ public class TransformService implements TransformApi {
 		ResourceInContext ric = new ResourceInContext(Map.of(), url);
 		Uni<ResourceInContext> uniRic = Uni.createFrom().item(ric);
 
-		return uniRic.plug(resourceProvider::getResource).onItem().transform((s) -> {
-			try {
-				return transformation.transform(parameters, config, url, s, resourceProvider);
-			} catch (TransformationPreparationException e) {
-				LOG.error(e.getMessage());
-				throw new BadRequestException(e.getMessage());
-			} catch (TransformationException e) {
-				LOG.error(e.getMessage());
-				throw new InternalServerErrorException(e.getMessage());
-			}
-		});
+		return uniRic.plug((r) -> {
+					return resourceProvider.getResource(r, request);
+				})
+				.onItem()
+				.transform((s) -> {
+					try {
+						return transformation.transform(parameters, config, url, s, resourceProvider, request);
+					} catch (TransformationPreparationException e) {
+						LOG.error(e.getMessage());
+						throw new BadRequestException(e.getMessage());
+					} catch (TransformationException e) {
+						LOG.error(e.getMessage());
+						throw new InternalServerErrorException(e.getMessage());
+					}
+				});
 	}
 
 	@Override
@@ -73,7 +81,7 @@ public class TransformService implements TransformApi {
 
 		return Uni.createFrom().item(source).onItem().transform((s) -> {
 			try {
-				return transformation.transform(parameters, config, url, s, resourceProvider);
+				return transformation.transform(parameters, config, url, s, resourceProvider, request);
 			} catch (TransformationPreparationException e) {
 				LOG.error(e.getMessage());
 				throw new BadRequestException(e.getMessage());
