@@ -144,16 +144,25 @@ high-level components of SEED XC (albeit the X in XC).
 
 #### Why SPARQL for the Collections Endpoint?
 
-That's just a default. You can bind a [transformation of any other
-type](../plugins). The reason behind it is the diversity of metadata
-in TEI but the relative stability of metadata in RDF-based models like
-LRMoo, FRBRoo or even DCterms. And the endpoint delivers linked open
-data.––It's much easier to write a generic SPARQL query than a generic
-XQuery that goes for metadata.
+It's impossible to write generic XQuery for delivering collection data
+directly from TEI. But it's possible from extracted graph data
+following FRBRoo, LRMoo or DCterms. So we recommend extracting RDF
+triples ahead-of-time, e.g. in a CI pipeline, and deposit them at an
+accessible location. At Münster, we're using [XTriples
+Micro](https://github.com/scdh/xtriples-micro) for this extraction.
+
+However, it's quite simple to change the transformation type. SPARQL
+is just the default. You can bind a [transformation of any other
+type](../plugins).
 
 #### Nice! Can I add my own endpoint to the service?
 
 Yes. That's the point of this project's approach!
+
+Have a look at the existing endpoints. Their code is just for passing
+over to the plugin system. Very straight forward. They implement
+interfaces generated from OpenAPI specifications. Have a look into the
+`pom.xml` file and watch out for the OpenAPI-Generator plugin.
 
 #### What's your Plans?
 
