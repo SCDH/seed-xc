@@ -16,14 +16,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The {@link SparqlTransformation} is a {@link Transformation}
+ * The {@link SparqlConstruct} is a {@link Transformation}
  * plugin for running SPARQL queries.
  */
-public class SparqlTransformation implements Transformation {
+public class SparqlConstruct implements Transformation {
 
-	private static final Logger LOG = LoggerFactory.getLogger(SparqlTransformation.class);
+	private static final Logger LOG = LoggerFactory.getLogger(SparqlConstruct.class);
 
-	public static final String TRANSFORMATION_TYPE = "sparql";
+	public static final String TRANSFORMATION_TYPE = "sparql-construct";
 
 	TransformationInfo transformationInfo;
 
@@ -37,7 +37,7 @@ public class SparqlTransformation implements Transformation {
 
 	@Override
 	public String getType() {
-		return SparqlTransformation.TRANSFORMATION_TYPE;
+		return SparqlConstruct.TRANSFORMATION_TYPE;
 	}
 
 	@Override
