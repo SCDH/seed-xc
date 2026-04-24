@@ -127,6 +127,6 @@ public class SparqlTransformation implements Transformation {
 
 	@Override
 	public String getOutputMediaType() {
-		return "";
+		return transformationInfo.getMediaType();
 	}
 }
