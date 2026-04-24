@@ -28,6 +28,8 @@ class SparqlTransformationTest {
 
 	private static TransformationInfo QC1;
 
+	private static TransformationInfo QC1_TTL;
+
 	private byte[] output;
 
 	private String getOutput() {
@@ -45,14 +47,24 @@ class SparqlTransformationTest {
 		TransformationInfo info = new TransformationInfo();
 		info.setPropertyClass(SparqlTransformation.TRANSFORMATION_TYPE);
 		info.setLocation(new File(RQ_DIR, "qc1.rq").getAbsolutePath());
+		info.setMediaType("application/n-triples");
 		QC1 = info;
 	}
 
-	Transformation transformation;
+	static {
+		TransformationInfo info = new TransformationInfo();
+		info.setPropertyClass(SparqlTransformation.TRANSFORMATION_TYPE);
+		info.setLocation(new File(RQ_DIR, "qc1.rq").getAbsolutePath());
+		info.setMediaType("text/turtle");
+		QC1_TTL = info;
+	}
+
+	SparqlTransformation transformation;
 
 	@BeforeEach
 	public void setup() {
 		transformation = new SparqlTransformation();
+		transformation.serializer = new Serializer();
 	}
 
 	@Test
@@ -84,5 +96,17 @@ class SparqlTransformationTest {
 		output = transformation.transform(null, null, VCDB1.getAbsolutePath(), in, null);
 		assertTrue(getOutput().startsWith("<http://somewhere/JohnSmith>"));
 		assertEquals(1, getOutput().lines().count());
+	}
+
+	@Test
+	public void testConstructQuerySerializeTurtle()
+			throws ConfigurationException, TransformationPreparationException, TransformationException,
+					FileNotFoundException {
+		transformation.setup(QC1_TTL, CONFIG);
+		InputStream in = new FileInputStream(VCDB1);
+		output = transformation.transform(null, null, VCDB1.getAbsolutePath(), in, null);
+		// assertEquals("", getOutput());
+		assertTrue(getOutput().startsWith("PREFIX rdf"));
+		assertEquals(5, getOutput().lines().count());
 	}
 }
