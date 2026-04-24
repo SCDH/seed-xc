@@ -14,7 +14,7 @@ import java.nio.file.Paths;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class SparqlTransformationTest {
+class SparqlConstructTest {
 
 	private static final File DATA_DIR =
 			Paths.get("src", "test", "resources", "data").toFile();
@@ -43,14 +43,14 @@ class SparqlTransformationTest {
 
 	static {
 		TransformationInfo info = new TransformationInfo();
-		info.setPropertyClass(SparqlTransformation.TRANSFORMATION_TYPE);
+		info.setPropertyClass(SparqlConstruct.TRANSFORMATION_TYPE);
 		info.setLocation(new File(RQ_DIR, "qs1.rq").getAbsolutePath());
 		QS1 = info;
 	}
 
 	static {
 		TransformationInfo info = new TransformationInfo();
-		info.setPropertyClass(SparqlTransformation.TRANSFORMATION_TYPE);
+		info.setPropertyClass(SparqlConstruct.TRANSFORMATION_TYPE);
 		info.setLocation(new File(RQ_DIR, "qc1.rq").getAbsolutePath());
 		info.setMediaType("application/n-triples");
 		QC1 = info;
@@ -58,17 +58,17 @@ class SparqlTransformationTest {
 
 	static {
 		TransformationInfo info = new TransformationInfo();
-		info.setPropertyClass(SparqlTransformation.TRANSFORMATION_TYPE);
+		info.setPropertyClass(SparqlConstruct.TRANSFORMATION_TYPE);
 		info.setLocation(new File(RQ_DIR, "qc1.rq").getAbsolutePath());
 		info.setMediaType("text/turtle");
 		QC1_TTL = info;
 	}
 
-	SparqlTransformation transformation;
+	SparqlConstruct transformation;
 
 	@BeforeEach
 	public void setup() {
-		transformation = new SparqlTransformation();
+		transformation = new SparqlConstruct();
 		transformation.serializer = new Serializer();
 	}
 
