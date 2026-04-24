@@ -7,6 +7,7 @@ import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpServerRequest;
+import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFFormat;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -50,5 +51,12 @@ class SerializerTest {
 	@Test
 	public void testFromSystemId() throws TransformationPreparationException {
 		assertEquals(RDFFormat.RDFXML_PLAIN, Serializer.getFormat(null, "data.rdf", null));
+	}
+
+	@Test
+	public void testJsonLD() throws TransformationPreparationException {
+		assertEquals(
+				Lang.JSONLD11,
+				Serializer.getFormat("application/ld+json", null, request).getLang());
 	}
 }

@@ -1,9 +1,14 @@
 package de.ulbms.scdh.seed.xc.jena;
 
+import com.apicatalog.jsonld.JsonLd;
+import com.apicatalog.jsonld.JsonLdError;
+import com.apicatalog.jsonld.JsonLdOptions;
+import com.apicatalog.jsonld.document.JsonDocument;
 import de.ulbms.scdh.seed.xc.api.*;
 import io.smallrye.mutiny.Uni;
 import io.vertx.core.http.HttpServerRequest;
 import jakarta.inject.Inject;
+import jakarta.json.*;
 import jakarta.ws.rs.InternalServerErrorException;
 import java.io.*;
 import java.nio.file.Files;
@@ -12,6 +17,9 @@ import java.nio.file.Paths;
 import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.*;
+import org.apache.jena.riot.system.jsonld.JenaToTitanium;
+import org.apache.jena.sparql.core.DatasetGraph;
+import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +32,8 @@ public class SparqlConstruct implements Transformation {
 	private static final Logger LOG = LoggerFactory.getLogger(SparqlConstruct.class);
 
 	public static final String TRANSFORMATION_TYPE = "sparql-construct";
+
+	String frame;
 
 	TransformationInfo transformationInfo;
 
@@ -100,13 +110,28 @@ public class SparqlConstruct implements Transformation {
 			// write result back to the wire
 			ByteArrayOutputStream output = new ByteArrayOutputStream();
 			RDFFormat format = serializer.getFormat(transformationInfo.getMediaType(), systemId, request);
-			RDFDataMgr.write(output, resultModel, format);
-			return output.toByteArray();
+			if (!format.getLang().equals(Lang.JSONLD11) || frame == null) {
+				RDFDataMgr.write(output, resultModel, format);
+				return output.toByteArray();
+			} else {
+				// use titanium for framing
+				JsonLdOptions opts = new JsonLdOptions();
+				DatasetGraph dsg = DatasetGraphFactory.create(resultModel.getGraph());
+				JsonArray ja = JenaToTitanium.convert(dsg, opts);
+				JsonDocument jdoc = JsonDocument.of(ja);
+				JsonObject framed = JsonLd.frame(jdoc, frame).get();
+				JsonWriter writer = Json.createWriter(output);
+				writer.writeObject(framed);
+				return output.toByteArray();
+			}
 		} catch (RiotException e) {
 			LOG.error("failed to read RDF dataset {}", e.getMessage());
 			throw new TransformationException(e);
 		} catch (QueryExecException e) {
 			LOG.error("failed to execute SPARQL query: {}", e.getMessage());
+			throw new TransformationException(e);
+		} catch (JsonLdError e) {
+			LOG.error("failed to load into titanium json-ld, {}", e.getMessage());
 			throw new TransformationException(e);
 		}
 	}
