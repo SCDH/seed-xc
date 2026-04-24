@@ -1,6 +1,7 @@
 package de.ulbms.scdh.seed.xc.api;
 
 import io.smallrye.mutiny.Uni;
+import io.vertx.core.http.HttpServerRequest;
 import java.io.InputStream;
 import net.sf.saxon.lib.ResourceResolver;
 import net.sf.saxon.lib.UnparsedTextURIResolver;
@@ -30,6 +31,7 @@ public interface ResourceProvider extends ResourceResolver, UnparsedTextURIResol
 	 * Returns a {@link InputStream} of a resource wrapped in a {@link Uni}.
 	 *
 	 * @param resourceInContextUni - Information for identifying the resource, wrapped in a {@link Uni}
+	 * @param request - access to the incoming HTTP request
 	 */
-	Uni<InputStream> getResource(Uni<ResourceInContext> resourceInContextUni);
+	Uni<InputStream> getResource(Uni<ResourceInContext> resourceInContextUni, HttpServerRequest request);
 }

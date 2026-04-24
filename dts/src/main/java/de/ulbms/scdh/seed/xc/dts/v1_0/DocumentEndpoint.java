@@ -5,6 +5,7 @@ import de.ulbms.scdh.seed.xc.api.inject.TransformTimeProvider;
 import de.ulbms.scdh.seed.xc.dts.endpoints.DocumentApi;
 import de.ulbms.scdh.seed.xc.transformations.TransformationMap;
 import io.smallrye.mutiny.Uni;
+import io.vertx.core.http.HttpServerRequest;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import java.util.Collections;
@@ -39,6 +40,9 @@ public class DocumentEndpoint implements DocumentApi {
 	@TransformTimeProvider
 	@Inject
 	ResourceProvider resourceProvider;
+
+	@Inject
+	HttpServerRequest request;
 
 	/**
 	 * Implementation of the DTS Document endpoint. This first gets the resource using the resource provider and then transformes it.
@@ -93,8 +97,11 @@ public class DocumentEndpoint implements DocumentApi {
 
 		LOG.info("here");
 
-		return uniRic.plug(resourceProvider::getResource).plug((s) -> {
-			return transformation.transformAsync(params, null, resource, s, resourceProvider);
-		});
+		return uniRic.plug((r) -> {
+					return resourceProvider.getResource(r, request);
+				})
+				.plug((s) -> {
+					return transformation.transformAsync(params, null, resource, s, resourceProvider, request);
+				});
 	}
 }

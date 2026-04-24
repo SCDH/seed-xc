@@ -9,6 +9,7 @@ import de.ulbms.scdh.seed.xc.saxon.harden.RestrictiveUnparsedTextResolver;
 import de.ulbms.scdh.seed.xc.saxon.harden.ServiceConfiguration;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
+import io.vertx.core.http.HttpServerRequest;
 import jakarta.ws.rs.WebApplicationException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -90,6 +91,8 @@ public class SaxonXslTransformationTest {
 	private byte[] output;
 
 	private final ServiceConfiguration SERVICE_CONFIG = new TestingConfiguration();
+
+	private final HttpServerRequest request = null;
 
 	SaxonXslTransformation transformation;
 
@@ -293,7 +296,7 @@ public class SaxonXslTransformationTest {
 			throws IOException, ConfigurationException, TransformationPreparationException, TransformationException {
 		transformation.setup(IMPORTING_CONFIG, BASE_DIR);
 		output = transformation.transform(
-				null, null, helloXml.toString(), helloXml.toURI().toURL().openStream(), resourceProvider);
+				null, null, helloXml.toString(), helloXml.toURI().toURL().openStream(), resourceProvider, request);
 		assertEquals(
 				"<?xml version=\"1.0\" " + "encoding=\"UTF-8\"?><hello><i><b>Hello</b></i></hello>",
 				outputToString(output));
@@ -311,7 +314,7 @@ public class SaxonXslTransformationTest {
 		assertThrows(
 				TransformationException.class,
 				() -> transformation.transform(
-						new RuntimeParameters(), null, helloXml.toString(), helloStream, resourceProvider));
+						new RuntimeParameters(), null, helloXml.toString(), helloStream, resourceProvider, request));
 	}
 
 	@Test
@@ -319,7 +322,8 @@ public class SaxonXslTransformationTest {
 			throws IOException, ConfigurationException, TransformationPreparationException, TransformationException {
 		transformation.setup(UNPARSED_TEXT_CONFIG, BASE_DIR);
 		FileInputStream helloStream = new FileInputStream(helloXml);
-		output = transformation.transform(PARAM_URI_PARAMS, null, helloXml.toString(), helloStream, resourceProvider);
+		output = transformation.transform(
+				PARAM_URI_PARAMS, null, helloXml.toString(), helloStream, resourceProvider, request);
 		assertEquals("Tolle, lege! Tolle, lege!\n", outputToString(output));
 	}
 
@@ -331,7 +335,7 @@ public class SaxonXslTransformationTest {
 		assertThrows(
 				TransformationException.class,
 				() -> transformation.transform(
-						new RuntimeParameters(), null, helloXml.toString(), inputStream, resourceProvider));
+						new RuntimeParameters(), null, helloXml.toString(), inputStream, resourceProvider, request));
 	}
 
 	@Test
@@ -341,7 +345,7 @@ public class SaxonXslTransformationTest {
 		RuntimeParameters params = new RuntimeParameters();
 		params.putGlobalParametersItem("uri", "allowed.xml");
 		FileInputStream inputStream = new FileInputStream(helloXml);
-		output = transformation.transform(params, null, helloXml.toString(), inputStream, resourceProvider);
+		output = transformation.transform(params, null, helloXml.toString(), inputStream, resourceProvider, request);
 		assertEquals(
 				"<?xml version=\"1.0\" " + "encoding=\"UTF-8\"?><result><allowed>*<star/>*</" + "allowed></result>",
 				outputToString(output));
@@ -375,7 +379,8 @@ public class SaxonXslTransformationTest {
 				null,
 				helloXml.toString(),
 				helloXml.toURI().toURL().openStream(),
-				resourceProvider);
+				resourceProvider,
+				request);
 		assertEquals(TIMES_3, outputToString(output));
 	}
 
@@ -389,7 +394,8 @@ public class SaxonXslTransformationTest {
 						null,
 						helloXml.toString(),
 						helloXml.toURI().toURL().openStream(),
-						resourceProvider));
+						resourceProvider,
+						request));
 	}
 
 	// TODO: should these NullPointerExceptions be something else?
@@ -418,7 +424,7 @@ public class SaxonXslTransformationTest {
 		transformation.setup(PARAM_INTEGER_CONFIG, BASE_DIR);
 		FileInputStream helloStream = new FileInputStream(helloXml);
 		output = transformation.transform(
-				PARAM_INTEGER_PARAMS, null, helloXml.toString(), helloStream, resourceProvider);
+				PARAM_INTEGER_PARAMS, null, helloXml.toString(), helloStream, resourceProvider, request);
 		assertEquals(TIMES_3, outputToString(output));
 	}
 
@@ -428,7 +434,8 @@ public class SaxonXslTransformationTest {
 		FileInputStream helloStream = new FileInputStream(helloXml);
 		assertThrows(
 				TransformationException.class,
-				() -> transformation.transform(null, null, helloXml.toString(), helloStream, resourceProvider));
+				() -> transformation.transform(
+						null, null, helloXml.toString(), helloStream, resourceProvider, request));
 	}
 
 	@Test
@@ -436,7 +443,7 @@ public class SaxonXslTransformationTest {
 			throws IOException, ConfigurationException, TransformationPreparationException, TransformationException {
 		transformation.setup(PARAM_INTEGER_CONFIG, BASE_DIR);
 		FileInputStream helloStream = new FileInputStream(helloXml);
-		output = transformation.transform(PARAM_INTEGER_PARAMS, null, null, helloStream, resourceProvider);
+		output = transformation.transform(PARAM_INTEGER_PARAMS, null, null, helloStream, resourceProvider, request);
 		assertEquals(TIMES_3, outputToString(output));
 	}
 
@@ -444,7 +451,8 @@ public class SaxonXslTransformationTest {
 	public void testTransformParamIntegerTransform4InputStreamNull()
 			throws ConfigurationException, TransformationPreparationException, TransformationException {
 		transformation.setup(PARAM_INTEGER_CONFIG, BASE_DIR);
-		output = transformation.transform(PARAM_INTEGER_PARAMS, null, helloXml.toString(), null, resourceProvider);
+		output = transformation.transform(
+				PARAM_INTEGER_PARAMS, null, helloXml.toString(), null, resourceProvider, request);
 		assertEquals(TIMES_3, outputToString(output));
 	}
 
@@ -471,7 +479,7 @@ public class SaxonXslTransformationTest {
 	public void testTransformParamIntegerStaticTransform()
 			throws ConfigurationException, TransformationPreparationException, TransformationException {
 		transformation.setup(PARAM_INTEGER_STATIC_CONFIG, BASE_DIR);
-		output = transformation.transform(null, null, helloXml.toString(), null, resourceProvider);
+		output = transformation.transform(null, null, helloXml.toString(), null, resourceProvider, request);
 		assertEquals(TIMES_3, outputToString(output));
 	}
 
@@ -485,7 +493,7 @@ public class SaxonXslTransformationTest {
 			throws IOException, ConfigurationException, TransformationPreparationException, TransformationException {
 		transformation.setup(ID_CONFIG_ABS, BASE_DIR);
 		FileInputStream input = new FileInputStream(unparsedEntityXml);
-		output = transformation.transform(null, null, unparsedEntityXml.toString(), input, resourceProvider);
+		output = transformation.transform(null, null, unparsedEntityXml.toString(), input, resourceProvider, request);
 		assertEquals(
 				"<?xml version=\"1.0\" encoding=\"UTF-8\"?><test " + "source=\"passwd\"/>", outputToString(output));
 	}
@@ -495,7 +503,7 @@ public class SaxonXslTransformationTest {
 			throws IOException, ConfigurationException, TransformationPreparationException, TransformationException {
 		transformation.setup(ID_CONFIG_ABS, BASE_DIR);
 		FileInputStream input = new FileInputStream(unparsedEntityXml);
-		output = transformation.transform(null, null, unparsedEntityXml.toString(), input, resourceProvider);
+		output = transformation.transform(null, null, unparsedEntityXml.toString(), input, resourceProvider, request);
 		assertEquals(
 				"<?xml version=\"1.0\" encoding=\"UTF-8\"?><test " + "source=\"passwd\"/>", outputToString(output));
 	}
@@ -506,7 +514,7 @@ public class SaxonXslTransformationTest {
 		FileInputStream input = new FileInputStream(helloXml);
 		assertThrows(
 				TransformationException.class,
-				() -> transformation.transform(null, null, helloXml.toString(), input, resourceProvider));
+				() -> transformation.transform(null, null, helloXml.toString(), input, resourceProvider, request));
 	}
 
 	@Test
@@ -516,7 +524,7 @@ public class SaxonXslTransformationTest {
 		assertThrows(
 				TransformationException.class,
 				() -> transformation.transform(
-						PARAM_RESULT_DOC_PARAMS, null, helloXml.toString(), input, resourceProvider));
+						PARAM_RESULT_DOC_PARAMS, null, helloXml.toString(), input, resourceProvider, request));
 	}
 
 	/* exception parser */
@@ -527,7 +535,7 @@ public class SaxonXslTransformationTest {
 		FileInputStream input = new FileInputStream(helloXml);
 		var e = assertThrows(
 				TransformationException.class,
-				() -> transformation.transform(null, null, helloXml.toString(), input, resourceProvider));
+				() -> transformation.transform(null, null, helloXml.toString(), input, resourceProvider, request));
 		assertInstanceOf(SaxonApiException.class, e.getCause());
 		assertEquals(
 				"XTMM9000", ((SaxonApiException) e.getCause()).getErrorCode().toString());
@@ -538,7 +546,8 @@ public class SaxonXslTransformationTest {
 		transformation.setup(TERMINATE_404_CONFIG, BASE_DIR);
 		Uni<FileInputStream> input = Uni.createFrom().item(new FileInputStream(helloXml));
 		UniAssertSubscriber<byte[]> subscriber = input.plug((is) -> {
-					return transformation.transformAsync(null, null, helloXml.toString(), input, resourceProvider);
+					return transformation.transformAsync(
+							null, null, helloXml.toString(), input, resourceProvider, request);
 				})
 				.subscribe()
 				.withSubscriber(UniAssertSubscriber.create());
@@ -553,7 +562,7 @@ public class SaxonXslTransformationTest {
 		var e = assertThrows(
 				WebApplicationException.class,
 				() -> transformation
-						.transformAsync(null, null, helloXml.toString(), input, resourceProvider)
+						.transformAsync(null, null, helloXml.toString(), input, resourceProvider, request)
 						.subscribe());
 		assertInstanceOf(WebApplicationException.class, e);
 		assertEquals(401, ((WebApplicationException) e).getResponse().getStatus());
@@ -565,7 +574,8 @@ public class SaxonXslTransformationTest {
 		transformation.setup(ASSERT_404_CONFIG, BASE_DIR);
 		Uni<FileInputStream> input = Uni.createFrom().item(new FileInputStream(helloXml));
 		UniAssertSubscriber<byte[]> subscriber = input.plug((is) -> {
-					return transformation.transformAsync(null, null, helloXml.toString(), input, resourceProvider);
+					return transformation.transformAsync(
+							null, null, helloXml.toString(), input, resourceProvider, request);
 				})
 				.subscribe()
 				.withSubscriber(UniAssertSubscriber.create());
@@ -620,7 +630,8 @@ public class SaxonXslTransformationTest {
 		FileInputStream input = new FileInputStream(tagSoup1);
 		assertThrows(
 				TransformationException.class,
-				() -> transformation.transform(null, null, unparsedEntityXml.toString(), input, resourceProvider));
+				() -> transformation.transform(
+						null, null, unparsedEntityXml.toString(), input, resourceProvider, request));
 	}
 
 	@Test
@@ -629,7 +640,7 @@ public class SaxonXslTransformationTest {
 		transformation.setup(ID_CONFIG_ABS, BASE_DIR);
 		FileInputStream input = new FileInputStream(tagSoup1);
 		output = transformation.transform(
-				null, NU_VALIDATOR_CONFIG, unparsedEntityXml.toString(), input, resourceProvider);
+				null, NU_VALIDATOR_CONFIG, unparsedEntityXml.toString(), input, resourceProvider, request);
 		assertTrue(outputToString(output)
 				.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?><html "
 						+ "xmlns=\"http://www.w3.org/1999/xhtml\">"));
@@ -641,7 +652,7 @@ public class SaxonXslTransformationTest {
 		transformation.setup(ID_CONFIG_ABS, BASE_DIR);
 		FileInputStream input = new FileInputStream(tagSoup1);
 		output = transformation.transform(
-				null, COWAN_TAGSOUP_CONFIG, unparsedEntityXml.toString(), input, resourceProvider);
+				null, COWAN_TAGSOUP_CONFIG, unparsedEntityXml.toString(), input, resourceProvider, request);
 		// assertEquals("", outputToString(output));
 		assertTrue(outputToString(output)
 				.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?><html "
@@ -656,7 +667,7 @@ public class SaxonXslTransformationTest {
 		assertThrows(
 				TransformationPreparationException.class,
 				() -> transformation.transform(
-						null, UNKNOWN_PARSER_CONFIG, unparsedEntityXml.toString(), input, resourceProvider));
+						null, UNKNOWN_PARSER_CONFIG, unparsedEntityXml.toString(), input, resourceProvider, request));
 	}
 
 	@Test
@@ -666,7 +677,7 @@ public class SaxonXslTransformationTest {
 		assertThrows(
 				TransformationPreparationException.class,
 				() -> transformation.transform(
-						null, BAD_PARSER_CONFIG, unparsedEntityXml.toString(), input, resourceProvider));
+						null, BAD_PARSER_CONFIG, unparsedEntityXml.toString(), input, resourceProvider, request));
 	}
 
 	public static final TransformationInfo ID_CONFIG_ABS_TAGSOUP_PARSER;
@@ -687,7 +698,7 @@ public class SaxonXslTransformationTest {
 			throws IOException, ConfigurationException, TransformationPreparationException, TransformationException {
 		transformation.setup(ID_CONFIG_ABS_TAGSOUP_PARSER, BASE_DIR);
 		FileInputStream input = new FileInputStream(tagSoup1);
-		output = transformation.transform(null, null, unparsedEntityXml.toString(), input, resourceProvider);
+		output = transformation.transform(null, null, unparsedEntityXml.toString(), input, resourceProvider, request);
 		// assertEquals("", outputToString(output));
 		assertTrue(outputToString(output)
 				.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?><html "
@@ -731,7 +742,8 @@ public class SaxonXslTransformationTest {
 			throws IOException, ConfigurationException, TransformationPreparationException, TransformationException {
 		transformation.setup(ID_CONFIG_ABS, BASE_DIR);
 		FileInputStream input = new FileInputStream(includeXml);
-		output = transformation.transform(null, CONFIG_WITH_XINCLUDE, includeXml.toString(), input, resourceProvider);
+		output = transformation.transform(
+				null, CONFIG_WITH_XINCLUDE, includeXml.toString(), input, resourceProvider, request);
 		assertEquals(
 				"<?xml version=\"1.0\" encoding=\"UTF-8\"?><wrapper "
 						+ "xmlns:xi=\"http://www.w3.org/2001/XInclude\">\n    <hello "
@@ -749,7 +761,7 @@ public class SaxonXslTransformationTest {
 		transformation.setup(ID_CONFIG_ABS, BASE_DIR);
 		FileInputStream input = new FileInputStream(includeXml);
 		output = transformation.transform(
-				null, CONFIG_WITH_XINCLUDE_FALSE, includeXml.toString(), input, resourceProvider);
+				null, CONFIG_WITH_XINCLUDE_FALSE, includeXml.toString(), input, resourceProvider, request);
 		assertEquals(
 				"<?xml version=\"1.0\" encoding=\"UTF-8\"?><wrapper "
 						+ "xmlns:xi=\"http://www.w3.org/2001/XInclude\">\n    "
@@ -763,7 +775,7 @@ public class SaxonXslTransformationTest {
 			throws IOException, ConfigurationException, TransformationPreparationException, TransformationException {
 		transformation.setup(ID_CONFIG_ABS, BASE_DIR);
 		FileInputStream input = new FileInputStream(includeXml);
-		output = transformation.transform(null, null, includeXml.toString(), input, resourceProvider);
+		output = transformation.transform(null, null, includeXml.toString(), input, resourceProvider, request);
 		assertEquals(
 				"<?xml version=\"1.0\" encoding=\"UTF-8\"?><wrapper "
 						+ "xmlns:xi=\"http://www.w3.org/2001/XInclude\">\n    "
@@ -778,7 +790,7 @@ public class SaxonXslTransformationTest {
 		transformation.setup(ID_CONFIG_ABS, BASE_DIR);
 		FileInputStream input = new FileInputStream(tagSoup1);
 		output = transformation.transform(
-				null, NU_VALIDATOR_CONFIG_WITH_XINCLUDE, tagSoup1.toString(), input, resourceProvider);
+				null, NU_VALIDATOR_CONFIG_WITH_XINCLUDE, tagSoup1.toString(), input, resourceProvider, request);
 		assertTrue(outputToString(output)
 				.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?><html "
 						+ "xmlns=\"http://www.w3.org/1999/xhtml\">"));
