@@ -2,6 +2,7 @@ package de.ulbms.scdh.seed.xc.jena;
 
 import de.ulbms.scdh.seed.xc.api.*;
 import io.smallrye.mutiny.Uni;
+import io.vertx.core.http.HttpServerRequest;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.InternalServerErrorException;
 import java.io.*;
@@ -68,7 +69,8 @@ public class SparqlTransformation implements Transformation {
 			Config config,
 			String systemId,
 			InputStream source,
-			ResourceProvider resourceProvider)
+			ResourceProvider resourceProvider,
+			HttpServerRequest request)
 			throws TransformationPreparationException, TransformationException {
 		try {
 			// make graph
@@ -97,7 +99,7 @@ public class SparqlTransformation implements Transformation {
 			qexec.close();
 			// write result back to the wire
 			ByteArrayOutputStream output = new ByteArrayOutputStream();
-			RDFFormat format = serializer.getFormat(transformationInfo.getMediaType(), systemId);
+			RDFFormat format = serializer.getFormat(transformationInfo.getMediaType(), systemId, request);
 			RDFDataMgr.write(output, resultModel, format);
 			return output.toByteArray();
 		} catch (RiotException e) {
@@ -115,10 +117,11 @@ public class SparqlTransformation implements Transformation {
 			Config config,
 			String systemId,
 			Uni<? extends InputStream> source,
-			ResourceProvider resourceProvider) {
+			ResourceProvider resourceProvider,
+			HttpServerRequest request) {
 		return source.onItem().transform((sourceStream) -> {
 			try {
-				return transform(parameters, config, systemId, sourceStream, resourceProvider);
+				return transform(parameters, config, systemId, sourceStream, resourceProvider, request);
 			} catch (TransformationPreparationException | TransformationException e) {
 				throw new InternalServerErrorException(e.getMessage());
 			}
