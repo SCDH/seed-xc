@@ -3,6 +3,8 @@ package de.ulbms.scdh.seed.xc.jena;
 import static org.junit.jupiter.api.Assertions.*;
 
 import de.ulbms.scdh.seed.xc.api.*;
+import io.vertx.core.http.HttpServerRequest;
+import jakarta.inject.Inject;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -29,6 +31,9 @@ class SparqlTransformationTest {
 	private static TransformationInfo QC1;
 
 	private static TransformationInfo QC1_TTL;
+
+	@Inject
+	HttpServerRequest request;
 
 	private byte[] output;
 
@@ -73,7 +78,8 @@ class SparqlTransformationTest {
 					FileNotFoundException {
 		transformation.setup(QS1, CONFIG);
 		InputStream in = new FileInputStream(VCDB1);
-		assertThrows(TransformationException.class, () -> transformation.transform(null, null, null, in, null));
+		assertThrows(
+				TransformationException.class, () -> transformation.transform(null, null, null, in, null, request));
 	}
 
 	@Test
@@ -84,7 +90,7 @@ class SparqlTransformationTest {
 		InputStream in = new FileInputStream(VCDB1);
 		assertThrows(
 				TransformationException.class,
-				() -> transformation.transform(null, null, VCDB1.getAbsolutePath(), in, null));
+				() -> transformation.transform(null, null, VCDB1.getAbsolutePath(), in, null, request));
 	}
 
 	@Test
@@ -93,7 +99,7 @@ class SparqlTransformationTest {
 					FileNotFoundException {
 		transformation.setup(QC1, CONFIG);
 		InputStream in = new FileInputStream(VCDB1);
-		output = transformation.transform(null, null, VCDB1.getAbsolutePath(), in, null);
+		output = transformation.transform(null, null, VCDB1.getAbsolutePath(), in, null, request);
 		assertTrue(getOutput().startsWith("<http://somewhere/JohnSmith>"));
 		assertEquals(1, getOutput().lines().count());
 	}
@@ -104,7 +110,7 @@ class SparqlTransformationTest {
 					FileNotFoundException {
 		transformation.setup(QC1_TTL, CONFIG);
 		InputStream in = new FileInputStream(VCDB1);
-		output = transformation.transform(null, null, VCDB1.getAbsolutePath(), in, null);
+		output = transformation.transform(null, null, VCDB1.getAbsolutePath(), in, null, request);
 		// assertEquals("", getOutput());
 		assertTrue(getOutput().startsWith("PREFIX rdf"));
 		assertEquals(5, getOutput().lines().count());
