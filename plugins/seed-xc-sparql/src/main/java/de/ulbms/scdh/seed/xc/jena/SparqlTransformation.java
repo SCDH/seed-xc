@@ -31,6 +31,9 @@ public class SparqlTransformation implements Transformation {
 	@Inject
 	ParameterConverter parameterConverter;
 
+	@Inject
+	Serializer serializer;
+
 	@Override
 	public String getType() {
 		return SparqlTransformation.TRANSFORMATION_TYPE;
@@ -94,7 +97,8 @@ public class SparqlTransformation implements Transformation {
 			qexec.close();
 			// write result back to the wire
 			ByteArrayOutputStream output = new ByteArrayOutputStream();
-			RDFDataMgr.write(output, resultModel, RDFFormat.NTRIPLES);
+			RDFFormat format = serializer.getFormat(transformationInfo.getMediaType(), systemId);
+			RDFDataMgr.write(output, resultModel, format);
 			return output.toByteArray();
 		} catch (RiotException e) {
 			LOG.error("failed to read RDF dataset {}", e.getMessage());
