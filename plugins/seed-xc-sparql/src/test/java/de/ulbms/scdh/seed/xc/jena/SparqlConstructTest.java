@@ -24,6 +24,9 @@ class SparqlConstructTest {
 	private static final File RQ_DIR =
 			Paths.get("src", "test", "resources", "rq").toFile();
 
+	private static final File FRAME =
+			Paths.get("src", "test", "resources", "context", "person.json").toFile();
+
 	private static final File CONFIG = RQ_DIR;
 
 	private static TransformationInfo QS1;
@@ -31,6 +34,8 @@ class SparqlConstructTest {
 	private static TransformationInfo QC1;
 
 	private static TransformationInfo QC1_TTL;
+
+	private static TransformationInfo QC1_JSONLD;
 
 	@Inject
 	HttpServerRequest request;
@@ -62,6 +67,14 @@ class SparqlConstructTest {
 		info.setLocation(new File(RQ_DIR, "qc1.rq").getAbsolutePath());
 		info.setMediaType("text/turtle");
 		QC1_TTL = info;
+	}
+
+	static {
+		TransformationInfo info = new TransformationInfo();
+		info.setPropertyClass(SparqlConstruct.TRANSFORMATION_TYPE);
+		info.setLocation(new File(RQ_DIR, "qc1.rq").getAbsolutePath());
+		info.setMediaType("application/ld+json");
+		QC1_JSONLD = info;
 	}
 
 	SparqlConstruct transformation;
@@ -114,5 +127,28 @@ class SparqlConstructTest {
 		// assertEquals("", getOutput());
 		assertTrue(getOutput().startsWith("PREFIX rdf"));
 		assertEquals(5, getOutput().lines().count());
+	}
+
+	@Test
+	public void testConstructQuerySerializeJsonLd()
+			throws ConfigurationException, TransformationPreparationException, TransformationException,
+					FileNotFoundException {
+		transformation.setup(QC1_JSONLD, CONFIG);
+		InputStream in = new FileInputStream(VCDB1);
+		output = transformation.transform(null, null, VCDB1.getAbsolutePath(), in, null, request);
+		assertTrue(getOutput().contains("\"@id\": \"http://somewhere/JohnSmith\""));
+		// assertEquals("", getOutput());
+	}
+
+	@Test
+	public void testConstructQuerySerializeFraming()
+			throws ConfigurationException, TransformationPreparationException, TransformationException,
+					FileNotFoundException {
+		transformation.setup(QC1_JSONLD, CONFIG);
+		transformation.frame = FRAME.getAbsoluteFile().toURI().toString();
+		InputStream in = new FileInputStream(VCDB1);
+		output = transformation.transform(null, null, VCDB1.getAbsolutePath(), in, null, request);
+		assertTrue(getOutput().contains("\"id\":\"here:JohnSmith\""));
+		// assertEquals("", getOutput());
 	}
 }

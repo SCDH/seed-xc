@@ -59,6 +59,8 @@ public class Serializer {
 			return new RDFFormat(lang, RDFFormat.PRETTY);
 		} else if (lang.equals(Lang.RDFXML)) {
 			return new RDFFormat(lang, RDFFormat.PLAIN);
+		} else if (lang.equals(Lang.JSONLD)) {
+			return RDFFormat.JSONLD11_PRETTY;
 		} else {
 			return new RDFFormat(lang);
 		}
