@@ -10,9 +10,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.riot.RDFFormat;
-import org.apache.jena.riot.RDFParser;
+import org.apache.jena.riot.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,33 +66,43 @@ public class SparqlTransformation implements Transformation {
 			String systemId,
 			InputStream source,
 			ResourceProvider resourceProvider)
-			throws TransformationPreparationException {
-		// make graph
-		Dataset graph = RDFParser.source(source).toDataset();
-		// make query
-		ParameterizedSparqlString queryTemplate = new ParameterizedSparqlString(this.query);
-		if (parameters != null) {
-			for (String key : parameters.getGlobalParameters().keySet()) {
-				ParameterDescriptor descriptor =
-						transformationInfo.getParameterDescriptors().get(key);
-				String value = parameters.getGlobalParameters().get(key);
-				if (descriptor == null) {
-					// assume string
-					queryTemplate.setLiteral(key, value);
-				} else {
-					parameterConverter.setQueryParameter(key, value, descriptor.getType(), queryTemplate);
+			throws TransformationPreparationException, TransformationException {
+		try {
+			// make graph
+			Lang lang = RDFLanguages.filenameToLang(systemId, Lang.N3);
+			LOG.info("trying to parse RDF data from {} as format {}", systemId, lang);
+			Dataset graph = RDFParser.source(source).lang(lang).toDataset();
+			// make query
+			ParameterizedSparqlString queryTemplate = new ParameterizedSparqlString(this.query);
+			if (parameters != null) {
+				for (String key : parameters.getGlobalParameters().keySet()) {
+					ParameterDescriptor descriptor =
+							transformationInfo.getParameterDescriptors().get(key);
+					String value = parameters.getGlobalParameters().get(key);
+					if (descriptor == null) {
+						// assume string
+						queryTemplate.setLiteral(key, value);
+					} else {
+						parameterConverter.setQueryParameter(key, value, descriptor.getType(), queryTemplate);
+					}
 				}
 			}
+			Query query = queryTemplate.asQuery();
+			// execute query
+			QueryExecution qexec = QueryExecutionFactory.create(query, graph);
+			Model resultModel = qexec.execConstruct();
+			qexec.close();
+			// write result back to the wire
+			ByteArrayOutputStream output = new ByteArrayOutputStream();
+			RDFDataMgr.write(output, resultModel, RDFFormat.NTRIPLES);
+			return output.toByteArray();
+		} catch (RiotException e) {
+			LOG.error("failed to read RDF dataset {}", e.getMessage());
+			throw new TransformationException(e);
+		} catch (QueryExecException e) {
+			LOG.error("failed to execute SPARQL query: {}", e.getMessage());
+			throw new TransformationException(e);
 		}
-		Query query = queryTemplate.asQuery();
-		// execute query
-		QueryExecution qexec = QueryExecutionFactory.create(query, graph);
-		Model resultModel = qexec.execConstruct();
-		qexec.close();
-		// write result back to the wire
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
-		RDFDataMgr.write(output, resultModel, RDFFormat.NTRIPLES);
-		return output.toByteArray();
 	}
 
 	@Override
@@ -107,7 +115,7 @@ public class SparqlTransformation implements Transformation {
 		return source.onItem().transform((sourceStream) -> {
 			try {
 				return transform(parameters, config, systemId, sourceStream, resourceProvider);
-			} catch (TransformationPreparationException e) {
+			} catch (TransformationPreparationException | TransformationException e) {
 				throw new InternalServerErrorException(e.getMessage());
 			}
 		});
