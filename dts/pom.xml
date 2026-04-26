@@ -33,9 +33,19 @@
       <artifactId>seed-xc-transformations</artifactId>
       <version>${revision}${changelist}</version>
     </dependency>
+    <!--
+      Add plugins to the classpath
+      important: scope should be runtime or test.
+     -->
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>seed-xc-saxon</artifactId>
+      <version>${revision}${changelist}</version>
+      <scope>${plugins.scope}</scope>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>seed-xc-sparql</artifactId>
       <version>${revision}${changelist}</version>
       <scope>${plugins.scope}</scope>
     </dependency>
