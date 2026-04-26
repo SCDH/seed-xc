@@ -107,7 +107,7 @@ public class FileSystemResourceProvider implements ResourceProvider {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Uni<InputStream> getResource(Uni<ResourceInContext> resourceInContext, HttpServerRequest request) {
+	public Uni<InputStream> asyncOpenStream(Uni<ResourceInContext> resourceInContext, HttpServerRequest request) {
 		if (error != null) {
 			return resourceInContext.replaceWith(Uni.createFrom().failure(error));
 		}

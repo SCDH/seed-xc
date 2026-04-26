@@ -98,7 +98,7 @@ public class DocumentEndpoint implements DocumentApi {
 		LOG.info("here");
 
 		return uniRic.plug((r) -> {
-					return resourceProvider.getResource(r, request);
+					return resourceProvider.asyncOpenStream(r, request);
 				})
 				.plug((s) -> {
 					return transformation.transformAsync(params, null, resource, s, resourceProvider, request);

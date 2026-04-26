@@ -45,7 +45,7 @@ public class TransformService implements TransformApi {
 		Uni<ResourceInContext> uniRic = Uni.createFrom().item(ric);
 
 		return uniRic.plug((r) -> {
-					return resourceProvider.getResource(r, request);
+					return resourceProvider.asyncOpenStream(r, request);
 				})
 				.onItem()
 				.transform((s) -> {

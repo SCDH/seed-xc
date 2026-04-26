@@ -110,7 +110,7 @@ public class NavigationEndpoint implements NavigationApi {
 		Uni<ResourceInContext> uniRic = Uni.createFrom().item(ric);
 
 		return uniRic.plug((r) -> {
-					return resourceProvider.getResource(r, request);
+					return resourceProvider.asyncOpenStream(r, request);
 				})
 				.plug((s) -> {
 					return transformation.transformAsync(params, null, resource, s, resourceProvider, request);

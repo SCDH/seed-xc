@@ -19,7 +19,10 @@ import java.net.URI;
 public interface ResourceProvider {
 
 	/**
-	 * Tries to open an input stream for a given {@link URI}
+	 * Tries to open an input stream for a given {@link URI}.<P/>
+	 *
+	 * It is up to the user to close the stream when done.
+	 *
 	 * @param uri - The resource as {@link URI}
 	 * @return the resource as {@link InputStream}
 	 * @throws ResourceProviderConfigurationException - on bad configuration
@@ -30,10 +33,12 @@ public interface ResourceProvider {
 			throws ResourceProviderConfigurationException, ResourceNotFoundException, ResourceException;
 
 	/**
-	 * Returns a {@link InputStream} of a resource wrapped in a {@link Uni}.
+	 * Opens an {@link InputStream} of a resource wrapped in a {@link Uni}.<P/>
+	 *
+	 * It is up to the user to close the stream when done.
 	 *
 	 * @param resourceInContextUni - Information for identifying the resource, wrapped in a {@link Uni}
 	 * @param request - access to the incoming HTTP request
 	 */
-	Uni<InputStream> getResource(Uni<ResourceInContext> resourceInContextUni, HttpServerRequest request);
+	Uni<InputStream> asyncOpenStream(Uni<ResourceInContext> resourceInContextUni, HttpServerRequest request);
 }
