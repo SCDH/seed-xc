@@ -171,7 +171,6 @@ public class SparqlConstruct implements Transformation {
 			RDFFormat format = serializer.getFormat(transformationInfo.getMediaType(), systemId, request);
 			if (!format.getLang().equals(Lang.JSONLD11) || getContextUri() == null) {
 				RDFDataMgr.write(output, resultModel, format);
-				return output.toByteArray();
 			} else {
 				// use titanium for framing
 				JsonLdOptions opts = new JsonLdOptions();
@@ -181,8 +180,8 @@ public class SparqlConstruct implements Transformation {
 				JsonObject framed = JsonLd.frame(jdoc, getContext()).get();
 				JsonWriter writer = Json.createWriter(output);
 				writer.writeObject(framed);
-				return output.toByteArray();
 			}
+			return output.toByteArray();
 		} catch (RiotException e) {
 			LOG.error("failed to read RDF dataset {}", e.getMessage());
 			throw new TransformationException(e);
