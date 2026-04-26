@@ -11,10 +11,13 @@ import io.smallrye.mutiny.Uni;
 import io.vertx.core.http.HttpServerRequest;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
@@ -48,7 +51,7 @@ public class FileSystemResourceProvider implements ResourceProvider {
 
 	private static final Logger LOG = LoggerFactory.getLogger(FileSystemResourceProvider.class);
 
-	private URI path = null;
+	private Path path = null;
 
 	private Exception error = null;
 
@@ -63,11 +66,7 @@ public class FileSystemResourceProvider implements ResourceProvider {
 			// resolving relative paths against the current
 			// user directory with getAbsoluteFile()
 			// simplifies testing and configuration.
-			this.path = Paths.get(path)
-					.toFile()
-					.getAbsoluteFile()
-					.getCanonicalFile()
-					.toURI();
+			this.path = Paths.get(path).toAbsolutePath().normalize();
 		} catch (Exception e) {
 			LOG.error("invalid path for FileSystemResourceProvider: {}", e.getMessage());
 			error = e;
@@ -87,15 +86,18 @@ public class FileSystemResourceProvider implements ResourceProvider {
 			LOG.error("failed to setup: {}", error.getMessage());
 			throw new ResourceProviderConfigurationException(error);
 		}
+		if (uri.getScheme() != null) if (!uri.getScheme().equals("file")) throw new ResourceException("not allowed");
+		Path filePath;
 		try {
-			URI normalized = path.resolve(uri).normalize();
-			LOG.debug("resolved {} to {}", uri, normalized);
-			if (!normalized.toString().startsWith(path.toString())) {
-				throw new ResourceException("not allowed");
+			filePath = path.resolve(uri.getSchemeSpecificPart()).normalize();
+			if (!filePath.startsWith(path)) {
+				LOG.warn("denying access to {}", uri);
+				throw new ResourceException("not found");
 			}
-			return normalized.toURL().openStream();
-		} catch (MalformedURLException e) {
-			throw new ResourceNotFoundException(e);
+			return new FileInputStream(filePath.toFile());
+		} catch (InvalidPathException e) {
+			LOG.warn("invalid path {}", uri);
+			throw new ResourceNotFoundException("not found");
 		} catch (IOException e) {
 			throw new ResourceNotFoundException(e);
 		}
@@ -112,15 +114,13 @@ public class FileSystemResourceProvider implements ResourceProvider {
 
 		return resourceInContext.onItem().transform((ric) -> {
 			try {
-				URI normalized = path.resolve(ric.getResource()).normalize();
-				LOG.debug("resolved {} to {}", ric.getResource(), normalized);
-				if (!normalized.toString().startsWith(path.toString())) {
-					throw new jakarta.ws.rs.NotAllowedException("not allowed");
-				}
-				return normalized.toURL().openStream();
-			} catch (MalformedURLException e) {
+				URI uri = new URI(ric.getResource());
+				return openStream(uri);
+			} catch (URISyntaxException e) {
 				throw new jakarta.ws.rs.BadRequestException(e);
-			} catch (IOException e) {
+			} catch (ResourceProviderConfigurationException e) {
+				throw new jakarta.ws.rs.InternalServerErrorException(e);
+			} catch (ResourceException | ResourceNotFoundException e) {
 				throw new jakarta.ws.rs.NotFoundException(e);
 			}
 		});
