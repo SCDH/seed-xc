@@ -12,7 +12,9 @@ import jakarta.inject.Inject;
 import jakarta.json.*;
 import jakarta.ws.rs.InternalServerErrorException;
 import java.io.*;
+import java.net.SocketTimeoutException;
 import java.net.URI;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -22,6 +24,7 @@ import org.apache.jena.riot.*;
 import org.apache.jena.riot.system.jsonld.JenaToTitanium;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +37,12 @@ public class SparqlConstruct implements Transformation {
 	private static final Logger LOG = LoggerFactory.getLogger(SparqlConstruct.class);
 
 	public static final String TRANSFORMATION_TYPE = "sparql-construct";
+
+	@ConfigProperty(name = "url-connect-timeout", defaultValue = "10000")
+	int contextConnectTimeout;
+
+	@ConfigProperty(name = "url-read-timeout", defaultValue = "10000")
+	int contextReadTimeout;
 
 	TransformationInfo transformationInfo;
 
@@ -94,15 +103,32 @@ public class SparqlConstruct implements Transformation {
 	 * @throws TransformationPreparationException when preparation failed
 	 */
 	private Document getContext() throws TransformationPreparationException {
+		InputStream in = null;
 		try {
-			return JsonDocument.of(getContextUri().toURL().openStream());
+			URLConnection connection = getContextUri().toURL().openConnection();
+			connection.setConnectTimeout(contextConnectTimeout);
+			connection.setReadTimeout(contextReadTimeout);
+			in = connection.getInputStream();
+			return JsonDocument.of(in);
 		} catch (JsonLdError e) {
 			LOG.error("failed to read JSON-LD framing context {}", getContextUri());
 			throw new TransformationPreparationException(
 					"failed to read JSON-LD framing context " + getContextUri(), e);
+		} catch (SocketTimeoutException e) {
+			LOG.warn("timeout when reading JSON-LD context from {}", getContextUri());
+			throw new TransformationPreparationException(
+					"timeout when reading JSON-LD context from " + getContextUri(), e);
 		} catch (IOException | NullPointerException e) {
 			LOG.error("JSON-LD framing URI not found {}", getContextUri());
 			throw new TransformationPreparationException("JSON-LD framing URI not found " + getContextUri(), e);
+		} finally {
+			if (in != null) {
+				try {
+					in.close();
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
 		}
 	}
 
