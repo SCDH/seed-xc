@@ -5,14 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import de.ulbms.scdh.seed.xc.api.ConfigurationException;
-import java.io.File;
-import java.io.IOException;
-import java.io.Reader;
+import de.ulbms.scdh.seed.xc.api.ResourceException;
+import de.ulbms.scdh.seed.xc.api.ResourceNotFoundException;
+import de.ulbms.scdh.seed.xc.api.ResourceProviderConfigurationException;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
-import net.sf.saxon.Configuration;
-import net.sf.saxon.trans.XPathException;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -35,17 +35,29 @@ public class FileSystemResourceProviderTest {
 					"src", "test", "resources", "xsl", "..", "samples", "hello.xml")
 			.toFile();
 
-	private static final Configuration config = new Configuration();
-
 	private static final String encoding = "UTF-8";
 
 	FileSystemResourceProvider provider;
 
+	Reader resource;
+
+	InputStream resourceStream;
+
 	@BeforeEach
-	public void setupReprovider() throws ConfigurationException {
+	public void setupProvider() throws ConfigurationException {
 		provider = new FileSystemResourceProvider(XSL_DIR.getAbsoluteFile().toString());
 		if (provider.getError() != null) {
 			throw new ConfigurationException(provider.getError().getMessage());
+		}
+	}
+
+	@AfterEach
+	public void tearDown() throws IOException {
+		if (resource != null) {
+			resource.close();
+		}
+		if (resourceStream != null) {
+			resourceStream.close();
 		}
 	}
 
@@ -57,54 +69,62 @@ public class FileSystemResourceProviderTest {
 
 	@Test
 	@EnabledOnOs(OS.LINUX)
-	public void rootPath() throws XPathException, URISyntaxException, IOException {
+	public void rootPath()
+			throws URISyntaxException, IOException, ResourceProviderConfigurationException, ResourceNotFoundException,
+					ResourceException {
 		FileSystemResourceProvider resolver = new FileSystemResourceProvider("/");
 		URI request = new URI("/etc/passwd");
 		// resolving may fail on non-*nix
-		Reader resource = resolver.resolve(request, encoding, config);
+		resource = new InputStreamReader(resolver.openStream(request), encoding);
 		assertTrue(resource.read() > 0); // not EOF
 	}
 
 	@Test
-	public void validPathIdentityXSL() throws XPathException, URISyntaxException, IOException {
-		URI request = new URI(ID_XSL.getAbsolutePath().toString());
-		Reader resource = provider.resolve(request, encoding, config);
+	public void validPathIdentityXSL()
+			throws URISyntaxException, IOException, ResourceProviderConfigurationException, ResourceNotFoundException,
+					ResourceException {
+		URI request = new URI(ID_XSL.getAbsolutePath());
+		resource = new InputStreamReader(provider.openStream(request), encoding);
 		assertEquals(0x3c, resource.read()); // 0x3c == '<'
 	}
 
 	@Test
-	public void validPathFileIdentityXSL() throws XPathException, URISyntaxException, IOException {
-		URI request = new URI("file:" + ID_XSL.getAbsolutePath().toString());
-		Reader resource = provider.resolve(request, encoding, config);
+	public void validPathFileIdentityXSL()
+			throws URISyntaxException, IOException, ResourceProviderConfigurationException, ResourceNotFoundException,
+					ResourceException {
+		URI request = new URI("file:" + ID_XSL.getAbsolutePath());
+		resource = new InputStreamReader(provider.openStream(request), encoding);
 		assertEquals(0x3c, resource.read()); // 0x3c == '<'
 	}
 
 	@Disabled("currently not resolving relative paths")
 	@Test
-	public void relativePathIdentityXSL() throws XPathException, URISyntaxException, IOException {
+	public void relativePathIdentityXSL()
+			throws URISyntaxException, IOException, ResourceProviderConfigurationException, ResourceNotFoundException,
+					ResourceException {
 		URI request = new URI("id.xsl");
-		Reader resource = provider.resolve(request, encoding, config);
+		resource = new InputStreamReader(provider.openStream(request), encoding);
 		assertEquals(0x3c, resource.read()); // 0x3c == '<'
 	}
 
 	@Test
 	public void validPathUnknownXSL() throws URISyntaxException {
-		URI request = new URI(UNKNOWN_XSL.getAbsolutePath().toString());
+		URI request = new URI(UNKNOWN_XSL.getAbsolutePath());
 		// the resource does not exist, so trying to make a FileReader from it
 		// fails
-		assertThrows(XPathException.class, () -> provider.resolve(request, encoding, config));
+		assertThrows(ResourceNotFoundException.class, () -> resourceStream = provider.openStream(request));
 	}
 
 	@Test
 	public void illegalPathFileEtcPasswd() throws URISyntaxException {
 		URI request = new URI("file:/etc/passwd");
-		assertThrows(XPathException.class, () -> provider.resolve(request, encoding, config));
+		assertThrows(ResourceException.class, () -> resourceStream = provider.openStream(request));
 	}
 
 	@Test
 	public void illegalPathEtcPasswd() throws URISyntaxException {
 		URI request = new URI("/etc/passwd");
-		assertThrows(XPathException.class, () -> provider.resolve(request, encoding, config));
+		assertThrows(ResourceException.class, () -> resourceStream = provider.openStream(request));
 	}
 
 	// @Test
@@ -125,13 +145,13 @@ public class FileSystemResourceProviderTest {
 
 	@Test
 	public void illegalPathHelloXML() throws URISyntaxException {
-		URI request = new URI(HELLO_XML.getAbsolutePath().toString());
-		assertThrows(XPathException.class, () -> provider.resolve(request, encoding, config));
+		URI request = new URI(HELLO_XML.getAbsolutePath());
+		assertThrows(ResourceException.class, () -> resourceStream = provider.openStream(request));
 	}
 
 	@Test
 	public void normalizationWorksForHelloXMLViaDots() throws URISyntaxException {
-		URI request = new URI(HELLO_XML_VIA_DOTS.getAbsolutePath().toString());
-		assertThrows(XPathException.class, () -> provider.resolve(request, encoding, config));
+		URI request = new URI(HELLO_XML_VIA_DOTS.getAbsolutePath());
+		assertThrows(ResourceException.class, () -> resourceStream = provider.openStream(request));
 	}
 }

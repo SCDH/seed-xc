@@ -1,7 +1,8 @@
 package de.ulbms.scdh.seed.xc.saxon;
 
 import de.ulbms.scdh.seed.xc.api.*;
-import de.ulbms.scdh.seed.xc.saxon.harden.ChainedUnparsedTextURIResolver;
+import de.ulbms.scdh.seed.xc.saxon.harden.ChainingResourceResolver;
+import de.ulbms.scdh.seed.xc.saxon.harden.ChainingUnparsedTextURIResolver;
 import de.ulbms.scdh.seed.xc.saxon.harden.ServiceConfiguration;
 import de.ulbms.scdh.seed.xc.saxon.harden.ZipFileURIResolver;
 import jakarta.enterprise.context.Dependent;
@@ -296,9 +297,9 @@ public class SaxonXslTransformation extends TransformationBase implements Transf
 		// XInclude.
 
 		// 1. resource resolver for accessing XML via fn:doc() etc.
-		transformer.setResourceResolver(new ChainedResourceResolver(compileTimeResourceResolver, resourceProvider));
+		transformer.setResourceResolver(new ChainingResourceResolver(compileTimeResourceResolver, resourceProvider));
 		transformer.setUnparsedTextResolver(
-				new ChainedUnparsedTextURIResolver(staticAssetsUnparsedTextURIResolver, resourceProvider));
+				new ChainingUnparsedTextURIResolver(staticAssetsUnparsedTextURIResolver, resourceProvider));
 
 		// calling <xsl:result-document> must always throw an error
 		transformer.setResultDocumentHandler(null);

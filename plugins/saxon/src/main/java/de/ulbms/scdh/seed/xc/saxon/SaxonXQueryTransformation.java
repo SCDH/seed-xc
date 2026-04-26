@@ -1,7 +1,8 @@
 package de.ulbms.scdh.seed.xc.saxon;
 
 import de.ulbms.scdh.seed.xc.api.*;
-import de.ulbms.scdh.seed.xc.saxon.harden.ChainedUnparsedTextURIResolver;
+import de.ulbms.scdh.seed.xc.saxon.harden.ChainingResourceResolver;
+import de.ulbms.scdh.seed.xc.saxon.harden.ChainingUnparsedTextURIResolver;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import java.io.File;
@@ -145,9 +146,9 @@ public class SaxonXQueryTransformation extends TransformationBase implements Tra
 		// XInclude.
 
 		// 1. resource resolver for accessing XML via fn:doc() etc.
-		evaluator.setResourceResolver(new ChainedResourceResolver(compileTimeResourceResolver, resourceProvider));
+		evaluator.setResourceResolver(new ChainingResourceResolver(compileTimeResourceResolver, resourceProvider));
 		evaluator.setUnparsedTextResolver(
-				new ChainedUnparsedTextURIResolver(staticAssetsUnparsedTextURIResolver, resourceProvider));
+				new ChainingUnparsedTextURIResolver(staticAssetsUnparsedTextURIResolver, resourceProvider));
 
 		ConversionRules conversionRules = processor.getUnderlyingConfiguration().getConversionRules();
 		StringConverter stringToStringConverter = new StringConverter.StringToString();
