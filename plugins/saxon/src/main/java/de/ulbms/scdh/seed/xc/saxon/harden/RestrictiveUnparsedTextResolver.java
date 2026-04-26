@@ -139,11 +139,11 @@ public class RestrictiveUnparsedTextResolver implements UnparsedTextURIResolver 
 					return resolver.resolve(uri, encoding, config);
 				} else {
 					LOG.error("illegal file URI: {}", uri);
-					throw new XPathException("illegal file URI: " + uri.toString());
+					throw new XPathException("illegal file URI: " + uri);
 				}
 			} else {
 				// be restrictive!
-				throw new XPathException("illegal URI: " + absoluteURI.toString());
+				throw new XPathException("illegal URI: " + absoluteURI);
 			}
 
 		} catch (NullPointerException | IllegalArgumentException | URISyntaxException e) {

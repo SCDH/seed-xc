@@ -53,14 +53,14 @@ public class ConfiguredProcessor {
 				try {
 					processor = new Processor(saxSource);
 				} catch (SaxonApiException e) {
-					LOG.error("Configuring Saxon with '{}' failed:\n{}", saxonPath, e);
+					LOG.error("Configuring Saxon with '{}' failed: {}", saxonPath, e.getMessage());
 					throw new ConfigurationException(e);
 				}
 			}
 		}
 		if (processor == null) {
 			LOG.info(
-					"No saxon configuration file provided at '{}'. Using default " + "configuration.",
+					"No Saxon configuration file provided at '{}'. Using default " + "configuration.",
 					saxonConfigLocations);
 			processor = new Processor(false);
 		}

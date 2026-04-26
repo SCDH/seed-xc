@@ -143,11 +143,11 @@ public class RestrictiveResourceResolver implements ResourceResolver {
 					return new StreamSource(location);
 				} else {
 					LOG.error("illegal file URI: {}", uri);
-					throw new XPathException("illegal file URI: " + uri.toString());
+					throw new XPathException("illegal file URI: " + uri);
 				}
 			} else {
 				LOG.error("illegal URI: {}", uri);
-				throw new XPathException("illegal URI: " + uri.toString());
+				throw new XPathException("illegal URI: " + uri);
 			}
 		} catch (NullPointerException | IllegalArgumentException | URISyntaxException e) {
 			LOG.error("illegal URI {}: {}", request.uri, e.getMessage());

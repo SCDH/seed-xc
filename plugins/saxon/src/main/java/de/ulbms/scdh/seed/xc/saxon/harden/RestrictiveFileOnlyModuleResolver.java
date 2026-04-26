@@ -15,8 +15,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A resource resolver that restricts access to the file system only
- * and the file system access is restricted to a configured path on
- * the base of {@link FileURIResolver}.
+ * and the file system access is restricted to a configured path.
  *
  */
 @ApplicationScoped
