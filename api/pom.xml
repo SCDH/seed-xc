@@ -34,11 +34,6 @@
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-mutiny</artifactId>
     </dependency>
-    <dependency>
-      <groupId>net.sf.saxon</groupId>
-      <artifactId>Saxon-HE</artifactId>
-      <version>${saxon.version}</version>
-    </dependency>
   </dependencies>
 
   <build>
