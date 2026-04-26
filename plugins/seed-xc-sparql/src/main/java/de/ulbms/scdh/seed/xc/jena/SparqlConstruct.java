@@ -44,6 +44,9 @@ public class SparqlConstruct implements Transformation {
 	@ConfigProperty(name = "url-read-timeout", defaultValue = "10000")
 	int contextReadTimeout;
 
+	@ConfigProperty(name = "context-max-size", defaultValue = "1048576")
+	long contextMaxSize;
+
 	TransformationInfo transformationInfo;
 
 	String query;
@@ -103,32 +106,29 @@ public class SparqlConstruct implements Transformation {
 	 * @throws TransformationPreparationException when preparation failed
 	 */
 	private Document getContext() throws TransformationPreparationException {
-		InputStream in = null;
+		URLConnection connection;
 		try {
-			URLConnection connection = getContextUri().toURL().openConnection();
+			// toURL cannot not cause NPE because of way this method is used
+			connection = getContextUri().toURL().openConnection();
 			connection.setConnectTimeout(contextConnectTimeout);
 			connection.setReadTimeout(contextReadTimeout);
-			in = connection.getInputStream();
+		} catch (IOException | NullPointerException e) {
+			LOG.error("JSON-LD framing URI not found {}", getContextUri());
+			throw new TransformationPreparationException("JSON-LD framing URI not found " + getContextUri(), e);
+		}
+		try (InputStream in = connection.getInputStream()) {
+			if (contextMaxSize != 0 && connection.getContentLengthLong() > contextMaxSize) {
+				throw new TransformationPreparationException("context exceeds size limit");
+			}
 			return JsonDocument.of(in);
-		} catch (JsonLdError e) {
-			LOG.error("failed to read JSON-LD framing context {}", getContextUri());
-			throw new TransformationPreparationException(
-					"failed to read JSON-LD framing context " + getContextUri(), e);
 		} catch (SocketTimeoutException e) {
 			LOG.warn("timeout when reading JSON-LD context from {}", getContextUri());
 			throw new TransformationPreparationException(
 					"timeout when reading JSON-LD context from " + getContextUri(), e);
-		} catch (IOException | NullPointerException e) {
-			LOG.error("JSON-LD framing URI not found {}", getContextUri());
-			throw new TransformationPreparationException("JSON-LD framing URI not found " + getContextUri(), e);
-		} finally {
-			if (in != null) {
-				try {
-					in.close();
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
-			}
+		} catch (JsonLdError | IOException e) {
+			LOG.error("failed to read JSON-LD framing context {}", getContextUri());
+			throw new TransformationPreparationException(
+					"failed to read JSON-LD framing context " + getContextUri(), e);
 		}
 	}
 
