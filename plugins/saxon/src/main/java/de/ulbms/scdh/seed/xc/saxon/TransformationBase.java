@@ -8,6 +8,7 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.WebApplicationException;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import javax.xml.transform.Source;
@@ -87,19 +88,26 @@ public abstract class TransformationBase implements Transformation {
 			ResourceProvider resourceProvider,
 			HttpServerRequest request)
 			throws TransformationPreparationException, TransformationException {
-
 		LOG.debug("Transforming `{}` ... (3)", systemId);
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		Serializer out = processor.newSerializer(output);
 
 		XMLReader reader = getParser(config);
-		Source source = new SAXSource(reader, new InputSource(sourceStream));
+		Source source;
+		source = new SAXSource(reader, new InputSource(sourceStream));
 
 		// setting the systemId is needed for the XML base property
 		source.setSystemId(systemId);
 
 		// hand over to implementation of abstract method
 		transform(parameters, config, source, out, resourceProvider);
+		try {
+			LOG.debug("closing input stream");
+			if (sourceStream != null) sourceStream.close();
+		} catch (IOException e) {
+			LOG.error("failed to close input stream: {}", systemId);
+			throw new TransformationException(e);
+		}
 		return output.toByteArray();
 	}
 

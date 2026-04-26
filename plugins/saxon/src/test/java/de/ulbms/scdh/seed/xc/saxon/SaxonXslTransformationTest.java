@@ -11,9 +11,7 @@ import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
 import io.vertx.core.http.HttpServerRequest;
 import jakarta.ws.rs.WebApplicationException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.List;
@@ -87,6 +85,8 @@ public class SaxonXslTransformationTest {
 
 	private final File includeXml =
 			Paths.get("src", "test", "resources", "samples", "include.xml").toFile();
+
+	private InputStream input;
 
 	private byte[] output;
 
@@ -295,11 +295,22 @@ public class SaxonXslTransformationTest {
 	public void testResolveImporting()
 			throws IOException, ConfigurationException, TransformationPreparationException, TransformationException {
 		transformation.setup(IMPORTING_CONFIG, BASE_DIR);
-		output = transformation.transform(
-				null, null, helloXml.toString(), helloXml.toURI().toURL().openStream(), resourceProvider, request);
+		input = helloXml.toURI().toURL().openStream();
+		output = transformation.transform(null, null, helloXml.toString(), input, resourceProvider, request);
 		assertEquals(
 				"<?xml version=\"1.0\" " + "encoding=\"UTF-8\"?><hello><i><b>Hello</b></i></hello>",
 				outputToString(output));
+	}
+
+	@Test
+	public void testClosesInputStream()
+			throws IOException, ConfigurationException, TransformationPreparationException, TransformationException {
+		transformation.setup(IMPORTING_CONFIG, BASE_DIR);
+		BufferedInputStream fileInputStreaminput = new BufferedInputStream(new FileInputStream(helloXml));
+		// fileInputStreaminput.mark(0);
+		output = transformation.transform(
+				null, null, helloXml.toString(), fileInputStreaminput, resourceProvider, request);
+		assertThrowsExactly(IOException.class, () -> fileInputStreaminput.reset());
 	}
 
 	@Test
