@@ -3,6 +3,7 @@ package de.ulbms.scdh.seed.xc.jena;
 import com.apicatalog.jsonld.JsonLd;
 import com.apicatalog.jsonld.JsonLdError;
 import com.apicatalog.jsonld.JsonLdOptions;
+import com.apicatalog.jsonld.document.Document;
 import com.apicatalog.jsonld.document.JsonDocument;
 import de.ulbms.scdh.seed.xc.api.*;
 import io.smallrye.mutiny.Uni;
@@ -86,6 +87,25 @@ public class SparqlConstruct implements Transformation {
 		return result;
 	}
 
+	/**
+	 * Returns the JSON-LD context as a {@link Document}. This method encapsulates
+	 * the preparation of the context including all options, e.g. setting a timeout.
+	 * @return the context {@link Document}
+	 * @throws TransformationPreparationException when preparation failed
+	 */
+	private Document getContext() throws TransformationPreparationException {
+		try {
+			return JsonDocument.of(getContextUri().toURL().openStream());
+		} catch (JsonLdError e) {
+			LOG.error("failed to read JSON-LD framing context {}", getContextUri());
+			throw new TransformationPreparationException(
+					"failed to read JSON-LD framing context " + getContextUri(), e);
+		} catch (IOException | NullPointerException e) {
+			LOG.error("JSON-LD framing URI not found {}", getContextUri());
+			throw new TransformationPreparationException("JSON-LD framing URI not found " + getContextUri(), e);
+		}
+	}
+
 	@Override
 	public byte[] transform(
 			RuntimeParameters parameters,
@@ -132,7 +152,7 @@ public class SparqlConstruct implements Transformation {
 				DatasetGraph dsg = DatasetGraphFactory.create(resultModel.getGraph());
 				JsonArray ja = JenaToTitanium.convert(dsg, opts);
 				JsonDocument jdoc = JsonDocument.of(ja);
-				JsonObject framed = JsonLd.frame(jdoc, getContextUri()).get();
+				JsonObject framed = JsonLd.frame(jdoc, getContext()).get();
 				JsonWriter writer = Json.createWriter(output);
 				writer.writeObject(framed);
 				return output.toByteArray();
@@ -144,7 +164,7 @@ public class SparqlConstruct implements Transformation {
 			LOG.error("failed to execute SPARQL query: {}", e.getMessage());
 			throw new TransformationException(e);
 		} catch (JsonLdError e) {
-			LOG.error("failed to load into titanium json-ld, {}", e.getMessage());
+			LOG.error("JSON-LD processing failed, {}", e.getMessage());
 			throw new TransformationException(e);
 		}
 	}
