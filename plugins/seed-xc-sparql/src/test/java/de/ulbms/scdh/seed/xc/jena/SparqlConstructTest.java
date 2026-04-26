@@ -37,6 +37,8 @@ class SparqlConstructTest {
 
 	private static TransformationInfo QC1_JSONLD;
 
+	private static TransformationInfo QC1_JSONLD_WITH_CONTEXT;
+
 	@Inject
 	HttpServerRequest request;
 
@@ -75,6 +77,15 @@ class SparqlConstructTest {
 		info.setLocation(new File(RQ_DIR, "qc1.rq").getAbsolutePath());
 		info.setMediaType("application/ld+json");
 		QC1_JSONLD = info;
+	}
+
+	static {
+		TransformationInfo info = new TransformationInfo();
+		info.setPropertyClass(SparqlConstruct.TRANSFORMATION_TYPE);
+		info.setLocation(new File(RQ_DIR, "qc1.rq").getAbsolutePath());
+		info.setMediaType("application/ld+json");
+		info.setContext(new Context(FRAME.getAbsoluteFile().toURI()));
+		QC1_JSONLD_WITH_CONTEXT = info;
 	}
 
 	SparqlConstruct transformation;
@@ -124,7 +135,6 @@ class SparqlConstructTest {
 		transformation.setup(QC1_TTL, CONFIG);
 		InputStream in = new FileInputStream(VCDB1);
 		output = transformation.transform(null, null, VCDB1.getAbsolutePath(), in, null, request);
-		// assertEquals("", getOutput());
 		assertTrue(getOutput().startsWith("PREFIX rdf"));
 		assertEquals(5, getOutput().lines().count());
 	}
@@ -137,18 +147,16 @@ class SparqlConstructTest {
 		InputStream in = new FileInputStream(VCDB1);
 		output = transformation.transform(null, null, VCDB1.getAbsolutePath(), in, null, request);
 		assertTrue(getOutput().contains("\"@id\": \"http://somewhere/JohnSmith\""));
-		// assertEquals("", getOutput());
 	}
 
 	@Test
 	public void testConstructQuerySerializeFraming()
 			throws ConfigurationException, TransformationPreparationException, TransformationException,
 					FileNotFoundException {
-		transformation.setup(QC1_JSONLD, CONFIG);
-		transformation.frame = FRAME.getAbsoluteFile().toURI().toString();
+		transformation.setup(QC1_JSONLD_WITH_CONTEXT, CONFIG);
 		InputStream in = new FileInputStream(VCDB1);
 		output = transformation.transform(null, null, VCDB1.getAbsolutePath(), in, null, request);
 		assertTrue(getOutput().contains("\"id\":\"here:JohnSmith\""));
-		// assertEquals("", getOutput());
+		assertFalse(getOutput().contains("\"@id\":\"here:JohnSmith\""));
 	}
 }

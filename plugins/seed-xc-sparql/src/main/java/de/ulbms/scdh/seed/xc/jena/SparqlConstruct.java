@@ -11,6 +11,7 @@ import jakarta.inject.Inject;
 import jakarta.json.*;
 import jakarta.ws.rs.InternalServerErrorException;
 import java.io.*;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -32,8 +33,6 @@ public class SparqlConstruct implements Transformation {
 	private static final Logger LOG = LoggerFactory.getLogger(SparqlConstruct.class);
 
 	public static final String TRANSFORMATION_TYPE = "sparql-construct";
-
-	String frame;
 
 	TransformationInfo transformationInfo;
 
@@ -73,6 +72,20 @@ public class SparqlConstruct implements Transformation {
 		return new XsltParameterDetails();
 	}
 
+	/**
+	 * Returns the configured context location or null when there is none.
+	 * @return - {@link URI} to the context location
+	 */
+	private URI getContextUri() {
+		URI result;
+		if (transformationInfo.getContext() == null) {
+			result = null;
+		} else {
+			result = transformationInfo.getContext().getLocation();
+		}
+		return result;
+	}
+
 	@Override
 	public byte[] transform(
 			RuntimeParameters parameters,
@@ -110,7 +123,7 @@ public class SparqlConstruct implements Transformation {
 			// write result back to the wire
 			ByteArrayOutputStream output = new ByteArrayOutputStream();
 			RDFFormat format = serializer.getFormat(transformationInfo.getMediaType(), systemId, request);
-			if (!format.getLang().equals(Lang.JSONLD11) || frame == null) {
+			if (!format.getLang().equals(Lang.JSONLD11) || getContextUri() == null) {
 				RDFDataMgr.write(output, resultModel, format);
 				return output.toByteArray();
 			} else {
@@ -119,7 +132,7 @@ public class SparqlConstruct implements Transformation {
 				DatasetGraph dsg = DatasetGraphFactory.create(resultModel.getGraph());
 				JsonArray ja = JenaToTitanium.convert(dsg, opts);
 				JsonDocument jdoc = JsonDocument.of(ja);
-				JsonObject framed = JsonLd.frame(jdoc, frame).get();
+				JsonObject framed = JsonLd.frame(jdoc, getContextUri()).get();
 				JsonWriter writer = Json.createWriter(output);
 				writer.writeObject(framed);
 				return output.toByteArray();
