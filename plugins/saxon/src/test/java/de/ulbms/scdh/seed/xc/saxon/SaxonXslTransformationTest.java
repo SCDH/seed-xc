@@ -302,14 +302,20 @@ public class SaxonXslTransformationTest {
 				outputToString(output));
 	}
 
+	/* tests if there are resource leaks */
 	@Test
 	public void testClosesInputStream()
 			throws IOException, ConfigurationException, TransformationPreparationException, TransformationException {
 		transformation.setup(IMPORTING_CONFIG, BASE_DIR);
 		BufferedInputStream fileInputStreaminput = new BufferedInputStream(new FileInputStream(helloXml));
-		// fileInputStreaminput.mark(0);
+		// read the stream once and reset
+		fileInputStreaminput.mark(0);
+		byte[] contents = fileInputStreaminput.readAllBytes();
+		assertTrue(outputToString(contents).startsWith("<"));
+		fileInputStreaminput.reset();
 		output = transformation.transform(
 				null, null, helloXml.toString(), fileInputStreaminput, resourceProvider, request);
+		assertTrue(outputToString(output).startsWith("<"));
 		assertThrowsExactly(IOException.class, () -> fileInputStreaminput.reset());
 	}
 

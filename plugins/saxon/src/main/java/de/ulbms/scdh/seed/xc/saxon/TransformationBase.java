@@ -101,13 +101,6 @@ public abstract class TransformationBase implements Transformation {
 
 		// hand over to implementation of abstract method
 		transform(parameters, config, source, out, resourceProvider);
-		try {
-			LOG.debug("closing input stream");
-			if (sourceStream != null) sourceStream.close();
-		} catch (IOException e) {
-			LOG.error("failed to close input stream: {}", systemId);
-			throw new TransformationException(e);
-		}
 		return output.toByteArray();
 	}
 
