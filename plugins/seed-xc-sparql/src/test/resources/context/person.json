@@ -1,0 +1,8 @@
+{
+  "@context": {
+    "here": "http://somewhere/",
+    "vCard": "http://www.w3.org/2001/vcard-rdf/3.0#",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "id": { "@type":  "@id", "@id":  "@id" }
+  }
+}

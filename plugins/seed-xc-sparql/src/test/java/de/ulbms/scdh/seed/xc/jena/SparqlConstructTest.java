@@ -1,0 +1,174 @@
+package de.ulbms.scdh.seed.xc.jena;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import de.ulbms.scdh.seed.xc.api.*;
+import io.vertx.core.http.HttpServerRequest;
+import jakarta.inject.Inject;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+class SparqlConstructTest {
+
+	private static final File DATA_DIR =
+			Paths.get("src", "test", "resources", "data").toFile();
+
+	private static final File VCDB1 = new File(DATA_DIR, "vc-db-1.rdf");
+
+	private static final File RQ_DIR =
+			Paths.get("src", "test", "resources", "rq").toFile();
+
+	private static final File FRAME =
+			Paths.get("src", "test", "resources", "context", "person.json").toFile();
+
+	private static final File CONFIG = RQ_DIR;
+
+	private static TransformationInfo QS1;
+
+	private static TransformationInfo QC1;
+
+	private static TransformationInfo QC1_TTL;
+
+	private static TransformationInfo QC1_JSONLD;
+
+	private static TransformationInfo QC1_JSONLD_WITH_CONTEXT;
+
+	@Inject
+	HttpServerRequest request;
+
+	private byte[] output;
+
+	private String getOutput() {
+		return new String(output, StandardCharsets.UTF_8);
+	}
+
+	static {
+		TransformationInfo info = new TransformationInfo();
+		info.setPropertyClass(SparqlConstruct.TRANSFORMATION_TYPE);
+		info.setLocation(new File(RQ_DIR, "qs1.rq").getAbsolutePath());
+		QS1 = info;
+	}
+
+	static {
+		TransformationInfo info = new TransformationInfo();
+		info.setPropertyClass(SparqlConstruct.TRANSFORMATION_TYPE);
+		info.setLocation(new File(RQ_DIR, "qc1.rq").getAbsolutePath());
+		info.setMediaType("application/n-triples");
+		QC1 = info;
+	}
+
+	static {
+		TransformationInfo info = new TransformationInfo();
+		info.setPropertyClass(SparqlConstruct.TRANSFORMATION_TYPE);
+		info.setLocation(new File(RQ_DIR, "qc1.rq").getAbsolutePath());
+		info.setMediaType("text/turtle");
+		QC1_TTL = info;
+	}
+
+	static {
+		TransformationInfo info = new TransformationInfo();
+		info.setPropertyClass(SparqlConstruct.TRANSFORMATION_TYPE);
+		info.setLocation(new File(RQ_DIR, "qc1.rq").getAbsolutePath());
+		info.setMediaType("application/ld+json");
+		QC1_JSONLD = info;
+	}
+
+	static {
+		TransformationInfo info = new TransformationInfo();
+		info.setPropertyClass(SparqlConstruct.TRANSFORMATION_TYPE);
+		info.setLocation(new File(RQ_DIR, "qc1.rq").getAbsolutePath());
+		info.setMediaType("application/ld+json");
+		info.setContext(new Context(FRAME.getAbsoluteFile().toURI()));
+		QC1_JSONLD_WITH_CONTEXT = info;
+	}
+
+	SparqlConstruct transformation;
+
+	@BeforeEach
+	public void setup() {
+		transformation = new SparqlConstruct();
+		transformation.serializer = new Serializer();
+	}
+
+	@Test
+	public void testNoSystemIdNonDefaultLang()
+			throws ConfigurationException, TransformationPreparationException, TransformationException,
+					FileNotFoundException {
+		transformation.setup(QS1, CONFIG);
+		InputStream in = new FileInputStream(VCDB1);
+		assertThrows(
+				TransformationException.class, () -> transformation.transform(null, null, null, in, null, request));
+	}
+
+	@Test
+	public void testSelectQuery()
+			throws ConfigurationException, TransformationPreparationException, TransformationException,
+					FileNotFoundException {
+		transformation.setup(QS1, CONFIG);
+		InputStream in = new FileInputStream(VCDB1);
+		assertThrows(
+				TransformationException.class,
+				() -> transformation.transform(null, null, VCDB1.getAbsolutePath(), in, null, request));
+	}
+
+	@Test
+	public void testConstructQuery()
+			throws ConfigurationException, TransformationPreparationException, TransformationException,
+					FileNotFoundException {
+		transformation.setup(QC1, CONFIG);
+		InputStream in = new FileInputStream(VCDB1);
+		output = transformation.transform(null, null, VCDB1.getAbsolutePath(), in, null, request);
+		assertTrue(getOutput().startsWith("<http://somewhere/JohnSmith>"));
+		assertEquals(1, getOutput().lines().count());
+	}
+
+	/* assert that are no resource leaks from input stream */
+	@Test
+	public void testStreamClosed()
+			throws ConfigurationException, TransformationPreparationException, TransformationException,
+					FileNotFoundException, IOException {
+		transformation.setup(QC1, CONFIG);
+		BufferedInputStream in = new BufferedInputStream(new FileInputStream(VCDB1));
+		in.mark(0);
+		in.reset();
+		output = transformation.transform(null, null, VCDB1.getAbsolutePath(), in, null, request);
+		assertTrue(getOutput().startsWith("<http://somewhere/JohnSmith>"));
+		assertEquals(1, getOutput().lines().count());
+		assertThrows(IOException.class, () -> in.reset());
+	}
+
+	@Test
+	public void testConstructQuerySerializeTurtle()
+			throws ConfigurationException, TransformationPreparationException, TransformationException,
+					FileNotFoundException {
+		transformation.setup(QC1_TTL, CONFIG);
+		InputStream in = new FileInputStream(VCDB1);
+		output = transformation.transform(null, null, VCDB1.getAbsolutePath(), in, null, request);
+		assertTrue(getOutput().startsWith("PREFIX rdf"));
+		assertEquals(5, getOutput().lines().count());
+	}
+
+	@Test
+	public void testConstructQuerySerializeJsonLd()
+			throws ConfigurationException, TransformationPreparationException, TransformationException,
+					FileNotFoundException {
+		transformation.setup(QC1_JSONLD, CONFIG);
+		InputStream in = new FileInputStream(VCDB1);
+		output = transformation.transform(null, null, VCDB1.getAbsolutePath(), in, null, request);
+		assertTrue(getOutput().contains("\"@id\": \"http://somewhere/JohnSmith\""));
+	}
+
+	@Test
+	public void testConstructQuerySerializeFraming()
+			throws ConfigurationException, TransformationPreparationException, TransformationException,
+					FileNotFoundException {
+		transformation.setup(QC1_JSONLD_WITH_CONTEXT, CONFIG);
+		InputStream in = new FileInputStream(VCDB1);
+		output = transformation.transform(null, null, VCDB1.getAbsolutePath(), in, null, request);
+		assertTrue(getOutput().contains("\"id\":\"here:JohnSmith\""));
+		assertFalse(getOutput().contains("\"@id\":\"here:JohnSmith\""));
+	}
+}

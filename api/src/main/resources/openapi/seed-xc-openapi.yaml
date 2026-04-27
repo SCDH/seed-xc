@@ -417,6 +417,16 @@ components:
         type:
           type: string
           description: The local name of the parameter type. Write 'integer' instead of 'xs:integer'!
+    context:
+      description: Options of the JSON-LD context
+      type: object
+      required:
+        - location
+      properties:
+        location:
+          type: string
+          format: uri
+          description: The URI of the initial active context
     transformationInfo:
       description: Information about the transformation resource and its runtime parameters
       type: object
@@ -490,6 +500,8 @@ components:
             $ref: '#/components/schemas/parser'
         serializer:
             $ref: '#/components/schemas/serializer'
+        context:
+          $ref: '#/components/schemas/context'
       required:
         - class
         - description
