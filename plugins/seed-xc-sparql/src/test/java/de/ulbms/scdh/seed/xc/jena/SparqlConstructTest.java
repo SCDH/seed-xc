@@ -5,10 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import de.ulbms.scdh.seed.xc.api.*;
 import io.vertx.core.http.HttpServerRequest;
 import jakarta.inject.Inject;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import org.junit.jupiter.api.BeforeEach;
@@ -126,6 +123,21 @@ class SparqlConstructTest {
 		output = transformation.transform(null, null, VCDB1.getAbsolutePath(), in, null, request);
 		assertTrue(getOutput().startsWith("<http://somewhere/JohnSmith>"));
 		assertEquals(1, getOutput().lines().count());
+	}
+
+	/* assert that are no resource leaks from input stream */
+	@Test
+	public void testStreamClosed()
+			throws ConfigurationException, TransformationPreparationException, TransformationException,
+					FileNotFoundException, IOException {
+		transformation.setup(QC1, CONFIG);
+		BufferedInputStream in = new BufferedInputStream(new FileInputStream(VCDB1));
+		in.mark(0);
+		in.reset();
+		output = transformation.transform(null, null, VCDB1.getAbsolutePath(), in, null, request);
+		assertTrue(getOutput().startsWith("<http://somewhere/JohnSmith>"));
+		assertEquals(1, getOutput().lines().count());
+		assertThrows(IOException.class, () -> in.reset());
 	}
 
 	@Test
