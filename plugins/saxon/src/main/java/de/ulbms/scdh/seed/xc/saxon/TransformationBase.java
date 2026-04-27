@@ -87,13 +87,13 @@ public abstract class TransformationBase implements Transformation {
 			ResourceProvider resourceProvider,
 			HttpServerRequest request)
 			throws TransformationPreparationException, TransformationException {
-
 		LOG.debug("Transforming `{}` ... (3)", systemId);
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		Serializer out = processor.newSerializer(output);
 
 		XMLReader reader = getParser(config);
-		Source source = new SAXSource(reader, new InputSource(sourceStream));
+		Source source;
+		source = new SAXSource(reader, new InputSource(sourceStream));
 
 		// setting the systemId is needed for the XML base property
 		source.setSystemId(systemId);
