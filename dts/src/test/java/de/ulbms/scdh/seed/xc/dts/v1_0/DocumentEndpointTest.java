@@ -136,4 +136,20 @@ public class DocumentEndpointTest {
 		assertFalse(contents.contains("<pb n=\"2\"/>"));
 		assertFalse(contents.contains("of all mankind."));
 	}
+
+	@Test
+	public void testJohnXmlMediaTypeXml200() {
+		given().when()
+				.get("/document?resource=john.xml&mediaType=text/xml")
+				.then()
+				.statusCode(400);
+	}
+
+	@Test
+	public void testJohnXmlMediaTypeHtml200() {
+		given().when()
+				.get("/document?resource=john.xml&mediaType=text/html")
+				.then()
+				.statusCode(400);
+	}
 }
