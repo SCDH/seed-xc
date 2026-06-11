@@ -8,6 +8,7 @@ import io.smallrye.mutiny.Uni;
 import io.vertx.core.http.HttpServerRequest;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,6 +35,12 @@ public class DocumentEndpoint implements DocumentApi {
 			defaultValue = "dts-transformations-xsl-document")
 	protected String TRANSFORMATION;
 
+	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.DocumentEndpoint.TYPE", defaultValue = "DtsDocumentProcessor")
+	protected String TYPE;
+
+	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.DocumentEndpoint.SETS_SERIALIZER", defaultValue = "true")
+	protected boolean SETS_SERIALIZER;
+
 	@Inject
 	protected TransformationMap transformations;
 
@@ -45,9 +52,9 @@ public class DocumentEndpoint implements DocumentApi {
 	HttpServerRequest request;
 
 	/**
-	 * Implementation of the DTS Document endpoint. This first gets the resource using the resource provider and then transformes it.
+	 * Implementation of the DTS Document endpoint. This first gets the resource using the resource provider and then transforms it.
 	 *
-	 * @param resource - Resource identifer. Passed as runtime parameter to the transformation and also to the resource provider.
+	 * @param resource - Resource identifier. Passed as runtime parameter to the transformation and also to the resource provider.
 	 * @param ref - See DTS specs. Passed as runtime parameter to the transformation.
 	 * @param start - See DTS specs. Passed as runtime parameter to the transformation.
 	 * @param end - See DTS specs. Passed as runtime parameter to the transformation.
@@ -68,24 +75,63 @@ public class DocumentEndpoint implements DocumentApi {
 			Map<String, String> cr,
 			Map<String, String> cf) {
 
-		// get the transformation or return failure
-		Transformation transformation = transformations.get(TRANSFORMATION);
-		if (transformation == null) {
-			LOG.error("transformation not available: {}", TRANSFORMATION);
-			return Uni.createFrom()
-					.failure(new jakarta.ws.rs.BadRequestException("transformation not available: " + TRANSFORMATION));
+		Transformation transformation = null;
+		Config config = null;
+		if (mediaType == null) {
+			// get the default transformation or return failure
+			transformation = transformations.get(TRANSFORMATION);
+			if (transformation == null) {
+				LOG.error("transformation not available: {}", TRANSFORMATION);
+				return Uni.createFrom()
+						.failure(new jakarta.ws.rs.BadRequestException(
+								"transformation not available: " + TRANSFORMATION));
+			}
+		} else {
+			// try to get a transformation for the requested media type
+			LOG.info("searching for document transformation to media type {}", mediaType);
+			boolean found = false;
+			for (String transformationId : transformations.keySet()) {
+				transformation = transformations.get(transformationId);
+				LOG.info(
+						"testing transformation {}, with type {}: {}",
+						transformationId,
+						transformation.getType(),
+						transformation.getOutputMediaType());
+				if (transformation.getOutputMediaType() != null
+						&& transformation.getOutputMediaType().equals(mediaType)
+						&& transformation.getType() != null
+						&& Arrays.asList(transformation.getType()).contains(TYPE)) {
+					found = true;
+					if (SETS_SERIALIZER) {
+						// we have to set the serializer because the called stylesheet is always document.xsl which has
+						// output method XML.
+						Serializer serializer = new Serializer();
+						serializer.setMethod(mediaType);
+						config = new Config();
+						config.setSerializer(serializer);
+					}
+					break;
+				}
+			}
+			if (!found) {
+				LOG.error("DTS document transformation to media type not available: {}", mediaType);
+				return Uni.createFrom()
+						.failure(new jakarta.ws.rs.BadRequestException(
+								"DTS document transformation to requested media type not available: " + mediaType));
+			}
 		}
+		final Transformation finalTransformation = transformation; // final required for the lambda expression below
+		final Config finalConfig = config;
 
 		// make RuntimeParameter object from parameters
 		RuntimeParameters params = new RuntimeParameters();
-		Map<String, String> map = new HashMap<String, String>();
+		Map<String, String> map = new HashMap<>();
+		if (mediaType != null) map.put("mediaType", mediaType);
 		if (resource != null) map.put("resource", resource);
 		if (ref != null) map.put("ref", ref);
 		if (start != null) map.put("start", start);
 		if (end != null) map.put("end", end);
 		if (tree != null) map.put("tree", tree);
-		/* TODO: media type */
-		// all cf (= Context Follow ups) parameters are passed to the stylesheet
 		if (cf != null) map.putAll(cf);
 		params.globalParameters(map);
 		LOG.info("parameters: {}", map);
@@ -95,13 +141,8 @@ public class DocumentEndpoint implements DocumentApi {
 		ResourceInContext ric = new ResourceInContext(Collections.unmodifiableMap(cr), resource);
 		Uni<ResourceInContext> uniRic = Uni.createFrom().item(ric);
 
-		LOG.info("here");
-
-		return uniRic.plug((r) -> {
-					return resourceProvider.asyncOpenStream(r, request);
-				})
-				.plug((s) -> {
-					return transformation.transformAsync(params, null, resource, s, resourceProvider, request);
-				});
+		return uniRic.plug((r) -> resourceProvider.asyncOpenStream(r, request))
+				.plug((s) -> finalTransformation.transformAsync(
+						params, finalConfig, resource, s, resourceProvider, request));
 	}
 }

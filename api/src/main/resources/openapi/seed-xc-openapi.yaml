@@ -437,6 +437,11 @@ components:
         class:
           description: The Java class of the transformation. This is evaluated by the service to create the transformation.
           type: string
+        type:
+          description: The type of the transformation. This can be used for filtering.
+          type: array
+          items:
+            type: string
         description:
           description: A human readable description of the transformation.
           type: string
@@ -447,7 +452,10 @@ components:
           description: URL where the transformation resource is located.
           type: string
         mediaType:
-          description: Mime-type of the transformed document.
+          description: Media type (content type) of the transformed document.
+          type: string
+        profile:
+          description: A profile on top of the media type.
           type: string
         compileTimeParameters:
           description: Static parameters passed at compile time.

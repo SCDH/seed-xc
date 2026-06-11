@@ -1,8 +1,7 @@
 package de.ulbms.scdh.seed.xc.dts.v1_0;
 
 import static io.restassured.RestAssured.given;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.common.http.TestHTTPResource;
@@ -134,6 +133,68 @@ public class DocumentEndpointTest {
 		assertFalse(contents.contains("In the beginning was the Word"));
 		assertFalse(contents.contains("He was with God in the beginning."));
 		assertFalse(contents.contains("<pb n=\"2\"/>"));
+		assertFalse(contents.contains("of all mankind."));
+	}
+
+	@Test
+	public void testJohnXmlMediaTypeXml200() {
+		given().when()
+				.get("/document?resource=john.xml&mediaType=text/xml")
+				.then()
+				.statusCode(200);
+	}
+
+	@Test
+	public void testJohnXmlMediaTypeHtml200() {
+		given().when()
+				.get("/document?resource=john.xml&mediaType=text/html")
+				.then()
+				.statusCode(400);
+	}
+
+	@Test
+	public void testJohnXmlMediaTypePlaintext200() {
+		given().when()
+				.get("/document?resource=john.xml&mediaType=text/plain")
+				.then()
+				.statusCode(200);
+	}
+
+	@TestHTTPEndpoint(DocumentEndpoint.class)
+	@TestHTTPResource("?resource=john.xml&mediaType=text/plain")
+	URL johnMediaTypePlaintext;
+
+	@Test
+	public void testJohnMediaTypePlaintextHasNoTags() throws IOException {
+		InputStream in = johnMediaTypePlaintext.openStream();
+		String contents = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+		assertFalse(contents.contains("<TEI"), "no TEI element");
+		assertFalse(contents.contains("<l"), "no verse elements");
+		assertFalse(contents.contains("<?xml"), "no XML declaration");
+		assertFalse(contents.contains("<"), "no triangle bracket");
+	}
+
+	@Test
+	public void testJohnMediaTypePlaintext() throws IOException {
+		InputStream in = johnMediaTypePlaintext.openStream();
+		String contents = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+		assertTrue(
+				contents.contains(
+						"In the beginning was the Word, and the Word was with God, and the Word was  God.\nHe was with God in the beginning."));
+		assertTrue(contents.endsWith("There was a man sent from God whose name was John.\nbla"));
+	}
+
+	@TestHTTPEndpoint(DocumentEndpoint.class)
+	@TestHTTPResource("?resource=john.xml&tree=page-hateoas&start=p.1.start&end=p.1.end&mediaType=text/plain")
+	URL johnP1MediaTypePlaintext;
+
+	@Test
+	public void testJohnP1MediaTypePlaintext() throws IOException {
+		InputStream in = johnP1MediaTypePlaintext.openStream();
+		String contents = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+		assertTrue(contents.contains("In the beginning was the Word"));
+		// assertTrue(contents.endsWith("In him was life, and that life was the light")); // not contained because of
+		// tei2txt stylesheet
 		assertFalse(contents.contains("of all mankind."));
 	}
 }

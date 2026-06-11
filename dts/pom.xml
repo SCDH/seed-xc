@@ -252,15 +252,28 @@
                   <outputDirectory>${openapi-specs.dir}</outputDirectory>
                 </configuration>
               </execution>
-              <!-- download DTS transformations (XSLT) -->
               <execution>
+                <!-- download DTS transformations (XSLT) -->
                 <id>download-dts-transformations</id>
                 <goals>
                   <goal>wget</goal>
                 </goals>
                 <phase>generate-sources</phase>
                 <configuration>
-                  <url>${dts-transformations.url}</url>
+                  <url>https://github.com/SCDH/dts-transformations/releases/download/${dts-transformations.version}/dts-transformations-${dts-transformations.version}-seed-resources.tar.gz</url>
+                  <unpack>true</unpack>
+                  <outputDirectory>${project.build.directory}/dependencies/</outputDirectory>
+                </configuration>
+              </execution>
+              <execution>
+                <!-- download DTS transformations testing package (XSLT) -->
+                <id>download-dts-transformations-testing</id>
+                <goals>
+                  <goal>wget</goal>
+                </goals>
+                <phase>generate-sources</phase>
+                <configuration>
+                  <url>https://github.com/SCDH/dts-transformations/releases/download/${dts-transformations.version}/dts-transformations-${dts-transformations.version}-seed-testing.tar.gz</url>
                   <unpack>true</unpack>
                   <outputDirectory>${project.build.directory}/dependencies/</outputDirectory>
                 </configuration>

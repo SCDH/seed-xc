@@ -37,7 +37,7 @@ public class SaxonXQueryTransformation extends TransformationBase implements Tra
 	 * {@inheritDoc}
 	 */
 	@Override
-	public String getType() {
+	public String getClazz() {
 		return SaxonXQueryTransformation.TRANSFORMATION_TYPE;
 	}
 

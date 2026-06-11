@@ -19,9 +19,14 @@ import java.io.InputStream;
 public interface Transformation {
 
 	/**
-	 * Returns the transformation type, e.g. <code>XSLT</code>.
+	 * Returns the transformation class, e.g. <code>XSLT</code>.
 	 */
-	String getType();
+	String getClazz();
+
+	/**
+	 * Returns an array of types, e.g. <code>DtsDocumentProcessor</code>.
+	 */
+	String[] getType();
 
 	/**
 	 * Set up (compile) the transformation from a {@link TransformationInfo}.

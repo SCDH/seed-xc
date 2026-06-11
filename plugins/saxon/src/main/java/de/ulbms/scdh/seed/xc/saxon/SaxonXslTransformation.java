@@ -44,7 +44,7 @@ public class SaxonXslTransformation extends TransformationBase implements Transf
 	 * {@inheritDoc}
 	 */
 	@Override
-	public String getType() {
+	public String getClazz() {
 		return SaxonXslTransformation.TRANSFORMATION_TYPE;
 	}
 
