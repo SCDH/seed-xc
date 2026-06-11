@@ -8,6 +8,7 @@ import io.smallrye.mutiny.Uni;
 import io.vertx.core.http.HttpServerRequest;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -83,13 +84,19 @@ public class DocumentEndpoint implements DocumentApi {
 			}
 		} else {
 			// try to get a transformation for the requested media type
+			LOG.info("searching for document transformation to media type {}", mediaType);
 			boolean found = false;
 			for (String transformationId : transformations.keySet()) {
 				transformation = transformations.get(transformationId);
+				LOG.info(
+						"testing transformation {}, with type {}: {}",
+						transformationId,
+						transformation.getType(),
+						transformation.getOutputMediaType());
 				if (transformation.getOutputMediaType() != null
 						&& transformation.getOutputMediaType().equals(mediaType)
 						&& transformation.getType() != null
-						&& transformation.getType().contains(TYPE)) {
+						&& Arrays.asList(transformation.getType()).contains(TYPE)) {
 					found = true;
 					break;
 				}

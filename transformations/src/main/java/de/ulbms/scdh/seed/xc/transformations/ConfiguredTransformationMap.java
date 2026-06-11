@@ -120,7 +120,7 @@ public class ConfiguredTransformationMap extends HashMap<String, Transformation>
 			boolean serviceFound = false;
 			while (transformationServices.hasNext()) {
 				Transformation service = transformationServices.next();
-				if (transformationType.equals(service.getType())) {
+				if (transformationType.equals(service.getClazz())) {
 					// we create a bean and therefore use Instance#select(Class) to dynamically
 					// create a transformation instance of a dynamically determined class
 					Instance<? extends Transformation> transformationInstance =

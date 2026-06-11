@@ -58,8 +58,19 @@ public class SparqlConstruct implements Transformation {
 	Serializer serializer;
 
 	@Override
-	public String getType() {
+	public String getClazz() {
 		return SparqlConstruct.TRANSFORMATION_TYPE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String[] getType() {
+		if (transformationInfo.getType() == null) {
+			return new String[] {};
+		}
+		return transformationInfo.getType().toArray(new String[0]);
 	}
 
 	@Override

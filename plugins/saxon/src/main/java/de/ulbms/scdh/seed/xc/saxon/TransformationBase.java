@@ -60,6 +60,17 @@ public abstract class TransformationBase implements Transformation {
 	 * {@inheritDoc}
 	 */
 	@Override
+	public String[] getType() {
+		if (transformationInfo.getType() == null) {
+			return new String[] {};
+		}
+		return transformationInfo.getType().toArray(new String[0]);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public String getOutputMediaType() {
 		return transformationInfo.getMediaType();
 	}
