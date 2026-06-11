@@ -10,6 +10,7 @@ import jakarta.ws.rs.WebApplicationException;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
+import java.util.regex.Pattern;
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
 import net.sf.saxon.lib.ResourceResolver;
@@ -101,6 +102,7 @@ public abstract class TransformationBase implements Transformation {
 		LOG.debug("Transforming `{}` ... (3)", systemId);
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		Serializer out = processor.newSerializer(output);
+		configureSerializer(out, config);
 
 		XMLReader reader = getParser(config);
 		Source source;
@@ -112,6 +114,26 @@ public abstract class TransformationBase implements Transformation {
 		// hand over to implementation of abstract method
 		transform(parameters, config, source, out, resourceProvider);
 		return output.toByteArray();
+	}
+
+	public void configureSerializer(Serializer serializer, Config config) {
+		if (config != null
+				&& config.getSerializer() != null
+				&& config.getSerializer().getMethod() != null) {
+			String method = config.getSerializer().getMethod();
+			if (Pattern.compile("\\(application\\|text\\)/(.*\\+)xml")
+					.matcher(method)
+					.find()) {
+				serializer.setOutputProperty(Serializer.Property.METHOD, "xml");
+			} else if (Pattern.compile("application/(.*\\+)json")
+					.matcher(method)
+					.find()) {
+				serializer.setOutputProperty(Serializer.Property.METHOD, "json");
+			} else if (Pattern.compile("text/plain").matcher(method).find()) {
+				serializer.setOutputProperty(Serializer.Property.METHOD, "text");
+			}
+			// default?
+		}
 	}
 
 	/**

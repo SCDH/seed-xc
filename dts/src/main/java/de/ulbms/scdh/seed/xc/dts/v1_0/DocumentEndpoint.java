@@ -73,6 +73,7 @@ public class DocumentEndpoint implements DocumentApi {
 			Map<String, String> cf) {
 
 		Transformation transformation = null;
+		Config config = null;
 		if (mediaType == null) {
 			// get the default transformation or return failure
 			transformation = transformations.get(TRANSFORMATION);
@@ -98,6 +99,12 @@ public class DocumentEndpoint implements DocumentApi {
 						&& transformation.getType() != null
 						&& Arrays.asList(transformation.getType()).contains(TYPE)) {
 					found = true;
+					// we have to set the serializer because the called stylesheet is always document.xsl which has
+					// output method XML.
+					Serializer serializer = new Serializer();
+					serializer.setMethod(mediaType);
+					config = new Config();
+					config.setSerializer(serializer);
 					break;
 				}
 			}
@@ -109,6 +116,7 @@ public class DocumentEndpoint implements DocumentApi {
 			}
 		}
 		final Transformation finalTransformation = transformation; // final required for the lambda expression below
+		final Config finalConfig = config;
 
 		// make RuntimeParameter object from parameters
 		RuntimeParameters params = new RuntimeParameters();
@@ -129,6 +137,7 @@ public class DocumentEndpoint implements DocumentApi {
 		Uni<ResourceInContext> uniRic = Uni.createFrom().item(ric);
 
 		return uniRic.plug((r) -> resourceProvider.asyncOpenStream(r, request))
-				.plug((s) -> finalTransformation.transformAsync(params, null, resource, s, resourceProvider, request));
+				.plug((s) -> finalTransformation.transformAsync(
+						params, finalConfig, resource, s, resourceProvider, request));
 	}
 }
