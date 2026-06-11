@@ -38,6 +38,9 @@ public class DocumentEndpoint implements DocumentApi {
 	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.DocumentEndpoint.TYPE", defaultValue = "DtsDocumentProcessor")
 	protected String TYPE;
 
+	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.DocumentEndpoint.SETS_SERIALIZER", defaultValue = "true")
+	protected boolean SETS_SERIALIZER;
+
 	@Inject
 	protected TransformationMap transformations;
 
@@ -99,12 +102,14 @@ public class DocumentEndpoint implements DocumentApi {
 						&& transformation.getType() != null
 						&& Arrays.asList(transformation.getType()).contains(TYPE)) {
 					found = true;
-					// we have to set the serializer because the called stylesheet is always document.xsl which has
-					// output method XML.
-					Serializer serializer = new Serializer();
-					serializer.setMethod(mediaType);
-					config = new Config();
-					config.setSerializer(serializer);
+					if (SETS_SERIALIZER) {
+						// we have to set the serializer because the called stylesheet is always document.xsl which has
+						// output method XML.
+						Serializer serializer = new Serializer();
+						serializer.setMethod(mediaType);
+						config = new Config();
+						config.setSerializer(serializer);
+					}
 					break;
 				}
 			}
