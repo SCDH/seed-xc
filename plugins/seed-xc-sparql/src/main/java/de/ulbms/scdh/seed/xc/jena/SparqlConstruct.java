@@ -180,6 +180,7 @@ public class SparqlConstruct implements Transformation {
 			QueryExecution qexec = QueryExecutionFactory.create(query, graph);
 			Model resultModel = qexec.execConstruct();
 			qexec.close();
+			LOG.debug("done processing SPARQL query");
 			// write result back to the wire
 			ByteArrayOutputStream output = new ByteArrayOutputStream();
 			RDFFormat format = serializer.getFormat(transformationInfo.getMediaType(), systemId, request);
