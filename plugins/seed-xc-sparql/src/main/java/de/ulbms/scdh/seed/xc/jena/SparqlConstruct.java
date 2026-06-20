@@ -8,6 +8,7 @@ import com.apicatalog.jsonld.document.JsonDocument;
 import de.ulbms.scdh.seed.xc.api.*;
 import io.smallrye.mutiny.Uni;
 import io.vertx.core.http.HttpServerRequest;
+import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.json.*;
 import jakarta.ws.rs.InternalServerErrorException;
@@ -32,6 +33,7 @@ import org.slf4j.LoggerFactory;
  * The {@link SparqlConstruct} is a {@link Transformation}
  * plugin for running SPARQL queries.
  */
+@Dependent
 public class SparqlConstruct implements Transformation {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SparqlConstruct.class);
