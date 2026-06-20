@@ -79,7 +79,8 @@ public class SparqlConstruct implements Transformation {
 	public void setup(TransformationInfo transformationInfo, File path) throws ConfigurationException {
 		this.transformationInfo = transformationInfo;
 		Path configFile = Paths.get(path.toURI()).toAbsolutePath().normalize();
-		Path queryFile = configFile.resolve(transformationInfo.getLocation());
+		Path queryFile =
+				configFile.getParent().resolve(transformationInfo.getLocation()).normalize();
 		try {
 			query = Files.readString(queryFile);
 		} catch (IOException e) {
