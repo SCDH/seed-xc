@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 public class CollectionEndpointTest {
 
 	@Test
-	public void testNoParams() {
+	public void testStatusGeneral() {
 		given().when().get("/collection?id=general").then().statusCode(200);
 	}
 }
