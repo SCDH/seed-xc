@@ -81,7 +81,9 @@ class SparqlConstructTest {
 		info.setPropertyClass(SparqlConstruct.TRANSFORMATION_TYPE);
 		info.setLocation(new File(RQ_DIR, "qc1.rq").getAbsolutePath());
 		info.setMediaType("application/ld+json");
-		info.setContext(new Context(FRAME.getAbsoluteFile().toURI()));
+		Context context = new Context();
+		context.setLocation(FRAME.getAbsoluteFile().toURI());
+		info.setContext(context);
 		QC1_JSONLD_WITH_CONTEXT = info;
 	}
 
@@ -91,6 +93,7 @@ class SparqlConstructTest {
 	public void setup() {
 		transformation = new SparqlConstruct();
 		transformation.serializer = new Serializer();
+		transformation.jsonLdContextFactory = new JsonLdContext();
 	}
 
 	@Test
