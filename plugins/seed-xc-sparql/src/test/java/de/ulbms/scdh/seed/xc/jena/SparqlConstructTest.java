@@ -21,8 +21,8 @@ class SparqlConstructTest {
 	private static final File RQ_DIR =
 			Paths.get("src", "test", "resources", "rq").toFile();
 
-	private static final File FRAME =
-			Paths.get("src", "test", "resources", "context", "person.json").toFile();
+	private static final File FRAME = Paths.get("src", "test", "resources", "META-INF", "resources", "person.json")
+			.toFile();
 
 	private static final File CONFIG = RQ_DIR;
 

@@ -3,10 +3,14 @@ package de.ulbms.scdh.seed.xc.jena;
 import com.apicatalog.jsonld.JsonLdError;
 import com.apicatalog.jsonld.document.Document;
 import com.apicatalog.jsonld.document.JsonDocument;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsonp.JSONPModule;
 import de.ulbms.scdh.seed.xc.api.Context;
 import de.ulbms.scdh.seed.xc.api.TransformationInfo;
 import de.ulbms.scdh.seed.xc.api.TransformationPreparationException;
 import jakarta.enterprise.context.Dependent;
+import jakarta.json.JsonStructure;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.SocketTimeoutException;
@@ -56,14 +60,16 @@ public class JsonLdContext {
 			return null;
 		}
 		if (context.getDocument() != null) {
-			return fromDocument(context.getDocument());
+			return fromDocument(context);
 		} else {
 			return fromUri(context.getLocation());
 		}
 	}
 
-	private Document fromDocument(Object document) throws TransformationPreparationException {
-		return null;
+	private Document fromDocument(Context context) throws TransformationPreparationException {
+		ObjectMapper om = JsonMapper.builder().addModule(new JSONPModule()).build();
+		JsonStructure jsonStructure = om.convertValue(context.getDocument(), JsonStructure.class);
+		return JsonDocument.of(jsonStructure);
 	}
 
 	private Document fromUri(URI location) throws TransformationPreparationException {
