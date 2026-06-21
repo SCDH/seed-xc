@@ -94,6 +94,7 @@ class SparqlConstructTest {
 		transformation = new SparqlConstruct();
 		transformation.serializer = new Serializer();
 		transformation.jsonLdContextFactory = new JsonLdContext();
+		transformation.jsonLdDocumentLoader = ConfiguredJsonLdLoader.createJsonLdLoader(10000);
 	}
 
 	@Test

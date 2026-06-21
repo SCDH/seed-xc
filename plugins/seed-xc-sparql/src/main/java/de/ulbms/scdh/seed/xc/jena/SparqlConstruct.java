@@ -3,7 +3,10 @@ package de.ulbms.scdh.seed.xc.jena;
 import com.apicatalog.jsonld.JsonLd;
 import com.apicatalog.jsonld.JsonLdError;
 import com.apicatalog.jsonld.JsonLdOptions;
+import com.apicatalog.jsonld.api.FramingApi;
+import com.apicatalog.jsonld.document.Document;
 import com.apicatalog.jsonld.document.JsonDocument;
+import com.apicatalog.jsonld.loader.DocumentLoader;
 import de.ulbms.scdh.seed.xc.api.*;
 import io.smallrye.mutiny.Uni;
 import io.vertx.core.http.HttpServerRequest;
@@ -52,6 +55,9 @@ public class SparqlConstruct implements Transformation {
 
 	@Inject
 	JsonLdContext jsonLdContextFactory;
+
+	@Inject
+	DocumentLoader jsonLdDocumentLoader;
 
 	/**
 	 * {@inheritDoc}
@@ -134,8 +140,15 @@ public class SparqlConstruct implements Transformation {
 				DatasetGraph dsg = DatasetGraphFactory.create(resultModel.getGraph());
 				JsonArray ja = JenaToTitanium.convert(dsg, opts);
 				JsonDocument jdoc = JsonDocument.of(ja);
-				JsonObject framed = JsonLd.frame(jdoc, jsonLdContextFactory.getContext(transformationInfo))
-						.get();
+				Document frameDoc = jsonLdContextFactory.getContext(transformationInfo);
+				JsonLdOptions options = new JsonLdOptions();
+				options.setOmitGraph(true);
+				options.setDocumentLoader(jsonLdDocumentLoader);
+				// TODO: try options here!
+				FramingApi framingApi = JsonLd.frame(jdoc, frameDoc);
+				framingApi.options(options);
+				framingApi.loader(jsonLdDocumentLoader);
+				JsonObject framed = framingApi.get();
 				JsonWriter writer = Json.createWriter(output);
 				writer.writeObject(framed);
 			}
