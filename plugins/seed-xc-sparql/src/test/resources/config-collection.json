@@ -1,0 +1,36 @@
+{
+    "dts-transformations-rq-children": {
+      "parameterDescriptors": {
+        "id": { 
+          "default": "()",
+          "static": false,
+          "type": "xs:anyURI",
+          "required": true },
+        "page": { 
+          "default": "()",
+          "static": false,
+          "type": "xs:integer",
+          "required": false }
+      },
+      "libraries": [  ],
+      "context": { 
+        "document": {
+          "member": { 
+            "@embed": "@always" },
+          "@context": [
+            "https:\/\/raw.githubusercontent.com\/SCDH\/dts-transformations\/refs\/tags\/0.5.2\/xsl\/context\/modules\/dct-nest.json",
+            "https:\/\/raw.githubusercontent.com\/SCDH\/dts-transformations\/refs\/tags\/0.5.2\/xsl\/context\/modules\/1.0rc1.json",
+            { 
+              "extensions": "@nest" }
+          ]
+        } },
+      "description": "Get metadata for collection or resource given by ID and for its children from a metadata knowledge graph.",
+      "location": "rq\/collection-children.rq",
+      "mediaType": "application\/ld+json",
+      "type": [ 
+        "DTS",
+        "DTSCollection" ],
+      "class": "sparql-construct",
+      "requiresSource": false
+    }
+  }

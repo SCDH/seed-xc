@@ -1,0 +1,72 @@
+_:B30f21bb861165f03db42e4807e5b4c50 <http://purl.org/dc/terms/language> "en" .
+_:B921c859c8f1f47600d0546eb7228a7fd <http://purl.org/dc/terms/language> "en" .
+_:Bd3973bfca68f7a416d7b7974ea69745f <http://purl.org/dc/terms/language> "en" .
+_:B9ecffaebde8a263ec2a437c5c916c821 <http://purl.org/dc/terms/language> "en" .
+_:B838e83b7c0d23dbc557e5e3020ed1143 <http://purl.org/dc/terms/language> "en" .
+<http://example.com/4ezr.xml> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://w3id.org/dts/api#Resource> .
+<http://example.com/4ezr.xml> <http://purl.org/dc/terms/description> "TEI-XML edition of the 4th book of Esra based on ..."@en .
+<http://example.com/4ezr.xml> <http://purl.org/dc/terms/title> "The 4th Book of Esra" .
+<http://example.com/4ezr.xml> <http://purl.org/dc/terms/title> "Esra IV"@en .
+<http://example.com/4ezr.xml> <https://w3id.org/dts/api#collection> "/collection?id=4ezr.xml{&nav}" .
+<http://example.com/4ezr.xml> <https://w3id.org/dts/api#document> "/document?resource=john.xml{&ref,start,end,tree,mediaType}" .
+<http://example.com/4ezr.xml> <https://w3id.org/dts/api#download> "4ezr.xml" .
+<http://example.com/4ezr.xml> <https://w3id.org/dts/api#dtsVersion> "1.0rc1" .
+<http://example.com/4ezr.xml> <https://w3id.org/dts/api#identifier> _:B9ecffaebde8a263ec2a437c5c916c821 .
+<http://example.com/4ezr.xml> <https://w3id.org/dts/api#navigation> "/navigation?resource=john.xml{&ref,start,end,tree}" .
+<http://example.com/4ezr.xml> <https://w3id.org/dts/api#totalChildren> "0"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<http://example.com/4ezr.xml> <https://w3id.org/dts/api#totalParents> "1"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<http://example.com/agrapha> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://w3id.org/dts/api#Collection> .
+<http://example.com/agrapha> <http://purl.org/dc/terms/title> "Collection of Agrapha" .
+<http://example.com/agrapha> <http://purl.org/dc/terms/title> _:B838e83b7c0d23dbc557e5e3020ed1143 .
+<http://example.com/agrapha> <https://w3id.org/dts/api#collection> "/collection?id=agrapha{&page,nav}" .
+<http://example.com/agrapha> <https://w3id.org/dts/api#dtsVersion> "1.0rc1" .
+<http://example.com/agrapha> <https://w3id.org/dts/api#member> <http://example.com/agraphai.xml> .
+<http://example.com/agrapha> <https://w3id.org/dts/api#totalChildren> "1"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<http://example.com/agrapha> <https://w3id.org/dts/api#totalParents> "1"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<http://example.com/agraphai.xml> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://w3id.org/dts/api#Resource> .
+<http://example.com/agraphai.xml> <http://purl.org/dc/terms/title> "Book of Non-Written Stuff I" .
+<http://example.com/agraphai.xml> <https://w3id.org/dts/api#collection> "/collection?id=agraphai.xml{&nav}" .
+<http://example.com/agraphai.xml> <https://w3id.org/dts/api#document> "/document?resource=agraphai.xml{&ref,start,end,tree,mediaType}" .
+<http://example.com/agraphai.xml> <https://w3id.org/dts/api#dtsVersion> "1.0rc1" .
+<http://example.com/agraphai.xml> <https://w3id.org/dts/api#navigation> "/navigation?resource=agraphai.xml{&ref,start,end,tree}" .
+<http://example.com/agraphai.xml> <https://w3id.org/dts/api#totalChildren> "0"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<http://example.com/agraphai.xml> <https://w3id.org/dts/api#totalParents> "1"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<http://example.com/apocryphs> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://w3id.org/dts/api#Collection> .
+<http://example.com/apocryphs> <http://purl.org/dc/terms/title> "Collection of Apocryphical Books" .
+<http://example.com/apocryphs> <http://purl.org/dc/terms/title> _:B921c859c8f1f47600d0546eb7228a7fd .
+<http://example.com/apocryphs> <https://w3id.org/dts/api#collection> "/collection?id=apogryphs{&page,nav}" .
+<http://example.com/apocryphs> <https://w3id.org/dts/api#dtsVersion> "1.0rc1" .
+<http://example.com/apocryphs> <https://w3id.org/dts/api#identifier> _:Bd3973bfca68f7a416d7b7974ea69745f .
+<http://example.com/apocryphs> <https://w3id.org/dts/api#member> <http://example.com/4ezr.xml> .
+<http://example.com/apocryphs> <https://w3id.org/dts/api#member> <http://example.com/agrapha> .
+<http://example.com/apocryphs> <https://w3id.org/dts/api#totalChildren> "2"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<http://example.com/apocryphs> <https://w3id.org/dts/api#totalParents> "1"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<http://example.com/general> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://w3id.org/dts/api#Collection> .
+<http://example.com/general> <http://purl.org/dc/terms/description> "This is a sample collection for Distributed Text Services (DTS)"@en .
+<http://example.com/general> <http://purl.org/dc/terms/title> "Sample Collection of DTS Transformations" .
+<http://example.com/general> <http://purl.org/dc/terms/title> _:B30f21bb861165f03db42e4807e5b4c50 .
+<http://example.com/general> <https://w3id.org/dts/api#collection> "/collection{?id,page,nav}" .
+<http://example.com/general> <https://w3id.org/dts/api#dtsVersion> "1.0rc1" .
+<http://example.com/general> <https://w3id.org/dts/api#member> <http://example.com/matt.xml> .
+<http://example.com/general> <https://w3id.org/dts/api#member> <http://example.com/john.xml> .
+<http://example.com/general> <https://w3id.org/dts/api#member> <http://example.com/agrapha> .
+<http://example.com/general> <https://w3id.org/dts/api#member> <http://example.com/apocryphs> .
+<http://example.com/general> <https://w3id.org/dts/api#totalChildren> "2"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<http://example.com/general> <https://w3id.org/dts/api#totalParents> "0"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<http://example.com/john.xml> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://w3id.org/dts/api#Resource> .
+<http://example.com/john.xml> <http://purl.org/dc/terms/title> "The Book of John" .
+<http://example.com/john.xml> <https://w3id.org/dts/api#collection> "/collection?id=john.xml{&nav}" .
+<http://example.com/john.xml> <https://w3id.org/dts/api#document> "/document?resource=john.xml{&ref,start,end,tree,mediaType}" .
+<http://example.com/john.xml> <https://w3id.org/dts/api#dtsVersion> "1.0rc1" .
+<http://example.com/john.xml> <https://w3id.org/dts/api#navigation> "/navigation?resource=john.xml{&ref,start,end,tree}" .
+<http://example.com/john.xml> <https://w3id.org/dts/api#totalChildren> "0"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<http://example.com/john.xml> <https://w3id.org/dts/api#totalParents> "1"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<http://example.com/matt.xml> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://w3id.org/dts/api#Resource> .
+<http://example.com/matt.xml> <http://purl.org/dc/terms/title> "The Book of matt" .
+<http://example.com/matt.xml> <https://w3id.org/dts/api#collection> "/collection?id=matt.xml{&nav}" .
+<http://example.com/matt.xml> <https://w3id.org/dts/api#document> "/document?resource=matt.xml{&ref,start,end,tree,mediaType}" .
+<http://example.com/matt.xml> <https://w3id.org/dts/api#dtsVersion> "1.0rc1" .
+<http://example.com/matt.xml> <https://w3id.org/dts/api#identifier> "The Book of John"@en .
+<http://example.com/matt.xml> <https://w3id.org/dts/api#navigation> "/navigation?resource=matt.xml{&ref,start,end,tree}" .
+<http://example.com/matt.xml> <https://w3id.org/dts/api#totalChildren> "0"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<http://example.com/matt.xml> <https://w3id.org/dts/api#totalParents> "1"^^<http://www.w3.org/2001/XMLSchema#integer> .
