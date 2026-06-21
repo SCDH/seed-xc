@@ -106,15 +106,17 @@ public class SparqlConstruct implements Transformation {
 		try {
 			// make graph
 			Lang lang = RDFLanguages.filenameToLang(systemId, Lang.N3);
-			LOG.info("trying to parse RDF data from {} as format {}", systemId, lang);
+			LOG.debug("trying to parse RDF data from {} as format {}", systemId, lang);
 			Dataset graph = RDFParser.source(source).lang(lang).toDataset();
 			// make query
 			ParameterizedSparqlString queryTemplate = new ParameterizedSparqlString(this.query);
+			LOG.debug("un-parametrized SPARQL query: {} ...", this.query.lines().findFirst());
 			if (parameters != null) {
 				for (String key : parameters.getGlobalParameters().keySet()) {
 					ParameterDescriptor descriptor =
 							transformationInfo.getParameterDescriptors().get(key);
 					String value = parameters.getGlobalParameters().get(key);
+					LOG.debug("setting parameter {} to {} as {}", key, value, descriptor);
 					if (descriptor == null) {
 						// assume string
 						queryTemplate.setLiteral(key, value);
@@ -124,6 +126,7 @@ public class SparqlConstruct implements Transformation {
 				}
 			}
 			Query query = queryTemplate.asQuery();
+			LOG.debug("parametrized SPARQL query: {}", query.toString());
 			// execute query
 			QueryExecution qexec = QueryExecutionFactory.create(query, graph);
 			Model resultModel = qexec.execConstruct();
