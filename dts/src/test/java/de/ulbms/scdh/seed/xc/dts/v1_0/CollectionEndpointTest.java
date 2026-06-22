@@ -112,12 +112,12 @@ public class CollectionEndpointTest {
 			assertEquals(
 					JsonValue.ValueType.STRING, ((JsonObject) body).get("@id").getValueType());
 			assertEquals("\"http://example.com/general\"", bodyObj.get("@id").toString());
-			// assertFalse(bodyObj.containsKey("member"));
-			if (bodyObj.containsKey("member")) {
-				assertEquals(JsonValue.ValueType.ARRAY, bodyObj.get("member").getValueType());
-				JsonArray members = (JsonArray) bodyObj.get("member");
-				assertEquals(0, members.size());
-			}
+			assertFalse(bodyObj.containsKey("member"), "leave has no member");
+			//			if (bodyObj.containsKey("member")) {
+			//				assertEquals(JsonValue.ValueType.ARRAY, bodyObj.get("member").getValueType());
+			//				JsonArray members = (JsonArray) bodyObj.get("member");
+			//				assertEquals(0, members.size());
+			//			}
 		}
 	}
 
@@ -191,12 +191,12 @@ public class CollectionEndpointTest {
 			assertEquals(
 					JsonValue.ValueType.STRING, ((JsonObject) body).get("@id").getValueType());
 			assertEquals("\"http://example.com/matt.xml\"", bodyObj.get("@id").toString());
-			// assertFalse(bodyObj.containsKey("member"), "has no member");
-			if (bodyObj.containsKey("member")) {
-				assertEquals(JsonValue.ValueType.ARRAY, bodyObj.get("member").getValueType());
-				JsonArray members = (JsonArray) bodyObj.get("member");
-				assertEquals(0, members.size());
-			}
+			assertFalse(bodyObj.containsKey("member"), "has no member");
+			//			if (bodyObj.containsKey("member")) {
+			//				assertEquals(JsonValue.ValueType.ARRAY, bodyObj.get("member").getValueType());
+			//				JsonArray members = (JsonArray) bodyObj.get("member");
+			//				assertEquals(0, members.size());
+			//			}
 		}
 	}
 
