@@ -14,6 +14,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public class SparqlConstructWithCollectionTest {
@@ -28,6 +29,8 @@ public class SparqlConstructWithCollectionTest {
 			Paths.get("src", "test", "resources", "data").toFile();
 
 	private static final File DATA_N3 = new File(DATA_DIR, "collection.n3");
+
+	private static final File DATA_JSON = new File(DATA_DIR, "collection.json");
 
 	private static final String[] GENERAL_MEMBERS = {
 		"\"http://example.com/agrapha\"",
@@ -84,6 +87,26 @@ public class SparqlConstructWithCollectionTest {
 				String memberId = member.get("@id").toString();
 				assertTrue(Arrays.asList(GENERAL_MEMBERS).contains(memberId), memberId + " in members");
 			});
+		}
+	}
+
+	@Disabled // TODO
+	@Test
+	public void testResourceGeneralFromJsonLd()
+			throws IOException, TransformationPreparationException, TransformationException {
+		try (InputStream in = new FileInputStream(DATA_JSON)) {
+			RuntimeParameters params = new RuntimeParameters();
+			params.setGlobalParameters(Map.of("id", BASE_URI + "general"));
+			output = CHILDREN.transform(params, null, DATA_JSON.toString(), in, null, request);
+			String result = new String(output, StandardCharsets.UTF_8);
+			JsonReader reader = Json.createReader(new StringReader(result));
+			JsonStructure body = reader.read();
+			assertEquals(JsonValue.ValueType.OBJECT, body.getValueType());
+			JsonObject bodyObj = (JsonObject) body;
+			assertFalse(bodyObj.containsKey("@graph"));
+			assertTrue(bodyObj.containsKey("@context"));
+			assertEquals(10, bodyObj.size());
+			assertTrue(bodyObj.containsKey("@id"));
 		}
 	}
 
