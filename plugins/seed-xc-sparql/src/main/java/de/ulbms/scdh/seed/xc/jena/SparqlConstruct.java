@@ -132,6 +132,11 @@ public class SparqlConstruct implements Transformation {
 			Model resultModel = qexec.execConstruct();
 			qexec.close();
 			LOG.debug("done processing SPARQL query");
+			if (LOG.isDebugEnabled()) {
+				StringWriter dbgOut = new StringWriter();
+				RDFDataMgr.write(dbgOut, resultModel, RDFFormat.TURTLE_PRETTY);
+				LOG.info("turtle result {}", dbgOut);
+			}
 			// write result back to the wire
 			ByteArrayOutputStream output = new ByteArrayOutputStream();
 			RDFFormat format = serializer.getFormat(transformationInfo.getMediaType(), systemId, request);
