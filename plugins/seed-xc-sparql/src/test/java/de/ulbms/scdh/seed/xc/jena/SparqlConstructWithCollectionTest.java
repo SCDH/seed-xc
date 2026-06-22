@@ -69,6 +69,7 @@ public class SparqlConstructWithCollectionTest {
 			assertEquals(JsonValue.ValueType.OBJECT, body.getValueType());
 			JsonObject bodyObj = (JsonObject) body;
 			assertFalse(bodyObj.containsKey("@graph"));
+			assertTrue(bodyObj.containsKey("@context"));
 			assertTrue(bodyObj.containsKey("@id"));
 			assertEquals(
 					JsonValue.ValueType.STRING, ((JsonObject) body).get("@id").getValueType());
