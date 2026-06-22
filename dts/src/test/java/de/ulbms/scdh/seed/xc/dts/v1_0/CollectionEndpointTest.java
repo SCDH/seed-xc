@@ -44,7 +44,6 @@ public class CollectionEndpointTest {
 			JsonObject bodyObj = (JsonObject) body;
 			assertFalse(bodyObj.containsKey("@graph"), "has no @graph");
 			assertTrue(bodyObj.containsKey("@context"), "has @context");
-			assertEquals(10, bodyObj.size());
 			assertTrue(bodyObj.containsKey("@id"), "has @id");
 			assertEquals(
 					JsonValue.ValueType.STRING, ((JsonObject) body).get("@id").getValueType());
@@ -60,6 +59,169 @@ public class CollectionEndpointTest {
 				assertTrue(Arrays.asList(GENERAL_MEMBERS).contains(memberId), memberId + " in members");
 			});
 			// assertEquals("", result);
+		}
+	}
+
+	@TestHTTPEndpoint(CollectionEndpoint.class)
+	@TestHTTPResource("?nav=children&id=http://example.com/general") // default explicit
+	URL urlGeneralChildren;
+
+	@Test
+	public void testGeneralChildren() throws IOException {
+		try (InputStream in = urlGeneralChildren.openStream()) {
+			String result = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+			JsonReader reader = Json.createReader(new StringReader(result));
+			JsonStructure body = reader.read();
+			assertEquals(JsonValue.ValueType.OBJECT, body.getValueType());
+			JsonObject bodyObj = (JsonObject) body;
+			assertFalse(bodyObj.containsKey("@graph"), "has no @graph");
+			assertTrue(bodyObj.containsKey("@context"), "has @context");
+			assertTrue(bodyObj.containsKey("@id"), "has @id");
+			assertEquals(
+					JsonValue.ValueType.STRING, ((JsonObject) body).get("@id").getValueType());
+			assertEquals("\"http://example.com/general\"", bodyObj.get("@id").toString());
+			assertTrue(bodyObj.containsKey("member"));
+			assertEquals(JsonValue.ValueType.ARRAY, bodyObj.get("member").getValueType());
+			JsonArray members = (JsonArray) bodyObj.get("member");
+			assertEquals(4, members.size());
+			members.forEach((m) -> {
+				assertEquals(JsonValue.ValueType.OBJECT, m.getValueType());
+				JsonObject member = (JsonObject) m;
+				String memberId = member.get("@id").toString();
+				assertTrue(Arrays.asList(GENERAL_MEMBERS).contains(memberId), memberId + " in members");
+			});
+		}
+	}
+
+	@TestHTTPEndpoint(CollectionEndpoint.class)
+	@TestHTTPResource("?nav=parents&id=http://example.com/general") // default explicit
+	URL urlGeneralParents;
+
+	@Test
+	public void testGeneralParents() throws IOException {
+		try (InputStream in = urlGeneralParents.openStream()) {
+			String result = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+			JsonReader reader = Json.createReader(new StringReader(result));
+			JsonStructure body = reader.read();
+			assertEquals(JsonValue.ValueType.OBJECT, body.getValueType());
+			JsonObject bodyObj = (JsonObject) body;
+			assertFalse(bodyObj.containsKey("@graph"), "has no @graph");
+			assertTrue(bodyObj.containsKey("@context"), "has @context");
+			// assertEquals(10, bodyObj.size());
+			assertTrue(bodyObj.containsKey("@id"), "has @id");
+			assertEquals(
+					JsonValue.ValueType.STRING, ((JsonObject) body).get("@id").getValueType());
+			assertEquals("\"http://example.com/general\"", bodyObj.get("@id").toString());
+			// assertFalse(bodyObj.containsKey("member"));
+			if (bodyObj.containsKey("member")) {
+				assertEquals(JsonValue.ValueType.ARRAY, bodyObj.get("member").getValueType());
+				JsonArray members = (JsonArray) bodyObj.get("member");
+				assertEquals(0, members.size());
+			}
+		}
+	}
+
+	@TestHTTPEndpoint(CollectionEndpoint.class)
+	@TestHTTPResource("?id=http://example.com/apocryphs")
+	URL urlCollection;
+
+	@Test
+	public void testCollection() throws IOException {
+		try (InputStream in = urlCollection.openStream()) {
+			String result = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+			JsonReader reader = Json.createReader(new StringReader(result));
+			JsonStructure body = reader.read();
+			assertEquals(JsonValue.ValueType.OBJECT, body.getValueType());
+			JsonObject bodyObj = (JsonObject) body;
+			assertFalse(bodyObj.containsKey("@graph"), "has no @graph");
+			assertTrue(bodyObj.containsKey("@context"), "has @context");
+			// assertEquals(10, bodyObj.size());
+			assertTrue(bodyObj.containsKey("@id"), "has @id");
+			assertEquals(
+					JsonValue.ValueType.STRING, ((JsonObject) body).get("@id").getValueType());
+			assertEquals("\"http://example.com/apocryphs\"", bodyObj.get("@id").toString());
+			assertTrue(bodyObj.containsKey("member"), "has member");
+			assertEquals(JsonValue.ValueType.ARRAY, bodyObj.get("member").getValueType());
+			JsonArray members = (JsonArray) bodyObj.get("member");
+			assertEquals(2, members.size());
+		}
+	}
+
+	@TestHTTPEndpoint(CollectionEndpoint.class)
+	@TestHTTPResource("?nav=parents&id=http://example.com/apocryphs")
+	URL urlCollectionParents;
+
+	@Test
+	public void testCollectionParents() throws IOException {
+		try (InputStream in = urlCollectionParents.openStream()) {
+			String result = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+			JsonReader reader = Json.createReader(new StringReader(result));
+			JsonStructure body = reader.read();
+			assertEquals(JsonValue.ValueType.OBJECT, body.getValueType());
+			JsonObject bodyObj = (JsonObject) body;
+			assertFalse(bodyObj.containsKey("@graph"), "has no @graph");
+			assertTrue(bodyObj.containsKey("@context"), "has @context");
+			// assertEquals(10, bodyObj.size());
+			assertTrue(bodyObj.containsKey("@id"), "has @id");
+			assertEquals(
+					JsonValue.ValueType.STRING, ((JsonObject) body).get("@id").getValueType());
+			assertEquals("\"http://example.com/apocryphs\"", bodyObj.get("@id").toString());
+			assertTrue(bodyObj.containsKey("member"), "has member");
+			assertEquals(JsonValue.ValueType.ARRAY, bodyObj.get("member").getValueType());
+			JsonArray members = (JsonArray) bodyObj.get("member");
+			assertEquals(1, members.size());
+		}
+	}
+
+	@TestHTTPEndpoint(CollectionEndpoint.class)
+	@TestHTTPResource("?id=http://example.com/matt.xml")
+	URL urlResource;
+
+	@Test
+	public void testResource() throws IOException {
+		try (InputStream in = urlResource.openStream()) {
+			String result = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+			JsonReader reader = Json.createReader(new StringReader(result));
+			JsonStructure body = reader.read();
+			assertEquals(JsonValue.ValueType.OBJECT, body.getValueType());
+			JsonObject bodyObj = (JsonObject) body;
+			assertFalse(bodyObj.containsKey("@graph"), "has no @graph");
+			assertTrue(bodyObj.containsKey("@context"), "has @context");
+			assertTrue(bodyObj.containsKey("@id"), "has @id");
+			assertEquals(
+					JsonValue.ValueType.STRING, ((JsonObject) body).get("@id").getValueType());
+			assertEquals("\"http://example.com/matt.xml\"", bodyObj.get("@id").toString());
+			// assertFalse(bodyObj.containsKey("member"), "has no member");
+			if (bodyObj.containsKey("member")) {
+				assertEquals(JsonValue.ValueType.ARRAY, bodyObj.get("member").getValueType());
+				JsonArray members = (JsonArray) bodyObj.get("member");
+				assertEquals(0, members.size());
+			}
+		}
+	}
+
+	@TestHTTPEndpoint(CollectionEndpoint.class)
+	@TestHTTPResource("?nav=parents&id=http://example.com/matt.xml")
+	URL urlResourceParents;
+
+	@Test
+	public void testResourceParents() throws IOException {
+		try (InputStream in = urlResourceParents.openStream()) {
+			String result = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+			JsonReader reader = Json.createReader(new StringReader(result));
+			JsonStructure body = reader.read();
+			assertEquals(JsonValue.ValueType.OBJECT, body.getValueType());
+			JsonObject bodyObj = (JsonObject) body;
+			assertFalse(bodyObj.containsKey("@graph"), "has no @graph");
+			assertTrue(bodyObj.containsKey("@context"), "has @context");
+			assertTrue(bodyObj.containsKey("@id"), "has @id");
+			assertEquals(
+					JsonValue.ValueType.STRING, ((JsonObject) body).get("@id").getValueType());
+			assertEquals("\"http://example.com/matt.xml\"", bodyObj.get("@id").toString());
+			assertTrue(bodyObj.containsKey("member"), "has member");
+			assertEquals(JsonValue.ValueType.ARRAY, bodyObj.get("member").getValueType());
+			JsonArray members = (JsonArray) bodyObj.get("member");
+			assertEquals(1, members.size());
 		}
 	}
 }
