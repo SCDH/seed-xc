@@ -34,12 +34,12 @@ public class CollectionEndpoint implements CollectionApi {
 	@ConfigProperty(
 			name = "de.ulbms.scdh.seed.xc.dts.CollectionEndpoint.CHILDREN_TRANSFORMATION",
 			defaultValue = "dts-transformations-rq-children")
-	private String CHILDREN_TRANSFORMATION;
+	protected String CHILDREN_TRANSFORMATION;
 
 	@ConfigProperty(
 			name = "de.ulbms.scdh.seed.xc.dts.CollectionEndpoint.PARENTS_TRANSFORMATION",
 			defaultValue = "dts-transformations-rq-parents")
-	private String PARENTS_TRANSFORMATION;
+	protected String PARENTS_TRANSFORMATION;
 
 	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.CollectionEndpoint.GRAPH", defaultValue = "collection.n3")
 	protected String GRAPH;
@@ -68,7 +68,7 @@ public class CollectionEndpoint implements CollectionApi {
 
 		// make RuntimeParameter object from parameters
 		RuntimeParameters params = new RuntimeParameters();
-		Map<String, String> map = new HashMap<String, String>();
+		Map<String, String> map = new HashMap<>();
 		if (id != null) map.put("id", id);
 		if (nav != null) map.put("nav", nav);
 		if (page != null) map.put("page", page.toString());
