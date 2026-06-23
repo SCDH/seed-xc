@@ -3,6 +3,7 @@ package de.ulbms.scdh.seed.xc.jena;
 import static de.ulbms.scdh.seed.xc.api.utils.ParameterValueFactory.pvOf;
 import static org.junit.jupiter.api.Assertions.*;
 
+import de.ulbms.scdh.seed.xc.api.TransformationPreparationException;
 import java.util.List;
 import org.apache.jena.query.ParameterizedSparqlString;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,11 +12,11 @@ import org.junit.jupiter.api.Test;
 
 public class ParameterConverterTest {
 
-	private ParameterizedSparqlString q1 =
+	private final ParameterizedSparqlString q1 =
 			new ParameterizedSparqlString("CONSTRUCT { ?s ?p ?o . } WHERE { BIND(?x as ?s) . ?s ?p ?o .}");
 
-	private ParameterizedSparqlString q2 =
-			new ParameterizedSparqlString("CONSTRUCT { ?s ?p ?o . } WHERE { VALUES ?x { 1 } . ?x ?p ?o .}");
+	private final ParameterizedSparqlString q2 =
+			new ParameterizedSparqlString("CONSTRUCT { ?s ?p ?o . } WHERE { VALUES ?s { ?x } . ?s ?p ?o .}");
 
 	ParameterConverter converter;
 
@@ -130,12 +131,44 @@ public class ParameterConverterTest {
 				"fallback to xs:string");
 	}
 
-	@Disabled
 	@Test
 	public void testStringSequence() {
 		assertDoesNotThrow(() -> {
 			converter.setQueryParameter("x", pvOf(List.of("hello", "world")), "xs:string*", q2);
 		});
-		assertEquals("CONSTRUCT { ?x ?p ?o . } WHERE { VALUES ?x { \"hello\" \"world\" } . ?x ?p ?o .}", q2.toString());
+		assertEquals(
+				"CONSTRUCT { ?s ?p ?o . } WHERE { VALUES ?s { (\"hello\") (\"world\") } . ?s ?p ?o .}", q2.toString());
+	}
+
+	@Test
+	public void testIntegerSequence() {
+		assertDoesNotThrow(() -> {
+			converter.setQueryParameter("x", pvOf(List.of("1", "2")), "xs:integer*", q2);
+		});
+		assertEquals(
+				"CONSTRUCT { ?s ?p ?o . } WHERE { VALUES ?s { (\"1\"^^<http://www.w3.org/2001/XMLSchema#int>) (\"2\"^^<http://www.w3.org/2001/XMLSchema#int>) } . ?s ?p ?o .}",
+				q2.toString());
+	}
+
+	@Test
+	public void testEmptySequence() {
+		assertDoesNotThrow(() -> {
+			converter.setQueryParameter("x", pvOf(List.of()), "xs:string*", q2);
+		});
+		assertEquals("CONSTRUCT { ?s ?p ?o . } WHERE { VALUES ?s {  } . ?s ?p ?o .}", q2.toString());
+	}
+
+	@Test
+	public void testEmptySequenceForAtLeastOne() {
+		assertThrows(TransformationPreparationException.class, () -> {
+			converter.setQueryParameter("x", pvOf(List.of()), "xs:string+", q2);
+		});
+	}
+
+	@Test
+	public void testEmptySequenceForAtMostOne() {
+		assertThrows(TransformationPreparationException.class, () -> {
+			converter.setQueryParameter("x", pvOf(List.of("hello", "world")), "xs:string?", q2);
+		});
 	}
 }

@@ -5,10 +5,13 @@ import de.ulbms.scdh.seed.xc.api.TransformationPreparationException;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
-import org.apache.jena.graph.Node;
-import org.apache.jena.graph.NodeFactory;
+import java.util.List;
 import org.apache.jena.query.ParameterizedSparqlString;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.RDFNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,17 +25,18 @@ public class ParameterConverter {
 
 	private static final String SEQUENCE_MODIFIERS = "?+*";
 
-	private Node toNode(String name, String value, String type) throws TransformationPreparationException {
+	private RDFNode toNode(String name, String value, String type) throws TransformationPreparationException {
+		Model model = ModelFactory.createDefaultModel();
 		switch (type) {
 			case "xs:anyURI" -> {
-				return NodeFactory.createURI(value);
+				return model.createResource(value);
 			}
 			case "xs:string" -> {
-				return NodeFactory.createLiteralByValue(value);
+				return model.createTypedLiteral(value);
 			}
 			case "xs:integer" -> {
 				try {
-					return NodeFactory.createLiteralByValue(Integer.parseInt(value));
+					return model.createTypedLiteral(Integer.parseInt(value));
 				} catch (NumberFormatException e) {
 					LOG.error("failed to cast '{}' value of parameter {} to integer", value, name);
 					throw new TransformationPreparationException("failed to set parameter " + name, e);
@@ -40,7 +44,7 @@ public class ParameterConverter {
 			}
 			case "xs:long" -> {
 				try {
-					return NodeFactory.createLiteralByValue(Long.parseLong(value));
+					return model.createTypedLiteral(Long.parseLong(value));
 				} catch (NumberFormatException e) {
 					LOG.error("failed to cast '{}' value of parameter {} to long", value, name);
 					throw new TransformationPreparationException("failed to set parameter " + name, e);
@@ -48,7 +52,7 @@ public class ParameterConverter {
 			}
 			case "xs:float" -> {
 				try {
-					return NodeFactory.createLiteralByValue(Float.parseFloat(value));
+					return model.createTypedLiteral(Float.parseFloat(value));
 				} catch (NumberFormatException e) {
 					LOG.error("failed to cast '{}' value of parameter {} to float", value, name);
 					throw new TransformationPreparationException("failed to set parameter " + name, e);
@@ -56,7 +60,7 @@ public class ParameterConverter {
 			}
 			case "xs:double" -> {
 				try {
-					return NodeFactory.createLiteralByValue(Double.parseDouble(value));
+					return model.createTypedLiteral(Double.parseDouble(value));
 				} catch (NumberFormatException e) {
 					LOG.error("failed to cast '{}' value of parameter {} to double", value, name);
 					throw new TransformationPreparationException("failed to set parameter " + name, e);
@@ -64,7 +68,7 @@ public class ParameterConverter {
 			}
 			case "xs:boolean" -> {
 				try {
-					return NodeFactory.createLiteralByValue(Boolean.parseBoolean(value));
+					return model.createTypedLiteral(Boolean.parseBoolean(value));
 				} catch (NumberFormatException e) {
 					LOG.error("failed to cast '{}' value of parameter {} to boolean", value, name);
 					throw new TransformationPreparationException("failed to set parameter " + name, e);
@@ -75,7 +79,7 @@ public class ParameterConverter {
 					Calendar calendar = Calendar.getInstance();
 					SimpleDateFormat sdf = new SimpleDateFormat();
 					calendar.setTime(sdf.parse(value));
-					return NodeFactory.createLiteralByValue(calendar);
+					return model.createTypedLiteral(calendar);
 				} catch (ParseException e) {
 					LOG.error("failed to cast '{}' value of parameter {} to calendar", value, name);
 					throw new TransformationPreparationException("failed to set parameter " + name, e);
@@ -84,7 +88,7 @@ public class ParameterConverter {
 			default -> {
 				// defaults to string again
 				LOG.error("no valid type information for parameter {}: {}. Using string", name, type);
-				return NodeFactory.createLiteralByValue(value);
+				return model.createTypedLiteral(value);
 			}
 		}
 	}
@@ -103,10 +107,23 @@ public class ParameterConverter {
 		if (type == null || type.isEmpty()) {
 			// assume string
 			query.setLiteral(name, value.getFirst());
-		} else if (!SEQUENCE_MODIFIERS.contains(type.substring(type.length() - 1))) {
-			query.setParam(name, toNode(name, value.getFirst(), type));
 		} else {
-			// TODO: support plural
+			String sequenceModifier = type.substring(type.length() - 1);
+			if (!SEQUENCE_MODIFIERS.contains(sequenceModifier)) {
+				query.setParam(name, toNode(name, value.getFirst(), type));
+			} else if (sequenceModifier.equals("+") && value.isEmpty()) {
+				LOG.error("empty sequence for parameter '{}' with type {}", name, type);
+				throw new TransformationPreparationException("empty sequence for type " + type);
+			} else if (sequenceModifier.equals("?") && value.size() > 1) {
+				LOG.error("sequence of more then one item for parameter '{}' of type {}", name, type);
+				throw new TransformationPreparationException("sequence of more than one item for type " + type);
+			} else {
+
+				LOG.debug("setting VALUES of type {}", type.substring(0, type.length() - 1));
+				List<RDFNode> values = new ArrayList<>();
+				for (String v : value) values.add(toNode(name, v, type.substring(0, type.length() - 1)));
+				query.setValues(name, values);
+			}
 		}
 	}
 }
