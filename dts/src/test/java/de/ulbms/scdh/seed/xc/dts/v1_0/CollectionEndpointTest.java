@@ -48,6 +48,7 @@ public class CollectionEndpointTest {
 			assertEquals(
 					JsonValue.ValueType.STRING, ((JsonObject) body).get("@id").getValueType());
 			assertEquals("\"http://example.com/general\"", bodyObj.get("@id").toString());
+			assertFalse(bodyObj.containsKey("mediaTypes"), "collection does not have mediaTypes");
 			assertTrue(bodyObj.containsKey("member"));
 			assertEquals(JsonValue.ValueType.ARRAY, bodyObj.get("member").getValueType());
 			JsonArray members = (JsonArray) bodyObj.get("member");
@@ -57,6 +58,13 @@ public class CollectionEndpointTest {
 				JsonObject member = (JsonObject) m;
 				String memberId = member.get("@id").toString();
 				assertTrue(Arrays.asList(GENERAL_MEMBERS).contains(memberId), memberId + " in members");
+				if (memberId.endsWith(".xml")) {
+					assertTrue(member.containsKey("mediaTypes"), "has mediaTypes property");
+					assertEquals(
+							JsonValue.ValueType.ARRAY, member.get("mediaTypes").getValueType());
+					JsonArray mediaTypes = (JsonArray) member.get("mediaTypes");
+					assertFalse(mediaTypes.isEmpty(), "at least one transformation available");
+				}
 			});
 		}
 	}
@@ -79,6 +87,7 @@ public class CollectionEndpointTest {
 			assertEquals(
 					JsonValue.ValueType.STRING, ((JsonObject) body).get("@id").getValueType());
 			assertEquals("\"http://example.com/general\"", bodyObj.get("@id").toString());
+			assertFalse(bodyObj.containsKey("mediaTypes"), "collection does not have mediaTypes");
 			assertTrue(bodyObj.containsKey("member"));
 			assertEquals(JsonValue.ValueType.ARRAY, bodyObj.get("member").getValueType());
 			JsonArray members = (JsonArray) bodyObj.get("member");
@@ -111,6 +120,7 @@ public class CollectionEndpointTest {
 			assertEquals(
 					JsonValue.ValueType.STRING, ((JsonObject) body).get("@id").getValueType());
 			assertEquals("\"http://example.com/general\"", bodyObj.get("@id").toString());
+			assertFalse(bodyObj.containsKey("mediaTypes"), "collection does not have mediaTypes");
 			assertFalse(bodyObj.containsKey("member"), "leave has no member");
 			//			if (bodyObj.containsKey("member")) {
 			//				assertEquals(JsonValue.ValueType.ARRAY, bodyObj.get("member").getValueType());
@@ -139,6 +149,7 @@ public class CollectionEndpointTest {
 			assertEquals(
 					JsonValue.ValueType.STRING, ((JsonObject) body).get("@id").getValueType());
 			assertEquals("\"http://example.com/apocryphs\"", bodyObj.get("@id").toString());
+			assertFalse(bodyObj.containsKey("mediaTypes"), "collection does not have mediaTypes");
 			assertTrue(bodyObj.containsKey("member"), "has member");
 			assertEquals(JsonValue.ValueType.ARRAY, bodyObj.get("member").getValueType());
 			JsonArray members = (JsonArray) bodyObj.get("member");
@@ -165,6 +176,7 @@ public class CollectionEndpointTest {
 			assertEquals(
 					JsonValue.ValueType.STRING, ((JsonObject) body).get("@id").getValueType());
 			assertEquals("\"http://example.com/apocryphs\"", bodyObj.get("@id").toString());
+			assertFalse(bodyObj.containsKey("mediaTypes"), "collection does not have mediaTypes");
 			assertTrue(bodyObj.containsKey("member"), "has member");
 			assertEquals(JsonValue.ValueType.ARRAY, bodyObj.get("member").getValueType());
 			JsonArray members = (JsonArray) bodyObj.get("member");
@@ -191,6 +203,10 @@ public class CollectionEndpointTest {
 					JsonValue.ValueType.STRING, ((JsonObject) body).get("@id").getValueType());
 			assertEquals("\"http://example.com/matt.xml\"", bodyObj.get("@id").toString());
 			assertFalse(bodyObj.containsKey("member"), "has no member");
+			assertTrue(bodyObj.containsKey("mediaTypes"), "has mediaTypes property");
+			assertEquals(JsonValue.ValueType.ARRAY, bodyObj.get("mediaTypes").getValueType());
+			JsonArray mediaTypes = (JsonArray) bodyObj.get("mediaTypes");
+			assertFalse(mediaTypes.isEmpty(), "at least one transformation available");
 			//			if (bodyObj.containsKey("member")) {
 			//				assertEquals(JsonValue.ValueType.ARRAY, bodyObj.get("member").getValueType());
 			//				JsonArray members = (JsonArray) bodyObj.get("member");
@@ -221,6 +237,10 @@ public class CollectionEndpointTest {
 			assertEquals(JsonValue.ValueType.ARRAY, bodyObj.get("member").getValueType());
 			JsonArray members = (JsonArray) bodyObj.get("member");
 			assertEquals(1, members.size());
+			assertTrue(bodyObj.containsKey("mediaTypes"), "has mediaTypes property");
+			assertEquals(JsonValue.ValueType.ARRAY, bodyObj.get("mediaTypes").getValueType());
+			JsonArray mediaTypes = (JsonArray) bodyObj.get("mediaTypes");
+			assertFalse(mediaTypes.isEmpty(), "at least one transformation available");
 		}
 	}
 
