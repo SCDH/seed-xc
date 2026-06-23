@@ -115,11 +115,11 @@ public class SparqlConstruct implements Transformation {
 				for (String key : parameters.getGlobalParameters().keySet()) {
 					ParameterDescriptor descriptor =
 							transformationInfo.getParameterDescriptors().get(key);
-					String value = parameters.getGlobalParameters().get(key);
+					ParameterValue value = parameters.getGlobalParameters().get(key);
 					LOG.debug("setting parameter {} to {} as {}", key, value, descriptor);
 					if (descriptor == null) {
 						// assume string
-						queryTemplate.setLiteral(key, value);
+						queryTemplate.setLiteral(key, value.getFirst());
 					} else {
 						parameterConverter.setQueryParameter(key, value, descriptor.getType(), queryTemplate);
 					}

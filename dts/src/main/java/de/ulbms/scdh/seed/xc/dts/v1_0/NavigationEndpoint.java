@@ -1,13 +1,12 @@
 package de.ulbms.scdh.seed.xc.dts.v1_0;
 
+import static de.ulbms.scdh.seed.xc.api.utils.ParameterValueFactory.pvOf;
+
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.ulbms.scdh.seed.xc.api.ResourceInContext;
-import de.ulbms.scdh.seed.xc.api.ResourceProvider;
-import de.ulbms.scdh.seed.xc.api.RuntimeParameters;
-import de.ulbms.scdh.seed.xc.api.Transformation;
+import de.ulbms.scdh.seed.xc.api.*;
 import de.ulbms.scdh.seed.xc.api.inject.TransformTimeProvider;
 import de.ulbms.scdh.seed.xc.dts.endpoints.NavigationApi;
 import de.ulbms.scdh.seed.xc.dts.model.Navigation;
@@ -84,16 +83,16 @@ public class NavigationEndpoint implements NavigationApi {
 
 		// make RuntimeParameter object from parameters
 		RuntimeParameters params = new RuntimeParameters();
-		Map<String, String> map = new HashMap<String, String>();
-		if (resource != null) map.put("resource", resource);
-		if (down != null) map.put("down", down.toString());
-		if (tree != null) map.put("tree", tree);
-		if (page != null) map.put("page", page.toString());
-		if (ref != null) map.put("ref", ref);
-		if (start != null) map.put("start", start);
-		if (end != null) map.put("end", end);
-		// all cf (= Context Follow ups) parameters are passed to the stylesheet
-		if (cf != null) map.putAll(cf);
+		Map<String, ParameterValue> map = new HashMap<>();
+		if (resource != null) map.put("resource", pvOf(resource));
+		if (down != null) map.put("down", pvOf(down.toString()));
+		if (tree != null) map.put("tree", pvOf(tree));
+		if (page != null) map.put("page", pvOf(page.toString()));
+		if (ref != null) map.put("ref", pvOf(ref));
+		if (start != null) map.put("start", pvOf(start));
+		if (end != null) map.put("end", pvOf(end));
+		// all cf (= Context Follow-ups) parameters are passed to the stylesheet
+		if (cf != null) for (String k : cf.keySet()) map.put(k, pvOf(cf));
 		params.globalParameters(map);
 
 		// get the transformation or return failure

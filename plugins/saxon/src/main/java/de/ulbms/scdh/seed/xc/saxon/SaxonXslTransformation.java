@@ -342,7 +342,7 @@ public class SaxonXslTransformation extends TransformationBase implements Transf
 		if (parameters == null) {
 			return stylesheetParameters;
 		}
-		Map<String, String> parametersMap = parameters.getGlobalParameters();
+		Map<String, ParameterValue> parametersMap = parameters.getGlobalParameters();
 		if (parametersMap == null) {
 			return stylesheetParameters;
 		}
@@ -353,7 +353,8 @@ public class SaxonXslTransformation extends TransformationBase implements Transf
 			ConversionRules conversionRules =
 					processor.getUnderlyingConfiguration().getConversionRules();
 			if (parametersMap.containsKey(nameString)) {
-				XdmValue stringValue = new XdmAtomicValue(parametersMap.get(nameString));
+				XdmValue stringValue =
+						new XdmAtomicValue(parametersMap.get(nameString).getFirst()); // TODO: support plural
 				// TODO: evaluate type description
 				ItemType itemType = parameterDetails.getDeclaredItemType();
 				try {
@@ -365,7 +366,8 @@ public class SaxonXslTransformation extends TransformationBase implements Transf
 					// FIXME: what about sequence types
 					StringConverter converter = conversionRules.makeStringConverter(atomicType);
 					AtomicValue atomicValue = converter
-							.convertString(StringView.of(parametersMap.get(nameString)))
+							.convertString(
+									StringView.of(parametersMap.get(nameString).getFirst())) // TODO: support plural
 							.asAtomic();
 					XdmAtomicValue value = XdmAtomicValue.makeAtomicValue(atomicValue);
 					stylesheetParameters.put(name, value);

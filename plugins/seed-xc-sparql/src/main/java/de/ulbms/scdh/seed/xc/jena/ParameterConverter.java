@@ -1,5 +1,6 @@
 package de.ulbms.scdh.seed.xc.jena;
 
+import de.ulbms.scdh.seed.xc.api.ParameterValue;
 import de.ulbms.scdh.seed.xc.api.TransformationPreparationException;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.text.ParseException;
@@ -16,6 +17,8 @@ import org.slf4j.LoggerFactory;
 public class ParameterConverter {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ParameterConverter.class);
+
+	private static final String SEQUENCE_MODIFIERS = "?+*";
 
 	/**
 	 * Sets the variable with <code>name</code> in the supplied query.
@@ -79,6 +82,20 @@ public class ParameterConverter {
 				LOG.error("no valid type information for parameter {}: {}. Using string", name, type);
 				query.setLiteral(name, value);
 			}
+		}
+	}
+
+	public void setQueryParameter(String name, ParameterValue value, String type, ParameterizedSparqlString query)
+			throws TransformationPreparationException {
+		if (type == null || type.isEmpty()) {
+			// assume string
+			query.setLiteral(name, value.getFirst());
+		} else if (!SEQUENCE_MODIFIERS.contains(type.substring(type.length() - 1))) {
+			setQueryParameter(name, value.getFirst(), type, query);
+		} else if (value.size() == 1) {
+			setQueryParameter(name, value.getFirst(), type, query);
+		} else {
+			// TODO: support plural
 		}
 	}
 }
