@@ -1,5 +1,6 @@
 package de.ulbms.scdh.seed.xc.jena;
 
+import static de.ulbms.scdh.seed.xc.api.utils.ParameterValueFactory.pvOf;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.fasterxml.jackson.core.JsonFactory;
@@ -64,7 +65,7 @@ public class SparqlConstructWithCollectionTest {
 	public void testResourceGeneral() throws IOException, TransformationPreparationException, TransformationException {
 		try (InputStream in = new FileInputStream(DATA_N3)) {
 			RuntimeParameters params = new RuntimeParameters();
-			params.setGlobalParameters(Map.of("id", BASE_URI + "general"));
+			params.setGlobalParameters(Map.of("id", pvOf(BASE_URI + "general")));
 			output = CHILDREN.transform(params, null, DATA_N3.toString(), in, null, request);
 			String result = new String(output, StandardCharsets.UTF_8);
 			JsonReader reader = Json.createReader(new StringReader(result));
@@ -96,7 +97,7 @@ public class SparqlConstructWithCollectionTest {
 			throws IOException, TransformationPreparationException, TransformationException {
 		try (InputStream in = new FileInputStream(DATA_JSON)) {
 			RuntimeParameters params = new RuntimeParameters();
-			params.setGlobalParameters(Map.of("id", BASE_URI + "general"));
+			params.setGlobalParameters(Map.of("id", pvOf(BASE_URI + "general")));
 			output = CHILDREN.transform(params, null, DATA_JSON.toString(), in, null, request);
 			String result = new String(output, StandardCharsets.UTF_8);
 			JsonReader reader = Json.createReader(new StringReader(result));
@@ -115,7 +116,7 @@ public class SparqlConstructWithCollectionTest {
 			throws IOException, TransformationPreparationException, TransformationException {
 		try (InputStream in = new FileInputStream(DATA_N3)) {
 			RuntimeParameters params = new RuntimeParameters();
-			params.setGlobalParameters(Map.of("id", BASE_URI + "general", "nav", "parents"));
+			params.setGlobalParameters(Map.of("id", pvOf(BASE_URI + "general"), "nav", pvOf("parents")));
 			output = CHILDREN.transform(params, null, DATA_N3.toString(), in, null, request);
 			String result = new String(output, StandardCharsets.UTF_8);
 			JsonReader reader = Json.createReader(new StringReader(result));
@@ -132,7 +133,8 @@ public class SparqlConstructWithCollectionTest {
 			throws IOException, TransformationPreparationException, TransformationException {
 		try (InputStream in = new FileInputStream(DATA_N3)) {
 			RuntimeParameters params = new RuntimeParameters();
-			params.setGlobalParameters(Map.of("id", BASE_URI + "general", "nav", "parents", "page", "1"));
+			params.setGlobalParameters(
+					Map.of("id", pvOf(BASE_URI + "general"), "nav", pvOf("parents"), "page", pvOf("1")));
 			output = CHILDREN.transform(params, null, DATA_N3.toString(), in, null, request);
 			String result = new String(output, StandardCharsets.UTF_8);
 			JsonReader reader = Json.createReader(new StringReader(result));
@@ -148,7 +150,7 @@ public class SparqlConstructWithCollectionTest {
 	public void testUnknownResource() throws IOException, TransformationPreparationException, TransformationException {
 		try (InputStream in = new FileInputStream(DATA_N3)) {
 			RuntimeParameters params = new RuntimeParameters();
-			params.setGlobalParameters(Map.of("id", BASE_URI + "unknown"));
+			params.setGlobalParameters(Map.of("id", pvOf(BASE_URI + "unknown")));
 			output = CHILDREN.transform(params, null, DATA_N3.toString(), in, null, request);
 			String result = new String(output, StandardCharsets.UTF_8);
 			JsonReader reader = Json.createReader(new StringReader(result));
@@ -164,7 +166,7 @@ public class SparqlConstructWithCollectionTest {
 	public void testUnknownParam() throws IOException {
 		try (InputStream in = new FileInputStream(DATA_N3)) {
 			RuntimeParameters params = new RuntimeParameters();
-			params.setGlobalParameters(Map.of("id", BASE_URI + "general", "lion", "tiger"));
+			params.setGlobalParameters(Map.of("id", pvOf(BASE_URI + "general"), "lion", pvOf("tiger")));
 			assertDoesNotThrow(() -> {
 				output = CHILDREN.transform(params, null, DATA_N3.toString(), in, null, request);
 			});
@@ -182,7 +184,7 @@ public class SparqlConstructWithCollectionTest {
 	public void testUriParamType() throws IOException {
 		try (InputStream in = new FileInputStream(DATA_N3)) {
 			RuntimeParameters params = new RuntimeParameters();
-			params.setGlobalParameters(Map.of("id", "general"));
+			params.setGlobalParameters(Map.of("id", pvOf("general")));
 			assertDoesNotThrow(() -> {
 				output = CHILDREN.transform(params, null, DATA_N3.toString(), in, null, request);
 			});
@@ -193,7 +195,7 @@ public class SparqlConstructWithCollectionTest {
 	public void testIntegerParamTypeMismatch() throws IOException {
 		try (InputStream in = new FileInputStream(DATA_N3)) {
 			RuntimeParameters params = new RuntimeParameters();
-			params.setGlobalParameters(Map.of("id", BASE_URI + "general", "page", "tiger"));
+			params.setGlobalParameters(Map.of("id", pvOf(BASE_URI + "general"), "page", pvOf("tiger")));
 			assertThrows(
 					TransformationPreparationException.class,
 					() -> CHILDREN.transform(params, null, DATA_N3.toString(), in, null, request));
