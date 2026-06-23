@@ -14,7 +14,7 @@ public class ParameterValueFactory {
 		return pv;
 	}
 
-	public static ParameterValue pvOf(Iterable<? extends String> xs) {
+	public static ParameterValue pvOfS(Iterable<String> xs) {
 		ParameterValue pv = new ParameterValue();
 		for (String x : xs) pv.add(x);
 		return pv;
