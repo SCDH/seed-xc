@@ -13,6 +13,7 @@ import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
@@ -46,6 +47,9 @@ public class CollectionEndpoint implements CollectionApi {
 	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.CollectionEndpoint.CR_GRAPH_KEY", defaultValue = "graph")
 	protected String CR_GRAPH_KEY;
 
+	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.DocumentEndpoint.TYPE", defaultValue = "DtsDocumentProcessor")
+	protected String MEDIA_TYPES_TRANSFORMATIONS;
+
 	@Inject
 	protected TransformationMap transformations;
 
@@ -69,6 +73,10 @@ public class CollectionEndpoint implements CollectionApi {
 		if (nav != null) map.put("nav", nav);
 		if (page != null) map.put("page", page.toString());
 		if (cf != null) map.putAll(cf);
+		List<String> mediaTypes = transformations.getByType(MEDIA_TYPES_TRANSFORMATIONS).stream()
+				.map(Transformation::getOutputMediaType)
+				.toList();
+		// map.put("mediaTypes", mediaTypes.toString()); // TODO: plural required
 		params.setGlobalParameters(map);
 
 		Transformation transformation;
