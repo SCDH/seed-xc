@@ -58,7 +58,6 @@ public class CollectionEndpointTest {
 				String memberId = member.get("@id").toString();
 				assertTrue(Arrays.asList(GENERAL_MEMBERS).contains(memberId), memberId + " in members");
 			});
-			// assertEquals("", result);
 		}
 	}
 
@@ -240,6 +239,24 @@ public class CollectionEndpointTest {
 			assertFalse(bodyObj.containsKey("@graph"), "has no @graph");
 			assertTrue(bodyObj.containsKey("@context"), "has @context");
 			assertFalse(bodyObj.containsKey("@id"), "has no @id");
+		}
+	}
+
+	@Test
+	public void testRequestedExtension() throws IOException {
+		// The dts:requested extension property is semantically meaningless but key to get JSON-LD framing right!
+		try (InputStream in = urlGeneral.openStream()) {
+			String result = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+			JsonReader reader = Json.createReader(new StringReader(result));
+			JsonStructure body = reader.read();
+			assertEquals(JsonValue.ValueType.OBJECT, body.getValueType());
+			JsonObject bodyObj = (JsonObject) body;
+			assertFalse(bodyObj.containsKey("dts:requested"), "dts:requested not directly in Collection object");
+			assertFalse(bodyObj.containsKey("requested"), "requested not directly in Collection object");
+			assertTrue(bodyObj.containsKey("extensions"), "Collection has extensions property");
+			assertEquals(JsonValue.ValueType.OBJECT, bodyObj.get("extensions").getValueType());
+			JsonObject extensions = (JsonObject) bodyObj.get("extensions");
+			assertTrue(extensions.containsKey("requested"), "requested is nested in extensions");
 		}
 	}
 }
