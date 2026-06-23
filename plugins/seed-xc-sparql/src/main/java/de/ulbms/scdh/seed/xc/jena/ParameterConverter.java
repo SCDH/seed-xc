@@ -66,6 +66,14 @@ public class ParameterConverter {
 					throw new TransformationPreparationException("failed to set parameter " + name, e);
 				}
 			}
+			case "xs:boolean" -> {
+				try {
+					query.setLiteral(name, Boolean.parseBoolean(value));
+				} catch (NumberFormatException e) {
+					LOG.error("failed to cast '{}' value of parameter {} to boolean", value, name);
+					throw new TransformationPreparationException("failed to set parameter " + name, e);
+				}
+			}
 			case "xs:date" -> {
 				try {
 					Calendar calendar = Calendar.getInstance();
