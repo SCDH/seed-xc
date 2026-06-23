@@ -45,4 +45,11 @@ public interface TransformationMap {
 	 * @return a {@link Set} view of the transformation identifiers
 	 */
 	Set<String> keySet();
+
+	/**
+	 * Returns a set of {@link Transformation} objects that are tagged by a given <code>type</code>.
+	 * @param type - The transformation type, e.g. <code>DTSDocumentProcessor</code>
+	 * @return Transformation
+	 */
+	Set<Transformation> getByType(String type);
 }

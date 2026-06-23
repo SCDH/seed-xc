@@ -13,9 +13,12 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.ServiceLoader;
+import java.util.Set;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +50,17 @@ public class ConfiguredTransformationMap extends HashMap<String, Transformation>
 	@Override
 	public Transformation get(String transformationId) {
 		return super.get(transformationId);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Set<Transformation> getByType(String type) {
+		Set<Transformation> matching = new HashSet<>();
+		for (String id : super.keySet())
+			if (Arrays.asList(this.get(id).getType()).contains(type)) matching.add(this.get(id));
+		return matching;
 	}
 
 	/**
