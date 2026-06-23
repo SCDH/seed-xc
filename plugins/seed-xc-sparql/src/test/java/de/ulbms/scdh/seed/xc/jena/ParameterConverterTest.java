@@ -37,7 +37,9 @@ public class ParameterConverterTest {
 		assertDoesNotThrow(() -> {
 			converter.setQueryParameter("x", pvOf("42"), "xs:integer", q1);
 		});
-		assertEquals("CONSTRUCT { ?s ?p ?o . } WHERE { BIND(42 as ?s) . ?s ?p ?o .}", q1.toString());
+		assertEquals(
+				"CONSTRUCT { ?s ?p ?o . } WHERE { BIND(\"42\"^^<http://www.w3.org/2001/XMLSchema#int> as ?s) . ?s ?p ?o .}",
+				q1.toString());
 	}
 
 	@Test
@@ -45,7 +47,9 @@ public class ParameterConverterTest {
 		assertDoesNotThrow(() -> {
 			converter.setQueryParameter("x", pvOf("42"), "xs:long", q1);
 		});
-		assertEquals("CONSTRUCT { ?s ?p ?o . } WHERE { BIND(42 as ?s) . ?s ?p ?o .}", q1.toString());
+		assertEquals(
+				"CONSTRUCT { ?s ?p ?o . } WHERE { BIND(\"42\"^^<http://www.w3.org/2001/XMLSchema#long> as ?s) . ?s ?p ?o .}",
+				q1.toString());
 	}
 
 	@Test
