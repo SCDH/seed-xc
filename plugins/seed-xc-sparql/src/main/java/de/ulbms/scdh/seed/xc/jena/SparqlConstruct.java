@@ -3,18 +3,18 @@ package de.ulbms.scdh.seed.xc.jena;
 import com.apicatalog.jsonld.JsonLd;
 import com.apicatalog.jsonld.JsonLdError;
 import com.apicatalog.jsonld.JsonLdOptions;
+import com.apicatalog.jsonld.api.FramingApi;
 import com.apicatalog.jsonld.document.Document;
 import com.apicatalog.jsonld.document.JsonDocument;
+import com.apicatalog.jsonld.loader.DocumentLoader;
 import de.ulbms.scdh.seed.xc.api.*;
 import io.smallrye.mutiny.Uni;
 import io.vertx.core.http.HttpServerRequest;
+import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.json.*;
 import jakarta.ws.rs.InternalServerErrorException;
 import java.io.*;
-import java.net.SocketTimeoutException;
-import java.net.URI;
-import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,7 +24,6 @@ import org.apache.jena.riot.*;
 import org.apache.jena.riot.system.jsonld.JenaToTitanium;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,20 +31,12 @@ import org.slf4j.LoggerFactory;
  * The {@link SparqlConstruct} is a {@link Transformation}
  * plugin for running SPARQL queries.
  */
+@Dependent
 public class SparqlConstruct implements Transformation {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SparqlConstruct.class);
 
 	public static final String TRANSFORMATION_TYPE = "sparql-construct";
-
-	@ConfigProperty(name = "url-connect-timeout", defaultValue = "10000")
-	int contextConnectTimeout;
-
-	@ConfigProperty(name = "url-read-timeout", defaultValue = "10000")
-	int contextReadTimeout;
-
-	@ConfigProperty(name = "context-max-size", defaultValue = "1048576")
-	long contextMaxSize;
 
 	TransformationInfo transformationInfo;
 
@@ -62,6 +53,12 @@ public class SparqlConstruct implements Transformation {
 		return SparqlConstruct.TRANSFORMATION_TYPE;
 	}
 
+	@Inject
+	JsonLdContext jsonLdContextFactory;
+
+	@Inject
+	DocumentLoader jsonLdDocumentLoader;
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -77,7 +74,8 @@ public class SparqlConstruct implements Transformation {
 	public void setup(TransformationInfo transformationInfo, File path) throws ConfigurationException {
 		this.transformationInfo = transformationInfo;
 		Path configFile = Paths.get(path.toURI()).toAbsolutePath().normalize();
-		Path queryFile = configFile.resolve(transformationInfo.getLocation());
+		Path queryFile =
+				configFile.getParent().resolve(transformationInfo.getLocation()).normalize();
 		try {
 			query = Files.readString(queryFile);
 		} catch (IOException e) {
@@ -96,53 +94,6 @@ public class SparqlConstruct implements Transformation {
 		return new XsltParameterDetails();
 	}
 
-	/**
-	 * Returns the configured context location or null when there is none.
-	 * @return - {@link URI} to the context location
-	 */
-	private URI getContextUri() {
-		URI result;
-		if (transformationInfo.getContext() == null) {
-			result = null;
-		} else {
-			result = transformationInfo.getContext().getLocation();
-		}
-		return result;
-	}
-
-	/**
-	 * Returns the JSON-LD context as a {@link Document}. This method encapsulates
-	 * the preparation of the context including all options, e.g. setting a timeout.
-	 * @return the context {@link Document}
-	 * @throws TransformationPreparationException when preparation failed
-	 */
-	private Document getContext() throws TransformationPreparationException {
-		URLConnection connection;
-		try {
-			// toURL cannot not cause NPE because of way this method is used
-			connection = getContextUri().toURL().openConnection();
-			connection.setConnectTimeout(contextConnectTimeout);
-			connection.setReadTimeout(contextReadTimeout);
-		} catch (IOException | NullPointerException e) {
-			LOG.error("JSON-LD framing URI not found {}", getContextUri());
-			throw new TransformationPreparationException("JSON-LD framing URI not found " + getContextUri(), e);
-		}
-		try (InputStream in = connection.getInputStream()) {
-			if (contextMaxSize != 0 && connection.getContentLengthLong() > contextMaxSize) {
-				throw new TransformationPreparationException("context exceeds size limit");
-			}
-			return JsonDocument.of(in);
-		} catch (SocketTimeoutException e) {
-			LOG.warn("timeout when reading JSON-LD context from {}", getContextUri());
-			throw new TransformationPreparationException(
-					"timeout when reading JSON-LD context from " + getContextUri(), e);
-		} catch (JsonLdError | IOException e) {
-			LOG.error("failed to read JSON-LD framing context {}", getContextUri());
-			throw new TransformationPreparationException(
-					"failed to read JSON-LD framing context " + getContextUri(), e);
-		}
-	}
-
 	@Override
 	public byte[] transform(
 			RuntimeParameters parameters,
@@ -155,15 +106,17 @@ public class SparqlConstruct implements Transformation {
 		try {
 			// make graph
 			Lang lang = RDFLanguages.filenameToLang(systemId, Lang.N3);
-			LOG.info("trying to parse RDF data from {} as format {}", systemId, lang);
+			LOG.debug("trying to parse RDF data from {} as format {}", systemId, lang);
 			Dataset graph = RDFParser.source(source).lang(lang).toDataset();
 			// make query
 			ParameterizedSparqlString queryTemplate = new ParameterizedSparqlString(this.query);
+			LOG.debug("un-parametrized SPARQL query: {} ...", this.query.lines().findFirst());
 			if (parameters != null) {
 				for (String key : parameters.getGlobalParameters().keySet()) {
 					ParameterDescriptor descriptor =
 							transformationInfo.getParameterDescriptors().get(key);
 					String value = parameters.getGlobalParameters().get(key);
+					LOG.debug("setting parameter {} to {} as {}", key, value, descriptor);
 					if (descriptor == null) {
 						// assume string
 						queryTemplate.setLiteral(key, value);
@@ -173,14 +126,21 @@ public class SparqlConstruct implements Transformation {
 				}
 			}
 			Query query = queryTemplate.asQuery();
+			LOG.debug("parametrized SPARQL query: {}", query.toString());
 			// execute query
 			QueryExecution qexec = QueryExecutionFactory.create(query, graph);
 			Model resultModel = qexec.execConstruct();
 			qexec.close();
+			LOG.debug("done processing SPARQL query");
+			if (LOG.isDebugEnabled()) {
+				StringWriter dbgOut = new StringWriter();
+				RDFDataMgr.write(dbgOut, resultModel, RDFFormat.TURTLE_PRETTY);
+				LOG.info("turtle result {}", dbgOut);
+			}
 			// write result back to the wire
 			ByteArrayOutputStream output = new ByteArrayOutputStream();
 			RDFFormat format = serializer.getFormat(transformationInfo.getMediaType(), systemId, request);
-			if (!format.getLang().equals(Lang.JSONLD11) || getContextUri() == null) {
+			if (!format.getLang().equals(Lang.JSONLD11) || !jsonLdContextFactory.providesContext(transformationInfo)) {
 				RDFDataMgr.write(output, resultModel, format);
 			} else {
 				// use titanium for framing
@@ -188,7 +148,15 @@ public class SparqlConstruct implements Transformation {
 				DatasetGraph dsg = DatasetGraphFactory.create(resultModel.getGraph());
 				JsonArray ja = JenaToTitanium.convert(dsg, opts);
 				JsonDocument jdoc = JsonDocument.of(ja);
-				JsonObject framed = JsonLd.frame(jdoc, getContext()).get();
+				Document frameDoc = jsonLdContextFactory.getContext(transformationInfo);
+				JsonLdOptions options = new JsonLdOptions();
+				options.setOmitGraph(true);
+				options.setDocumentLoader(jsonLdDocumentLoader);
+				// TODO: try options here!
+				FramingApi framingApi = JsonLd.frame(jdoc, frameDoc);
+				framingApi.options(options);
+				framingApi.loader(jsonLdDocumentLoader);
+				JsonObject framed = framingApi.get();
 				JsonWriter writer = Json.createWriter(output);
 				writer.writeObject(framed);
 			}
