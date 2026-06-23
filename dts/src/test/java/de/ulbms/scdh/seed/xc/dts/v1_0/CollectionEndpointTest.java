@@ -224,4 +224,22 @@ public class CollectionEndpointTest {
 			assertEquals(1, members.size());
 		}
 	}
+
+	@TestHTTPEndpoint(CollectionEndpoint.class)
+	@TestHTTPResource("?nav=parents&id=http://example.com/unknown")
+	URL urlUnknownParents;
+
+	@Test
+	public void testUnknownParents() throws IOException {
+		try (InputStream in = urlUnknownParents.openStream()) {
+			String result = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+			JsonReader reader = Json.createReader(new StringReader(result));
+			JsonStructure body = reader.read();
+			assertEquals(JsonValue.ValueType.OBJECT, body.getValueType());
+			JsonObject bodyObj = (JsonObject) body;
+			assertFalse(bodyObj.containsKey("@graph"), "has no @graph");
+			assertTrue(bodyObj.containsKey("@context"), "has @context");
+			assertFalse(bodyObj.containsKey("@id"), "has no @id");
+		}
+	}
 }
