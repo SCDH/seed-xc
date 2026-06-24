@@ -67,20 +67,17 @@ public class CollectionEndpoint implements CollectionApi {
 
 		// make RuntimeParameter object from parameters
 		RuntimeParameters params = new RuntimeParameters();
-		Map<String, String> map = new HashMap<>();
-		if (id != null) map.put("id", id);
-		if (nav != null) map.put("nav", nav);
-		if (page != null) map.put("page", page.toString());
-		if (cf != null) map.putAll(cf);
-		List<String> mediaTypes = transformations.getByType(MEDIA_TYPES_TRANSFORMATIONS).stream()
-				.map(Transformation::getOutputMediaType)
-				.toList();
-		// map.put("mediaTypes", mediaTypes.toString()); // TODO: plural required
 		Map<String, ParameterValue> map = new HashMap<>();
 		if (id != null) map.put("id", pvOf(id));
 		if (nav != null) map.put("nav", pvOf(nav));
 		if (page != null) map.put("page", pvOf(page.toString()));
 		if (cf != null) for (String k : cf.keySet()) map.put(k, pvOf(cf));
+		// set mediaTypes from available transformations
+		List<String> mediaTypes = transformations.getByType(MEDIA_TYPES_TRANSFORMATIONS).stream()
+				.map(Transformation::getOutputMediaType)
+				.toList();
+		LOG.debug("setting mediaTypes to {}", mediaTypes);
+		// map.put("mediaTypes", pvOf(mediaTypes));
 		params.setGlobalParameters(map);
 
 		Transformation transformation;
