@@ -15,8 +15,14 @@ public class ParameterConverterTest {
 	private final ParameterizedSparqlString q1 =
 			new ParameterizedSparqlString("CONSTRUCT { ?s ?p ?o . } WHERE { BIND(?x as ?s) . ?s ?p ?o .}");
 
+	private final ParameterizedSparqlString q1m =
+			new ParameterizedSparqlString("CONSTRUCT { ?x ?p ?o . } WHERE { ?x ?p ?o .}");
+
 	private final ParameterizedSparqlString q2 =
 			new ParameterizedSparqlString("CONSTRUCT { ?s ?p ?o . } WHERE { VALUES ?s { ?x } . ?s ?p ?o .}");
+
+	private final ParameterizedSparqlString q2m = new ParameterizedSparqlString(
+			"CONSTRUCT { ?s ?p ?o . } WHERE { VALUES ?s { ?x } . ?s ?p ?o . WHERE { VALUES ?O { ?x } ?s ?p ?O .}}");
 
 	ParameterConverter converter;
 
@@ -132,6 +138,14 @@ public class ParameterConverterTest {
 	}
 
 	@Test
+	public void testInMultiPlacesUriLiteral() {
+		assertDoesNotThrow(() -> {
+			converter.setQueryParameter("x", pvOf("doi:911"), "xs:anyURI", q1m);
+		});
+		assertEquals("CONSTRUCT { <doi:911> ?p ?o . } WHERE { <doi:911> ?p ?o .}", q1m.toString());
+	}
+
+	@Test
 	public void testStringSequence() {
 		assertDoesNotThrow(() -> {
 			converter.setQueryParameter("x", pvOf(List.of("hello", "world")), "xs:string*", q2);
@@ -170,5 +184,15 @@ public class ParameterConverterTest {
 		assertThrows(TransformationPreparationException.class, () -> {
 			converter.setQueryParameter("x", pvOf(List.of("hello", "world")), "xs:string?", q2);
 		});
+	}
+
+	@Test
+	public void testMultiIntegerSequence() {
+		assertDoesNotThrow(() -> {
+			converter.setQueryParameter("x", pvOf(List.of("doi:911")), "xs:anyURI?", q2m);
+		});
+		assertEquals(
+				"CONSTRUCT { ?s ?p ?o . } WHERE { VALUES ?s { (<doi:911>) } . ?s ?p ?o . WHERE { VALUES ?O { (<doi:911>) } ?s ?p ?O .}}",
+				q2m.toString());
 	}
 }
