@@ -16,12 +16,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The {@link ParameterConverter} class casts strings to Java objects based on a xs-type.
+ * The {@link ParameterInjector} class casts strings to Java objects based on a xs-type.
  */
 @ApplicationScoped
-public class ParameterConverter {
+public class ParameterInjector {
 
-	private static final Logger LOG = LoggerFactory.getLogger(ParameterConverter.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ParameterInjector.class);
 
 	private static final String SEQUENCE_MODIFIERS = "?+*";
 

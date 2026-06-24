@@ -43,7 +43,7 @@ public class SparqlConstruct implements Transformation {
 	String query;
 
 	@Inject
-	ParameterConverter parameterConverter;
+	ParameterInjector parameterInjector;
 
 	@Inject
 	Serializer serializer;
@@ -121,7 +121,7 @@ public class SparqlConstruct implements Transformation {
 						// assume string
 						queryTemplate.setLiteral(key, value.getFirst());
 					} else {
-						parameterConverter.setQueryParameter(key, value, descriptor.getType(), queryTemplate);
+						parameterInjector.setQueryParameter(key, value, descriptor.getType(), queryTemplate);
 					}
 				}
 			}

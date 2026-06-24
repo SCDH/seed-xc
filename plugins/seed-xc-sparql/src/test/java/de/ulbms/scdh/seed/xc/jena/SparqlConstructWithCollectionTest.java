@@ -58,7 +58,7 @@ public class SparqlConstructWithCollectionTest {
 		CHILDREN.serializer = new Serializer();
 		CHILDREN.jsonLdContextFactory = new JsonLdContext();
 		CHILDREN.jsonLdDocumentLoader = ConfiguredJsonLdLoader.createJsonLdLoader(10000);
-		CHILDREN.parameterConverter = new ParameterConverter();
+		CHILDREN.parameterInjector = new ParameterInjector();
 	}
 
 	@Test

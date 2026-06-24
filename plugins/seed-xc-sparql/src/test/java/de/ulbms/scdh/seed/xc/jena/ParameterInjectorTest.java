@@ -10,7 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-public class ParameterConverterTest {
+public class ParameterInjectorTest {
 
 	private final ParameterizedSparqlString q1 =
 			new ParameterizedSparqlString("CONSTRUCT { ?s ?p ?o . } WHERE { BIND(?x as ?s) . ?s ?p ?o .}");
@@ -24,11 +24,11 @@ public class ParameterConverterTest {
 	private final ParameterizedSparqlString q2m = new ParameterizedSparqlString(
 			"CONSTRUCT { ?s ?p ?o . } WHERE { VALUES ?s { ?x } . ?s ?p ?o . WHERE { VALUES ?O { ?x } ?s ?p ?O .}}");
 
-	ParameterConverter converter;
+	ParameterInjector converter;
 
 	@BeforeEach
 	void setConverter() {
-		converter = new ParameterConverter();
+		converter = new ParameterInjector();
 	}
 
 	@Test
