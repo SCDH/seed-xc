@@ -73,7 +73,7 @@ public class TransformServiceTest {
 	public void testTransformParamIntegerPost() {
 		given().contentType("multipart/form-data")
 				.multiPart("source", helloXml, "application/xml")
-				.multiPart("runtimeParameters", "{\"globalParameters\":{\"times\":\"3\"}}", "application/json")
+				.multiPart("runtimeParameters", "{\"globalParameters\":{\"times\":[\"3\"]}}", "application/json")
 				.when()
 				.post("/transform/param-integer")
 				.then()
@@ -85,7 +85,7 @@ public class TransformServiceTest {
 	public void testTransformParamIntegerPostAsNumber() {
 		given().contentType("multipart/form-data")
 				.multiPart("source", helloXml, "application/xml")
-				.multiPart("runtimeParameters", "{\"globalParameters\":{\"times\":3}}", "application/json")
+				.multiPart("runtimeParameters", "{\"globalParameters\":{\"times\":[3]}}", "application/json")
 				.when()
 				.post("/transform/param-integer")
 				.then()
@@ -98,7 +98,7 @@ public class TransformServiceTest {
 	public void testTransformParamIntegerPostHexNumber() {
 		given().contentType("multipart/form-data")
 				.multiPart("source", helloXml, "application/xml")
-				.multiPart("runtimeParameters", "{\"globalParameters\":{\"times\":\"0x3\"}}", "application/json")
+				.multiPart("runtimeParameters", "{\"globalParameters\":{\"times\":[\"0x3\"]}}", "application/json")
 				.when()
 				.post("/transform/param-integer")
 				.then()
@@ -110,7 +110,7 @@ public class TransformServiceTest {
 	public void testTransformParamIntegerPostInvalidNumber() {
 		given().contentType("multipart/form-data")
 				.multiPart("source", helloXml, "application/xml")
-				.multiPart("runtimeParameters", "{\"globalParameters\":{\"times\":\"3z\"}}", "application/json")
+				.multiPart("runtimeParameters", "{\"globalParameters\":{\"times\":[\"3z\"]}}", "application/json")
 				.when()
 				.post("/transform/param-integer")
 				.then()

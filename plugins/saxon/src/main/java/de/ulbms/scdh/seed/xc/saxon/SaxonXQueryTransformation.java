@@ -169,8 +169,8 @@ public class SaxonXQueryTransformation extends TransformationBase implements Tra
 						// TODO: try to get type from default value: XdmValue defaultValue =
 						// evaluator.getExternalVariable(qname);
 						// assume xs:string
-						value = XdmAtomicValue.makeAtomicValue(stringToStringConverter.convertString(
-								StringView.of(parameters.getGlobalParameters().get(name))));
+						value = XdmAtomicValue.makeAtomicValue(stringToStringConverter.convertString(StringView.of(
+								parameters.getGlobalParameters().get(name).getFirst()))); // TODO: support plural
 						evaluator.setExternalVariable(qname, value);
 					} else {
 						SchemaType schemaType = BuiltInType.getSchemaTypeByLocalName(

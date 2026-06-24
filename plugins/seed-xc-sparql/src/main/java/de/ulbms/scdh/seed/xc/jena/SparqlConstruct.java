@@ -43,7 +43,7 @@ public class SparqlConstruct implements Transformation {
 	String query;
 
 	@Inject
-	ParameterConverter parameterConverter;
+	ParameterInjector parameterInjector;
 
 	@Inject
 	Serializer serializer;
@@ -115,14 +115,11 @@ public class SparqlConstruct implements Transformation {
 				for (String key : parameters.getGlobalParameters().keySet()) {
 					ParameterDescriptor descriptor =
 							transformationInfo.getParameterDescriptors().get(key);
-					String value = parameters.getGlobalParameters().get(key);
+					ParameterValue value = parameters.getGlobalParameters().get(key);
 					LOG.debug("setting parameter {} to {} as {}", key, value, descriptor);
-					if (descriptor == null) {
-						// assume string
-						queryTemplate.setLiteral(key, value);
-					} else {
-						parameterConverter.setQueryParameter(key, value, descriptor.getType(), queryTemplate);
-					}
+					String type = null; // unknown by default
+					if (descriptor != null) type = descriptor.getType();
+					parameterInjector.setQueryParameter(key, value, type, queryTemplate);
 				}
 			}
 			Query query = queryTemplate.asQuery();
@@ -152,7 +149,7 @@ public class SparqlConstruct implements Transformation {
 				JsonLdOptions options = new JsonLdOptions();
 				options.setOmitGraph(true);
 				options.setDocumentLoader(jsonLdDocumentLoader);
-				// TODO: try options here!
+				// add more options here!
 				FramingApi framingApi = JsonLd.frame(jdoc, frameDoc);
 				framingApi.options(options);
 				framingApi.loader(jsonLdDocumentLoader);

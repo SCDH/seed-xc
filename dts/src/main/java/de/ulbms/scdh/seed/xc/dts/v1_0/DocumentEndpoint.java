@@ -1,5 +1,7 @@
 package de.ulbms.scdh.seed.xc.dts.v1_0;
 
+import static de.ulbms.scdh.seed.xc.api.utils.ParameterValueFactory.pvOf;
+
 import de.ulbms.scdh.seed.xc.api.*;
 import de.ulbms.scdh.seed.xc.api.inject.TransformTimeProvider;
 import de.ulbms.scdh.seed.xc.dts.endpoints.DocumentApi;
@@ -125,14 +127,14 @@ public class DocumentEndpoint implements DocumentApi {
 
 		// make RuntimeParameter object from parameters
 		RuntimeParameters params = new RuntimeParameters();
-		Map<String, String> map = new HashMap<>();
-		if (mediaType != null) map.put("mediaType", mediaType);
-		if (resource != null) map.put("resource", resource);
-		if (ref != null) map.put("ref", ref);
-		if (start != null) map.put("start", start);
-		if (end != null) map.put("end", end);
-		if (tree != null) map.put("tree", tree);
-		if (cf != null) map.putAll(cf);
+		Map<String, ParameterValue> map = new HashMap<>();
+		if (mediaType != null) map.put("mediaType", pvOf(mediaType));
+		if (resource != null) map.put("resource", pvOf(resource));
+		if (ref != null) map.put("ref", pvOf(ref));
+		if (start != null) map.put("start", pvOf(start));
+		if (end != null) map.put("end", pvOf(end));
+		if (tree != null) map.put("tree", pvOf(tree));
+		if (cf != null) for (String k : cf.keySet()) map.put(k, pvOf(cf));
 		params.globalParameters(map);
 		LOG.info("parameters: {}", map);
 
