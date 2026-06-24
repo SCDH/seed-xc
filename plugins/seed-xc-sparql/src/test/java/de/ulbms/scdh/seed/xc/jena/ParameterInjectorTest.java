@@ -24,6 +24,9 @@ public class ParameterInjectorTest {
 	private final ParameterizedSparqlString q2m = new ParameterizedSparqlString(
 			"CONSTRUCT { ?s ?p ?o . } WHERE { VALUES ?s { ?x } . ?s ?p ?o . WHERE { VALUES ?O { ?x } ?s ?p ?O .}}");
 
+	private final ParameterizedSparqlString q2s = new ParameterizedSparqlString(
+			"CONSTRUCT { ?s ?p ?o . } WHERE { ?s ?p ?o . OPTIONAL { SELECT ?spec (COALESCE(?xi, \"empty\") as ?xv) VALUES ?xi { ?x } ?s ?a ?xi. }}");
+
 	ParameterInjector converter;
 
 	@BeforeEach
@@ -194,5 +197,26 @@ public class ParameterInjectorTest {
 		assertEquals(
 				"CONSTRUCT { ?s ?p ?o . } WHERE { VALUES ?s { (<doi:911>) } . ?s ?p ?o . WHERE { VALUES ?O { (<doi:911>) } ?s ?p ?O .}}",
 				q2m.toString());
+	}
+
+	//@Disabled("injecting VALUES into subqueries seem to be not working")
+	@Test
+	public void testSubQuerySequence() {
+		assertDoesNotThrow(() -> {
+			converter.setQueryParameter("x", pvOf(List.of("doi:911", "doi:112")), "xs:anyURI*", q2s);
+		});
+		assertEquals(
+				"CONSTRUCT { ?s ?p ?o . } WHERE { ?s ?p ?o . OPTIONAL { SELECT ?spec (COALESCE(?xi, \"empty\") as ?xv) VALUES ?xi { (<doi:911>) (<doi:112>) } ?s ?a ?xi. }}",
+				q2s.toString());
+	}
+
+	@Test
+	public void testSingletonIntoValues() {
+		assertDoesNotThrow(() -> {
+			converter.setQueryParameter("x", pvOf(List.of("doi:911")), "xs:anyURI", q2s);
+		});
+		assertEquals(
+				"CONSTRUCT { ?s ?p ?o . } WHERE { ?s ?p ?o . OPTIONAL { SELECT ?spec (COALESCE(?xi, \"empty\") as ?xv) VALUES ?xi { <doi:911> } ?s ?a ?xi. }}",
+				q2s.toString());
 	}
 }
