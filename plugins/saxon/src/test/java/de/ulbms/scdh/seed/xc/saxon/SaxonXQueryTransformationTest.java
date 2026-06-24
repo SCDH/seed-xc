@@ -1,5 +1,6 @@
 package de.ulbms.scdh.seed.xc.saxon;
 
+import static de.ulbms.scdh.seed.xc.api.utils.ParameterValueFactory.pvOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import de.ulbms.scdh.seed.xc.api.*;
@@ -84,7 +85,7 @@ public class SaxonXQueryTransformationTest {
 
 	static {
 		RuntimeParameters params = new RuntimeParameters();
-		params.putGlobalParametersItem("resources", "../samples/?select=hell*");
+		params.putGlobalParametersItem("resources", pvOf("../samples/?select=hell*"));
 		HELLO_RESOURCES = params;
 	}
 

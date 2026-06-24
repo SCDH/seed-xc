@@ -1,9 +1,8 @@
 package de.ulbms.scdh.seed.xc.dts.v1_0;
 
-import de.ulbms.scdh.seed.xc.api.ResourceInContext;
-import de.ulbms.scdh.seed.xc.api.ResourceProvider;
-import de.ulbms.scdh.seed.xc.api.RuntimeParameters;
-import de.ulbms.scdh.seed.xc.api.Transformation;
+import static de.ulbms.scdh.seed.xc.api.utils.ParameterValueFactory.pvOf;
+
+import de.ulbms.scdh.seed.xc.api.*;
 import de.ulbms.scdh.seed.xc.api.inject.TransformTimeProvider;
 import de.ulbms.scdh.seed.xc.dts.endpoints.CollectionApi;
 import de.ulbms.scdh.seed.xc.transformations.TransformationMap;
@@ -77,6 +76,11 @@ public class CollectionEndpoint implements CollectionApi {
 				.map(Transformation::getOutputMediaType)
 				.toList();
 		// map.put("mediaTypes", mediaTypes.toString()); // TODO: plural required
+		Map<String, ParameterValue> map = new HashMap<>();
+		if (id != null) map.put("id", pvOf(id));
+		if (nav != null) map.put("nav", pvOf(nav));
+		if (page != null) map.put("page", pvOf(page.toString()));
+		if (cf != null) for (String k : cf.keySet()) map.put(k, pvOf(cf));
 		params.setGlobalParameters(map);
 
 		Transformation transformation;

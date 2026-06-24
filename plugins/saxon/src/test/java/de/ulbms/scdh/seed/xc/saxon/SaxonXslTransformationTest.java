@@ -1,5 +1,6 @@
 package de.ulbms.scdh.seed.xc.saxon;
 
+import static de.ulbms.scdh.seed.xc.api.utils.ParameterValueFactory.pvOf;
 import static org.junit.jupiter.api.Assertions.*;
 
 import de.ulbms.scdh.seed.xc.api.*;
@@ -240,7 +241,7 @@ public class SaxonXslTransformationTest {
 		RuntimeParameters params = new RuntimeParameters();
 		// Map<String, String> globalParams = new HashMap<String, String>();
 		// globalParams.put("times", "3");
-		params.putGlobalParametersItem("times", "3");
+		params.putGlobalParametersItem("times", pvOf("3"));
 		PARAM_INTEGER_PARAMS = params;
 	}
 
@@ -262,7 +263,7 @@ public class SaxonXslTransformationTest {
 
 	static {
 		RuntimeParameters params = new RuntimeParameters();
-		params.putGlobalParametersItem("uri", "lego.txt");
+		params.putGlobalParametersItem("uri", pvOf("lego.txt"));
 		PARAM_URI_PARAMS = params;
 	}
 
@@ -272,7 +273,7 @@ public class SaxonXslTransformationTest {
 		RuntimeParameters params = new RuntimeParameters();
 		// Map<String, String> globalParams = new HashMap<String, String>();
 		// globalParams.put("times", "3");
-		params.putGlobalParametersItem("output", "hacked.xml");
+		params.putGlobalParametersItem("output", pvOf("hacked.xml"));
 		PARAM_RESULT_DOC_PARAMS = params;
 	}
 
@@ -360,7 +361,7 @@ public class SaxonXslTransformationTest {
 			throws IOException, ConfigurationException, TransformationPreparationException, TransformationException {
 		transformation.setup(READ_DOC_CONFIG, BASE_DIR);
 		RuntimeParameters params = new RuntimeParameters();
-		params.putGlobalParametersItem("uri", "allowed.xml");
+		params.putGlobalParametersItem("uri", pvOf("allowed.xml"));
 		FileInputStream inputStream = new FileInputStream(helloXml);
 		output = transformation.transform(params, null, helloXml.toString(), inputStream, resourceProvider, request);
 		assertEquals(
