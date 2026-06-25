@@ -77,7 +77,7 @@ public class CollectionEndpoint implements CollectionApi {
 				.map(Transformation::getOutputMediaType)
 				.toList();
 		LOG.debug("setting mediaTypes to {}", mediaTypes);
-		// map.put("mediaTypes", pvOf(mediaTypes));
+		map.put("mediaTypes", pvOf(mediaTypes));
 		params.setGlobalParameters(map);
 
 		Transformation transformation;

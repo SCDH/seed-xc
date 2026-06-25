@@ -263,6 +263,32 @@ public class CollectionEndpointTest {
 	}
 
 	@Test
+	public void testMediaTypes() throws IOException {
+		// The dts:requested extension property is semantically meaningless but key to get JSON-LD framing right!
+		try (InputStream in = urlResource.openStream()) {
+			String result = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+			JsonReader reader = Json.createReader(new StringReader(result));
+			JsonStructure body = reader.read();
+			assertEquals(JsonValue.ValueType.OBJECT, body.getValueType());
+			JsonObject bodyObj = (JsonObject) body;
+			assertTrue(bodyObj.containsKey("mediaTypes"), "Resource has mediaTypes property");
+			assertEquals(JsonValue.ValueType.ARRAY, bodyObj.get("mediaTypes").getValueType());
+			JsonArray mediaTypes = (JsonArray) bodyObj.get("mediaTypes");
+			assertTrue(mediaTypes.size() > 1, "at least 2 transformations configured for document endpoint");
+			assertEquals(2, mediaTypes.size());
+			// assertTrue(mediaTypes.stream().map(String::valueOf).toList().contains("text/plain"), "text/plain is
+			// available");
+			boolean plainPresent = false;
+			for (JsonValue mediaType : mediaTypes.stream().toList()) {
+				assertEquals(JsonValue.ValueType.STRING, mediaType.getValueType());
+				JsonString js = (JsonString) mediaType;
+				if (js.getString().equals("text/plain")) plainPresent = true;
+			}
+			assertTrue(plainPresent, "text/plain is available");
+		}
+	}
+
+	@Test
 	public void testRequestedExtension() throws IOException {
 		// The dts:requested extension property is semantically meaningless but key to get JSON-LD framing right!
 		try (InputStream in = urlGeneral.openStream()) {
