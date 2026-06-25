@@ -102,15 +102,18 @@ public class ParameterInjector {
 	 * @param query - the parametrized query
 	 * @throws TransformationPreparationException - on a cast failure
 	 */
-	public void setQueryParameter(String name, ParameterValue value, String type, ParameterizedSparqlString query)
+	public ParameterizedSparqlString setQueryParameter(
+			String name, ParameterValue value, String type, ParameterizedSparqlString query)
 			throws TransformationPreparationException {
 		if (type == null || type.isEmpty()) {
 			// assume string
 			query.setLiteral(name, value.getFirst());
+			return query;
 		} else {
 			String sequenceModifier = type.substring(type.length() - 1);
 			if (!SEQUENCE_MODIFIERS.contains(sequenceModifier)) {
 				query.setParam(name, toNode(name, value.getFirst(), type));
+				return query;
 			} else if (sequenceModifier.equals("+") && value.isEmpty()) {
 				LOG.error("empty sequence for parameter '{}' with type {}", name, type);
 				throw new TransformationPreparationException("empty sequence for type " + type);
@@ -118,12 +121,34 @@ public class ParameterInjector {
 				LOG.error("sequence of more then one item for parameter '{}' of type {}", name, type);
 				throw new TransformationPreparationException("sequence of more than one item for type " + type);
 			} else {
-
 				LOG.debug("setting VALUES of type {}", type.substring(0, type.length() - 1));
+				// we cannot use setValues(String, Collection<RdfNode>) because it does not affect
+				// subqueries.
+
 				List<RDFNode> values = new ArrayList<>();
 				for (String v : value) values.add(toNode(name, v, type.substring(0, type.length() - 1)));
-				query.setValues(name, values);
+
+				String[] cuts = query.toString().split("\\?" + name + "\\s");
+				ParameterizedSparqlString q = new ParameterizedSparqlString();
+				for (int i = 0; i < cuts.length; i++) {
+					q.append(cuts[i]);
+					if (i < cuts.length - 1) {
+						for (RDFNode n : values) {
+							// q.append('('); // parens: SPARQL engine throws an exception
+							q.append(serialize(n));
+							// q.append(')');
+							q.append(' ');
+						}
+					}
+				}
+				return q;
 			}
 		}
+	}
+
+	private String serialize(RDFNode node) {
+		ParameterizedSparqlString query = new ParameterizedSparqlString();
+		query.appendNode(node);
+		return query.toString();
 	}
 }
