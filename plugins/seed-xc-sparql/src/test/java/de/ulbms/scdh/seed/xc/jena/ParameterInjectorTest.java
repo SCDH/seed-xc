@@ -156,8 +156,7 @@ public class ParameterInjectorTest {
 			result = converter.setQueryParameter("x", pvOf(List.of("hello", "world")), "xs:string*", q2);
 		});
 		assertEquals(
-				"CONSTRUCT { ?s ?p ?o . } WHERE { VALUES ?s { \"hello\" \"world\" } . ?s ?p ?o .}",
-				result.toString());
+				"CONSTRUCT { ?s ?p ?o . } WHERE { VALUES ?s { \"hello\" \"world\" } . ?s ?p ?o .}", result.toString());
 	}
 
 	@Test

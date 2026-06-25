@@ -134,9 +134,9 @@ public class ParameterInjector {
 					q.append(cuts[i]);
 					if (i < cuts.length - 1) {
 						for (RDFNode n : values) {
-							//q.append('('); // parens: SPARQL engine throws an exception
+							// q.append('('); // parens: SPARQL engine throws an exception
 							q.append(serialize(n));
-							//q.append(')');
+							// q.append(')');
 							q.append(' ');
 						}
 					}
