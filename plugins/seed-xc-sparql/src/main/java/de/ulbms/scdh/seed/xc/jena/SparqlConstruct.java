@@ -119,7 +119,7 @@ public class SparqlConstruct implements Transformation {
 					LOG.debug("setting parameter {} to {} as {}", key, value, descriptor);
 					String type = null; // unknown by default
 					if (descriptor != null) type = descriptor.getType();
-					parameterInjector.setQueryParameter(key, value, type, queryTemplate);
+					queryTemplate = parameterInjector.setQueryParameter(key, value, type, queryTemplate);
 				}
 			}
 			Query query = queryTemplate.asQuery();
