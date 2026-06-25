@@ -139,7 +139,7 @@ public class DocumentEndpointTest {
 	@Test
 	public void testJohnXmlMediaTypeXml200() {
 		given().when()
-				.get("/document?resource=john.xml&mediaType=text/xml")
+				.get("/document?resource=john.xml&mediaType=application/tei+xml")
 				.then()
 				.statusCode(200);
 	}

@@ -279,12 +279,15 @@ public class CollectionEndpointTest {
 			// assertTrue(mediaTypes.stream().map(String::valueOf).toList().contains("text/plain"), "text/plain is
 			// available");
 			boolean plainPresent = false;
+			boolean teiPresent = false;
 			for (JsonValue mediaType : mediaTypes.stream().toList()) {
 				assertEquals(JsonValue.ValueType.STRING, mediaType.getValueType());
 				JsonString js = (JsonString) mediaType;
 				if (js.getString().equals("text/plain")) plainPresent = true;
+				if (js.getString().equals("application/tei+xml")) teiPresent = true;
 			}
-			assertTrue(plainPresent, "text/plain is available");
+			assertTrue(plainPresent, "text/plain is available from dts-transformations-testing");
+			assertTrue(teiPresent, "application/tei+xml is available from plain dts-transformations");
 		}
 	}
 
