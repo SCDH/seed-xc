@@ -22,6 +22,7 @@ import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.*;
 import org.apache.jena.riot.system.jsonld.JenaToTitanium;
+import org.apache.jena.riot.system.jsonld.TitaniumJsonLdOptions;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.slf4j.Logger;
@@ -105,9 +106,15 @@ public class SparqlConstruct implements Transformation {
 			throws TransformationPreparationException, TransformationException {
 		try {
 			// make graph
-			Lang lang = RDFLanguages.filenameToLang(systemId, Lang.N3);
+			RDFParserBuilder parserBuilder = RDFParser.source(source);
+			Lang lang = RDFLanguages.filenameToLang(systemId, Lang.JSONLD11);
 			LOG.debug("trying to parse RDF data from {} as format {}", systemId, lang);
-			Dataset graph = RDFParser.source(source).lang(lang).toDataset();
+			if (lang.equals(Lang.JSONLD11)) {
+				JsonLdOptions jsonLdOptions = new JsonLdOptions();
+				jsonLdOptions.setDocumentLoader(jsonLdDocumentLoader);
+				parserBuilder.set(TitaniumJsonLdOptions.JSONLD_OPTIONS, jsonLdOptions);
+			}
+			Dataset graph = parserBuilder.lang(lang).toDataset();
 			// make query
 			ParameterizedSparqlString queryTemplate = new ParameterizedSparqlString(this.query);
 			LOG.debug("un-parametrized SPARQL query: {} ...", this.query.lines().findFirst());
