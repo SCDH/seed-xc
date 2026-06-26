@@ -13,6 +13,9 @@ import org.junit.jupiter.api.Test;
 
 class SparqlConstructTest {
 
+	private static final String CONTEXT_MAP =
+			Paths.get("src", "test", "resources", "context-map.json").toFile().getAbsolutePath();
+
 	private static final File DATA_DIR =
 			Paths.get("src", "test", "resources", "data").toFile();
 
@@ -94,7 +97,7 @@ class SparqlConstructTest {
 		transformation = new SparqlConstruct();
 		transformation.serializer = new Serializer();
 		transformation.jsonLdContextFactory = new JsonLdContext();
-		transformation.jsonLdDocumentLoader = ConfiguredJsonLdLoader.createJsonLdLoader(10000);
+		transformation.jsonLdDocumentLoader = ConfiguredJsonLdLoader.createJsonLdLoader(CONTEXT_MAP, 10000);
 	}
 
 	@Test

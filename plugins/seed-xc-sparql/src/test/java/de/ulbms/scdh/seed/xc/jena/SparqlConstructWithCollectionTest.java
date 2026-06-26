@@ -26,6 +26,8 @@ public class SparqlConstructWithCollectionTest {
 
 	private static final File CONFIG_DIR = Paths.get("src", "test", "resources").toFile();
 
+	private static final String CONTEXT_MAP = new File(CONFIG_DIR, "context-map.json").getAbsolutePath();
+
 	private static final File DATA_DIR =
 			Paths.get("src", "test", "resources", "data").toFile();
 
@@ -57,7 +59,7 @@ public class SparqlConstructWithCollectionTest {
 		//noinspection InstantiationOfUtilityClass
 		CHILDREN.serializer = new Serializer();
 		CHILDREN.jsonLdContextFactory = new JsonLdContext();
-		CHILDREN.jsonLdDocumentLoader = ConfiguredJsonLdLoader.createJsonLdLoader(10000);
+		CHILDREN.jsonLdDocumentLoader = ConfiguredJsonLdLoader.createJsonLdLoader(CONTEXT_MAP, 10000);
 		CHILDREN.parameterInjector = new ParameterInjector();
 	}
 
