@@ -18,6 +18,7 @@
     <!-- service configuration -->
     <seed-dts.config>${project.build.directory}/dependencies/dts-transformations.yaml</seed-dts.config>
     <seed-dts.saxon-config>${project.build.directory}/dependencies/dts-transformations/saxon.he.xml</seed-dts.saxon-config>
+    <seed-dts.jsonld-context-map>${project.build.directory}/dependencies/dts-transformations/context-map.json</seed-dts.jsonld-context-map>
     <seed-dts.accessible-path>${project.basedir}/../</seed-dts.accessible-path>
     <seed-dts.filesystem>${project.basedir}/../samples/</seed-dts.filesystem>
   </properties>
