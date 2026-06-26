@@ -433,6 +433,17 @@ components:
       anyOf:
         - required: [location]
         - required: [document]
+    resourceMapping:
+      description: A mapping of URIs to local resources (static assets).
+      type: object
+      additionalProperties:
+        type: object
+        required:
+          - path
+        properties:
+          path:
+            type: string
+            description: Path to the local resource.
     transformationInfo:
       description: Information about the transformation resource and its runtime parameters
       type: object
