@@ -40,7 +40,7 @@ public class CollectionEndpoint implements CollectionApi {
 			defaultValue = "dts-transformations-rq-parents")
 	protected String PARENTS_TRANSFORMATION;
 
-	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.CollectionEndpoint.GRAPH", defaultValue = "collection.n3")
+	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.CollectionEndpoint.GRAPH", defaultValue = "collection.json")
 	protected String GRAPH;
 
 	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.CollectionEndpoint.CR_GRAPH_KEY", defaultValue = "graph")
