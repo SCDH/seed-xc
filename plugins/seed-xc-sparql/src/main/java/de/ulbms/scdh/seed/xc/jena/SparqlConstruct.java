@@ -6,7 +6,6 @@ import com.apicatalog.jsonld.JsonLdOptions;
 import com.apicatalog.jsonld.api.FramingApi;
 import com.apicatalog.jsonld.document.Document;
 import com.apicatalog.jsonld.document.JsonDocument;
-import com.apicatalog.jsonld.loader.DocumentLoader;
 import de.ulbms.scdh.seed.xc.api.*;
 import io.smallrye.mutiny.Uni;
 import io.vertx.core.http.HttpServerRequest;
@@ -58,7 +57,7 @@ public class SparqlConstruct implements Transformation {
 	JsonLdContext jsonLdContextFactory;
 
 	@Inject
-	DocumentLoader jsonLdDocumentLoader;
+	JsonLdOptions jsonLdOptions;
 
 	/**
 	 * {@inheritDoc}
@@ -110,8 +109,6 @@ public class SparqlConstruct implements Transformation {
 			Lang lang = RDFLanguages.filenameToLang(systemId, Lang.JSONLD11);
 			LOG.debug("trying to parse RDF data from {} as format {}", systemId, lang);
 			if (lang.equals(Lang.JSONLD11)) {
-				JsonLdOptions jsonLdOptions = new JsonLdOptions();
-				jsonLdOptions.setDocumentLoader(jsonLdDocumentLoader);
 				parserBuilder.set(TitaniumJsonLdOptions.JSONLD_OPTIONS, jsonLdOptions);
 			}
 			Dataset graph = parserBuilder.lang(lang).toDataset();
@@ -153,13 +150,11 @@ public class SparqlConstruct implements Transformation {
 				JsonArray ja = JenaToTitanium.convert(dsg, opts);
 				JsonDocument jdoc = JsonDocument.of(ja);
 				Document frameDoc = jsonLdContextFactory.getContext(transformationInfo);
-				JsonLdOptions options = new JsonLdOptions();
+				JsonLdOptions options = new JsonLdOptions(jsonLdOptions);
 				options.setOmitGraph(true);
-				options.setDocumentLoader(jsonLdDocumentLoader);
 				// add more options here!
 				FramingApi framingApi = JsonLd.frame(jdoc, frameDoc);
-				framingApi.options(options);
-				framingApi.loader(jsonLdDocumentLoader);
+				// framingApi.loader(jsonLdDocumentLoader);
 				JsonObject framed = framingApi.get();
 				JsonWriter writer = Json.createWriter(output);
 				writer.writeObject(framed);

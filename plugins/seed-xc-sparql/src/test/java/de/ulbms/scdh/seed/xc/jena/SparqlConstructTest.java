@@ -2,6 +2,7 @@ package de.ulbms.scdh.seed.xc.jena;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.apicatalog.jsonld.JsonLdOptions;
 import de.ulbms.scdh.seed.xc.api.*;
 import io.vertx.core.http.HttpServerRequest;
 import jakarta.inject.Inject;
@@ -92,12 +93,21 @@ class SparqlConstructTest {
 
 	SparqlConstruct transformation;
 
+	private static final JsonLdOptions JSON_LD_OPTIONS;
+
+	static {
+		ConfiguredJsonLdOptions optsFactory = new ConfiguredJsonLdOptions();
+		optsFactory.uriValidationPolicy = "full";
+		optsFactory.documentLoader = ConfiguredJsonLdLoader.createJsonLdLoader(CONTEXT_MAP, 10000);
+		JSON_LD_OPTIONS = optsFactory.getJsonLdOptions();
+	}
+
 	@BeforeEach
 	public void setup() {
 		transformation = new SparqlConstruct();
 		transformation.serializer = new Serializer();
 		transformation.jsonLdContextFactory = new JsonLdContext();
-		transformation.jsonLdDocumentLoader = ConfiguredJsonLdLoader.createJsonLdLoader(CONTEXT_MAP, 10000);
+		transformation.jsonLdOptions = JSON_LD_OPTIONS;
 	}
 
 	@Test

@@ -3,6 +3,7 @@ package de.ulbms.scdh.seed.xc.jena;
 import static de.ulbms.scdh.seed.xc.api.utils.ParameterValueFactory.pvOf;
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.apicatalog.jsonld.JsonLdOptions;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.ulbms.scdh.seed.xc.api.*;
@@ -49,6 +50,15 @@ public class SparqlConstructWithCollectionTest {
 	@Inject
 	HttpServerRequest request;
 
+	private static final JsonLdOptions JSON_LD_OPTIONS;
+
+	static {
+		ConfiguredJsonLdOptions optsFactory = new ConfiguredJsonLdOptions();
+		optsFactory.uriValidationPolicy = "full";
+		optsFactory.documentLoader = ConfiguredJsonLdLoader.createJsonLdLoader(CONTEXT_MAP, 10000);
+		JSON_LD_OPTIONS = optsFactory.getJsonLdOptions();
+	}
+
 	@BeforeEach
 	public void setupTransformations() throws IOException, ConfigurationException {
 		ObjectMapper om = new ObjectMapper(new JsonFactory());
@@ -59,7 +69,7 @@ public class SparqlConstructWithCollectionTest {
 		//noinspection InstantiationOfUtilityClass
 		CHILDREN.serializer = new Serializer();
 		CHILDREN.jsonLdContextFactory = new JsonLdContext();
-		CHILDREN.jsonLdDocumentLoader = ConfiguredJsonLdLoader.createJsonLdLoader(CONTEXT_MAP, 10000);
+		CHILDREN.jsonLdOptions = JSON_LD_OPTIONS;
 		CHILDREN.parameterInjector = new ParameterInjector();
 	}
 
