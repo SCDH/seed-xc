@@ -17,6 +17,8 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import org.apache.jena.irix.IRIs;
+import org.apache.jena.irix.IRIxResolver;
 import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.*;
@@ -105,11 +107,22 @@ public class SparqlConstruct implements Transformation {
 			throws TransformationPreparationException, TransformationException {
 		try {
 			// make graph
-			RDFParserBuilder parserBuilder = RDFParser.source(source);
+			InputStream buffer = new BufferedInputStream(source);
+			RDFParserBuilder parserBuilder = RDFParser.source(buffer);
 			Lang lang = RDFLanguages.filenameToLang(systemId, Lang.JSONLD11);
 			LOG.debug("trying to parse RDF data from {} as format {}", systemId, lang);
 			if (lang.equals(Lang.JSONLD11)) {
 				parserBuilder.set(TitaniumJsonLdOptions.JSONLD_OPTIONS, jsonLdOptions);
+				// configure IRI resolver for not resolving relative IRIs (issue #22), still a TODO
+				IRIxResolver.Builder iriResolverBuilder =
+						IRIxResolver.create(IRIs.stdResolver().clone());
+				iriResolverBuilder.allowRelative(true);
+				// iriResolverBuilder.resolve(false); // fail
+				// parserBuilder.resolveURIs(false); // fail
+				// iriResolverBuilder.noBase(); // fail
+				// iriResolverBuilder.base("http://as.df/"); // requires to query for http://as.df/general !
+				// iriResolverBuilder.base(""); // resolves to file://...
+				parserBuilder.resolver(iriResolverBuilder.build());
 			}
 			Dataset graph = parserBuilder.lang(lang).toDataset();
 			// make query
@@ -151,10 +164,12 @@ public class SparqlConstruct implements Transformation {
 				JsonDocument jdoc = JsonDocument.of(ja);
 				Document frameDoc = jsonLdContextFactory.getContext(transformationInfo);
 				JsonLdOptions options = new JsonLdOptions(jsonLdOptions);
+				// options.setBase(null);
 				options.setOmitGraph(true);
 				// add more options here!
 				FramingApi framingApi = JsonLd.frame(jdoc, frameDoc);
-				// framingApi.loader(jsonLdDocumentLoader);
+				framingApi.loader(options.getDocumentLoader()); // important to set loader!
+				framingApi.base("");
 				JsonObject framed = framingApi.get();
 				JsonWriter writer = Json.createWriter(output);
 				writer.writeObject(framed);
