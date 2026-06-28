@@ -1,4 +1,4 @@
-package de.ulbms.scdh.seed.xc.dts.v1_0;
+package de.ulbms.scdh.seed.xc.dts;
 
 import static org.junit.jupiter.api.Assertions.*;
 
