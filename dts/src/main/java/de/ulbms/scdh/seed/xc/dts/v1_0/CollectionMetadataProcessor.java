@@ -58,11 +58,11 @@ public class CollectionMetadataProcessor {
 			if (!graph.containsResource(resource)) {
 				throw new NotFoundException("not found: " + id);
 			} else {
-				Statement locationStmt = resource.getProperty(SEED.LOCATION);
+				Statement locationStmt = resource.getProperty(SEED.location);
 				if (locationStmt != null && locationStmt.getObject().isLiteral()) {
 					return locationStmt.getObject().asLiteral().getString();
 				} else {
-					if (!resource.hasProperty(RDF.type, DTS.RESOURCE))
+					if (!resource.hasProperty(RDF.type, DTS.Resource))
 						throw new BadRequestException(id + " is not a dts:Resource");
 					throw new NotFoundException("invalid collection metadata: " + id
 							+ " seed:location ? . Property not present or not a literal");

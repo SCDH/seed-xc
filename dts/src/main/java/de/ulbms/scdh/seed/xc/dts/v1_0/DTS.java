@@ -10,7 +10,7 @@ public class DTS {
 
 	public static final String NAMESPACE = "https://w3id.org/dts/api#";
 
-	public static final Property RESOURCE = new PropertyImpl(NAMESPACE, "Resource");
+	public static final Property Resource = new PropertyImpl(NAMESPACE, "Resource");
 
-	public static final Property COLLECTION = new PropertyImpl(NAMESPACE, "Collection");
+	public static final Property Collection = new PropertyImpl(NAMESPACE, "Collection");
 }

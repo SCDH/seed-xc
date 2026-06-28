@@ -7,5 +7,5 @@ public class SEED {
 
 	public static final String NAMESPACE = "https://github.com/scdh/seed-xc/dts/semantics.ttl#";
 
-	public static final Property LOCATION = new PropertyImpl(NAMESPACE, "location");
+	public static final Property location = new PropertyImpl(NAMESPACE, "location");
 }
