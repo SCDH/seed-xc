@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.ulbms.scdh.seed.xc.api.*;
 import de.ulbms.scdh.seed.xc.api.inject.TransformTimeProvider;
+import de.ulbms.scdh.seed.xc.dts.CollectionMetadataProcessor;
 import de.ulbms.scdh.seed.xc.dts.endpoints.NavigationApi;
 import de.ulbms.scdh.seed.xc.dts.model.Navigation;
 import de.ulbms.scdh.seed.xc.transformations.TransformationMap;
@@ -44,6 +45,18 @@ public class NavigationEndpoint implements NavigationApi {
 			defaultValue = "dts-transformations-xsl-navigation")
 	private String TRANSFORMATION;
 
+	/**
+	 * Location of the collection metadata, same as for Collection endpoint.
+	 */
+	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.CollectionEndpoint.GRAPH", defaultValue = "collection.json")
+	protected String GRAPH;
+
+	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.NavigationEndpoint.RESOURCE_ID_PATH", defaultValue = "false")
+	protected boolean RESOURCE_IS_PATH;
+
+	@Inject
+	CollectionMetadataProcessor collectionMetadataProc;
+
 	@Inject
 	TransformationMap transformations;
 
@@ -58,7 +71,7 @@ public class NavigationEndpoint implements NavigationApi {
 	 * <P>Implementation of the DTS Navigation endpoint.</P>
 	 * <P>This first gets the resource using the resource provider and then transformes it.</P>
 	 *
-	 * @param resource - Resource identifer. Passed as runtime parameter to the transformation and also to the resource provider.
+	 * @param resource - Resource identifier. Passed as runtime parameter to the transformation and also to the resource provider.
 	 * @param ref - See DTS specs. Passed as runtime parameter to the transformation.
 	 * @param start - See DTS specs. Passed as runtime parameter to the transformation.
 	 * @param end - See DTS specs. Passed as runtime parameter to the transformation.
@@ -67,6 +80,7 @@ public class NavigationEndpoint implements NavigationApi {
 	 * @param page - See DTS specs. Passed as runtime parameter to the transformation.
 	 * @param cr - Context information for getting the resource as {@link Map<String,String>}. This hash map is passed to the resource provider.
 	 * @param cf - Context information for follow-up links as {@link Map<String,String>}. These are passed as runtime parameters to the transformation.
+	 * @param direct - Whether to interpret the resource parameter directly as a link to the resource
 	 * @return The document or parts of it in the requested media type.
 	 */
 	@Override
@@ -79,7 +93,8 @@ public class NavigationEndpoint implements NavigationApi {
 			String tree,
 			Integer page,
 			Map<String, String> cr,
-			Map<String, String> cf) {
+			Map<String, String> cf,
+			Boolean direct) {
 
 		// make RuntimeParameter object from parameters
 		RuntimeParameters params = new RuntimeParameters();
@@ -105,8 +120,28 @@ public class NavigationEndpoint implements NavigationApi {
 
 		// Create ResourceInContext from resource parameter and additional parameters
 		if (cr == null) cr = Map.of();
-		ResourceInContext ric = new ResourceInContext(Collections.unmodifiableMap(cr), resource);
-		Uni<ResourceInContext> uniRic = Uni.createFrom().item(ric);
+		LOG.info("additional parameters cr {}", cr);
+		Map<String, String> crContext = Collections.unmodifiableMap(cr);
+		Uni<ResourceInContext> uniRic;
+		if (RESOURCE_IS_PATH || (direct != null && direct)) {
+			ResourceInContext ric = new ResourceInContext(crContext, resource);
+			uniRic = Uni.createFrom().item(ric);
+		} else {
+			// get the resource location from the collection metadata
+			ResourceInContext collectionIc = new ResourceInContext(crContext, GRAPH);
+			uniRic = Uni.createFrom()
+					.item(collectionIc)
+					.plug((cic) -> {
+						return resourceProvider.asyncOpenStream(cic, request);
+					})
+					.plug((s) -> {
+						return collectionMetadataProc.getResourceLocation(s, GRAPH, crContext, resource);
+					})
+					.onItem()
+					.transform((location -> {
+						return new ResourceInContext(crContext, location);
+					}));
+		}
 
 		return uniRic.plug((r) -> {
 					return resourceProvider.asyncOpenStream(r, request);
