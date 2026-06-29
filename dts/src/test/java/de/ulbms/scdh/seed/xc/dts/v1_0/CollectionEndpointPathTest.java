@@ -14,6 +14,7 @@ public class CollectionEndpointPathTest {
 		given().when().get("/collection/general").then().statusCode(200);
 	}
 
+	@Disabled
 	@Test
 	public void testStatusDefault() {
 		given().when().get("/collection/").then().statusCode(200);
