@@ -117,11 +117,9 @@ public class SparqlConstruct implements Transformation {
 				IRIxResolver.Builder iriResolverBuilder =
 						IRIxResolver.create(IRIs.stdResolver().clone());
 				iriResolverBuilder.allowRelative(true);
-				// iriResolverBuilder.resolve(false); // fail
-				// parserBuilder.resolveURIs(false); // fail
-				// iriResolverBuilder.noBase(); // fail
-				// iriResolverBuilder.base("http://as.df/"); // requires to query for http://as.df/general !
-				// iriResolverBuilder.base(""); // resolves to file://...
+				if (config != null && config.getBase() != null) {
+					iriResolverBuilder.base(config.getBase());
+				}
 				parserBuilder.resolver(iriResolverBuilder.build());
 			}
 			Dataset graph = parserBuilder.lang(lang).toDataset();
