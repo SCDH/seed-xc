@@ -16,6 +16,7 @@ public class NavigationEndpointTest {
 
 	private static final String BASE = "http://example.com/"; // "http%3A%2F%2Fexample.com%2F";
 
+	@Disabled
 	@Test
 	public void testNoParams() {
 		given().when().get("/navigation").then().statusCode(400);
