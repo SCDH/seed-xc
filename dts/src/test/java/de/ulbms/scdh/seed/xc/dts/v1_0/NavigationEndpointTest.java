@@ -28,24 +28,24 @@ public class NavigationEndpointTest {
 
 	@Test
 	public void testJohnXmlDirectTrue200() {
-		given().when().get("/navigation?resource=john.xml&direct=true").then().statusCode(200);
+		given().when().get("/navigation/john.xml?direct=true").then().statusCode(200);
 	}
 
 	@Disabled
 	@Test
 	public void testJohnXmlDirectFlag200() {
-		given().when().get("/navigation?resource=john.xml&direct").then().statusCode(200);
+		given().when().get("/navigation/john.xml?direct").then().statusCode(200);
 	}
 
 	@Test
 	public void testJohnXmlIndirect200() {
-		given().when().get("/navigation?resource=" + BASE + "john.xml").then().statusCode(200);
+		given().when().get("/navigation/john.xml").then().statusCode(200);
 	}
 
 	@Test
 	public void testJohnXmlResponseBodyHasLODContext() {
 		given().when()
-				.get("/navigation?resource=john.xml&direct=true")
+				.get("/navigation/john.xml?direct=true")
 				.then()
 				.statusCode(200)
 				.body("@context", notNullValue());
@@ -54,7 +54,7 @@ public class NavigationEndpointTest {
 	@Test
 	public void testJohnXmlResponseBodyIsNavigationObject() {
 		given().when()
-				.get("/navigation?resource=john.xml&direct=true")
+				.get("/navigation/john.xml?direct=true")
 				.then()
 				.extract()
 				.body()
@@ -63,18 +63,13 @@ public class NavigationEndpointTest {
 
 	@Test
 	public void testJohnXmlIndirectResponseBodyIsNavigationObject() {
-		given().when()
-				.get("/navigation?resource=" + BASE + "john.xml")
-				.then()
-				.extract()
-				.body()
-				.as(Navigation.class);
+		given().when().get("/navigation/john.xml").then().extract().body().as(Navigation.class);
 	}
 
 	@Test
 	public void testJohnXmlResponseBodyHasCitationTrees() {
 		Navigation body = given().when()
-				.get("/navigation?resource=john.xml&direct=true")
+				.get("/navigation/john.xml?direct=true")
 				.then()
 				.statusCode(200)
 				.extract()
@@ -89,7 +84,7 @@ public class NavigationEndpointTest {
 	@Test
 	public void testJohnXmlResponseBodyDefaultTreeMembers() {
 		Navigation body = given().when()
-				.get("/navigation?resource=john.xml&direct=true")
+				.get("/navigation/john.xml?direct=true")
 				.then()
 				.statusCode(200)
 				.extract()
@@ -103,16 +98,13 @@ public class NavigationEndpointTest {
 
 	@Test
 	public void testJohnXmlDown0() {
-		given().when()
-				.get("/navigation?resource=john.xml&down=0&direct=true")
-				.then()
-				.statusCode(400);
+		given().when().get("/navigation/john.xml?down=0&direct=true").then().statusCode(400);
 	}
 
 	@Test
 	public void testJohnXmlResponseBodyDown0WithRefMembers() {
 		Navigation body = given().when()
-				.get("/navigation?resource=john.xml&down=0&ref=John&direct=true")
+				.get("/navigation/john.xml?down=0&ref=John&direct=true")
 				.then()
 				.statusCode(200)
 				.extract()
@@ -127,7 +119,7 @@ public class NavigationEndpointTest {
 	@Test
 	public void testJohnXmlDown0WithStartEnd() {
 		given().when()
-				.get("/navigation?resource=john.xml&down=0&start=John:1:2&end=John:1:4&direct=true")
+				.get("/navigation/john.xml?down=0&start=John:1:2&end=John:1:4&direct=true")
 				.then()
 				.statusCode(400);
 	}
@@ -135,7 +127,7 @@ public class NavigationEndpointTest {
 	@Test
 	public void testJohnXmlResponseBodyDown1Members() {
 		Navigation body = given().when()
-				.get("/navigation?resource=john.xml&down=1&direct=true")
+				.get("/navigation/john.xml?down=1&direct=true")
 				.then()
 				.statusCode(200)
 				.extract()
@@ -150,7 +142,7 @@ public class NavigationEndpointTest {
 	@Test
 	public void testJohnXmlResponseBodyDown2Members() {
 		Navigation body = given().when()
-				.get("/navigation?resource=john.xml&down=2&direct=true")
+				.get("/navigation/john.xml?down=2&direct=true")
 				.then()
 				.statusCode(200)
 				.extract()

@@ -84,7 +84,7 @@ public class NavigationEndpoint implements NavigationApi {
 	 */
 	@Override
 	public Uni<byte[]> navigation(
-			String resource,
+			URI resource,
 			String ref,
 			String start,
 			String end,
@@ -94,12 +94,34 @@ public class NavigationEndpoint implements NavigationApi {
 			Map<String, String> cr,
 			Map<String, String> cf,
 			Boolean direct) {
-		Config config = new Config();
+
+		if (resource == null || resource.toString().isEmpty())
+			throw new BadRequestException("resource parameter is required");
+
+		Config transformationConfig = new Config();
+		transformationConfig.base(request.absoluteURI());
+
+		URI thisIri;
+		try {
+			URI rqUrl = new URI(request.absoluteURI());
+			// the IRI of the resource is the current request, but query part and fragment cut off
+			thisIri = new URI(
+					rqUrl.getScheme(),
+					rqUrl.getRawUserInfo(),
+					rqUrl.getHost(),
+					rqUrl.getPort(),
+					rqUrl.getPath(),
+					null,
+					null);
+		} catch (URISyntaxException e) {
+			throw new InternalServerErrorException("failed to make Base URI");
+		}
+		LOG.debug("getting metadata for {}", thisIri);
 
 		// make RuntimeParameter object from parameters
 		RuntimeParameters params = new RuntimeParameters();
 		Map<String, ParameterValue> map = new HashMap<>();
-		if (resource != null) map.put("resource", pvOf(resource));
+		map.put("resource", pvOf(resource));
 		if (down != null) map.put("down", pvOf(down.toString()));
 		if (tree != null) map.put("tree", pvOf(tree));
 		if (page != null) map.put("page", pvOf(page.toString()));
@@ -124,7 +146,7 @@ public class NavigationEndpoint implements NavigationApi {
 		Map<String, String> crContext = Collections.unmodifiableMap(cr);
 		Uni<ResourceInContext> uniRic;
 		if (RESOURCE_IS_PATH || (direct != null && direct)) {
-			ResourceInContext ric = new ResourceInContext(crContext, resource);
+			ResourceInContext ric = new ResourceInContext(crContext, resource.toString());
 			uniRic = Uni.createFrom().item(ric);
 		} else {
 			// get the resource location from the collection metadata
@@ -135,7 +157,8 @@ public class NavigationEndpoint implements NavigationApi {
 						return resourceProvider.asyncOpenStream(cic, request);
 					})
 					.plug((s) -> {
-						return collectionMetadataProc.getResourceLocation(s, GRAPH, config, crContext, resource);
+						return collectionMetadataProc.getResourceLocation(
+								s, GRAPH, transformationConfig, crContext, thisIri.toString());
 					})
 					.onItem()
 					.transform((location -> {
