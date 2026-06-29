@@ -114,7 +114,7 @@ public class SparqlConstruct implements Transformation {
 			LOG.debug("trying to parse RDF data from {} as format {}", systemId, lang);
 			if (lang.equals(Lang.JSONLD11)) {
 				parserBuilder.set(TitaniumJsonLdOptions.JSONLD_OPTIONS, jsonLdOptions);
-				// configure IRI resolver for not resolving relative IRIs (issue #22), still a TODO
+				// configure IRI resolver for not resolving relative IRIs (issue #22)
 				IRIxResolver.Builder iriResolverBuilder =
 						IRIxResolver.create(IRIs.stdResolver().clone());
 				iriResolverBuilder.allowRelative(true);
