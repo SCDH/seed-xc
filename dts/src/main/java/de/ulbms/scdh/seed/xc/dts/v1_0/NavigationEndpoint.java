@@ -95,6 +95,7 @@ public class NavigationEndpoint implements NavigationApi {
 			Map<String, String> cr,
 			Map<String, String> cf,
 			Boolean direct) {
+		Config config = new Config();
 
 		// make RuntimeParameter object from parameters
 		RuntimeParameters params = new RuntimeParameters();
@@ -135,7 +136,7 @@ public class NavigationEndpoint implements NavigationApi {
 						return resourceProvider.asyncOpenStream(cic, request);
 					})
 					.plug((s) -> {
-						return collectionMetadataProc.getResourceLocation(s, GRAPH, crContext, resource);
+						return collectionMetadataProc.getResourceLocation(s, GRAPH, config, crContext, resource);
 					})
 					.onItem()
 					.transform((location -> {
@@ -147,7 +148,7 @@ public class NavigationEndpoint implements NavigationApi {
 					return resourceProvider.asyncOpenStream(r, request);
 				})
 				.plug((s) -> {
-					return transformation.transformAsync(params, null, resource, s, resourceProvider, request);
+					return transformation.transformAsync(params, config, resource, s, resourceProvider, request);
 				})
 				.onItem()
 				.transform((bs) -> {

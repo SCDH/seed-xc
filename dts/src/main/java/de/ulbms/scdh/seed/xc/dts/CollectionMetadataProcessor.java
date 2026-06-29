@@ -1,6 +1,7 @@
 package de.ulbms.scdh.seed.xc.dts;
 
 import com.apicatalog.jsonld.JsonLdOptions;
+import de.ulbms.scdh.seed.xc.api.Config;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -8,6 +9,8 @@ import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
 import java.io.InputStream;
 import java.util.Map;
+import org.apache.jena.irix.IRIs;
+import org.apache.jena.irix.IRIxResolver;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
@@ -41,7 +44,11 @@ public class CollectionMetadataProcessor {
 	 * @return - The resource as a wrapped stream
 	 */
 	public Uni<String> getResourceLocation(
-			Uni<InputStream> collectionMetadata, String systemId, Map<String, String> context, String id) {
+			Uni<InputStream> collectionMetadata,
+			String systemId,
+			Config config,
+			Map<String, String> context,
+			String id) {
 
 		return collectionMetadata.onItem().transform((inputStream -> {
 			// make graph
@@ -50,6 +57,14 @@ public class CollectionMetadataProcessor {
 			LOG.debug("trying to parse RDF data from {} as format {}", systemId, lang);
 			if (lang.equals(Lang.JSONLD11)) {
 				parserBuilder.set(TitaniumJsonLdOptions.JSONLD_OPTIONS, jsonLdOptions);
+				// configure IRI resolver for not resolving relative IRIs (issue #22)
+				IRIxResolver.Builder iriResolverBuilder =
+						IRIxResolver.create(IRIs.stdResolver().clone());
+				iriResolverBuilder.allowRelative(true);
+				if (config != null && config.getBase() != null) {
+					iriResolverBuilder.base(config.getBase());
+				}
+				parserBuilder.resolver(iriResolverBuilder.build());
 			}
 			Model graph = parserBuilder.lang(lang).toModel();
 			// get the location from the graph

@@ -170,7 +170,7 @@ public class DocumentEndpoint implements DocumentApi {
 						return resourceProvider.asyncOpenStream(cic, request);
 					})
 					.plug((s) -> {
-						return collectionMetadataProc.getResourceLocation(s, GRAPH, crContext, resource);
+						return collectionMetadataProc.getResourceLocation(s, GRAPH, finalConfig, crContext, resource);
 					})
 					.onItem()
 					.transform((location -> {
