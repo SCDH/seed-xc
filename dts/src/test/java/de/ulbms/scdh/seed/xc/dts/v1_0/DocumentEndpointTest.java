@@ -3,7 +3,6 @@ package de.ulbms.scdh.seed.xc.dts.v1_0;
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.*;
 
-import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.common.http.TestHTTPResource;
 import io.quarkus.test.junit.QuarkusTest;
 import java.io.IOException;
@@ -13,12 +12,12 @@ import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-@Disabled
 @QuarkusTest
 public class DocumentEndpointTest {
 
 	private static final String BASE = "http://example.com/"; // "http%3A%2F%2Fexample.com%2F";
 
+	@Disabled
 	@Test
 	public void testNoParams() {
 		given().when().get("/document").then().statusCode(400);
@@ -32,6 +31,11 @@ public class DocumentEndpointTest {
 	@Test
 	public void testJohnXml200() {
 		given().when().get("/document/john.xml?direct=true").then().statusCode(200);
+	}
+
+	@Test
+	public void testJohnXmlIndirect200() {
+		given().when().get("/document/john.xml").then().statusCode(200);
 	}
 
 	@Test
@@ -84,8 +88,8 @@ public class DocumentEndpointTest {
 	// Testing returned contents: For robustness against changes in the XSLT,
 	// just assert the presence or absence of significant parts!
 
-	@TestHTTPEndpoint(DocumentEndpoint.class)
-	@TestHTTPResource("/john.xml?direct=true")
+	// @TestHTTPEndpoint(DocumentEndpoint.class)
+	@TestHTTPResource("/document/john.xml?direct=true")
 	URL johnPlain;
 
 	@Test
@@ -95,8 +99,8 @@ public class DocumentEndpointTest {
 		assertTrue(contents.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"));
 	}
 
-	@TestHTTPEndpoint(DocumentEndpoint.class)
-	@TestHTTPResource("/john.xml")
+	// @TestHTTPEndpoint(DocumentEndpoint.class)
+	@TestHTTPResource("/document/john.xml")
 	URL johnPlainIndirect;
 
 	@Test
@@ -106,8 +110,8 @@ public class DocumentEndpointTest {
 		assertTrue(contents.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"));
 	}
 
-	@TestHTTPEndpoint(DocumentEndpoint.class)
-	@TestHTTPResource("/john.xml?ref=John:1:1&direct=true")
+	// @TestHTTPEndpoint(DocumentEndpoint.class)
+	@TestHTTPResource("/document/john.xml?ref=John:1:1&direct=true")
 	URL john11;
 
 	@Test
@@ -120,8 +124,8 @@ public class DocumentEndpointTest {
 		assertFalse(contents.contains("He was with God in the beginning."));
 	}
 
-	@TestHTTPEndpoint(DocumentEndpoint.class)
-	@TestHTTPResource("/john.xml?tree=page-hateoas&start=p.1.start&end=p.1.end&direct=true")
+	// @TestHTTPEndpoint(DocumentEndpoint.class)
+	@TestHTTPResource("/document/john.xml?tree=page-hateoas&start=p.1.start&end=p.1.end&direct=true")
 	URL johnP1;
 
 	@Test
@@ -137,8 +141,8 @@ public class DocumentEndpointTest {
 		assertFalse(contents.contains("of all mankind."));
 	}
 
-	@TestHTTPEndpoint(DocumentEndpoint.class)
-	@TestHTTPResource("/john.xml?tree=page-hateoas&ref=p.1&direct=true")
+	// @TestHTTPEndpoint(DocumentEndpoint.class)
+	@TestHTTPResource("/document/john.xml?tree=page-hateoas&ref=p.1&direct=true")
 	URL johnP1ref;
 
 	@Test
@@ -178,8 +182,8 @@ public class DocumentEndpointTest {
 				.statusCode(200);
 	}
 
-	@TestHTTPEndpoint(DocumentEndpoint.class)
-	@TestHTTPResource("/john.xml?mediaType=text/plain&direct=true")
+	// @TestHTTPEndpoint(DocumentEndpoint.class)
+	@TestHTTPResource("/document/john.xml?mediaType=text/plain&direct=true")
 	URL johnMediaTypePlaintext;
 
 	@Test
@@ -202,8 +206,9 @@ public class DocumentEndpointTest {
 		assertTrue(contents.endsWith("There was a man sent from God whose name was John.\nbla"));
 	}
 
-	@TestHTTPEndpoint(DocumentEndpoint.class)
-	@TestHTTPResource("/john.xml?tree=page-hateoas&start=p.1.start&end=p.1.end&mediaType=text/plain&direct=true")
+	// @TestHTTPEndpoint(DocumentEndpoint.class)
+	@TestHTTPResource(
+			"/document/john.xml?tree=page-hateoas&start=p.1.start&end=p.1.end&mediaType=text/plain&direct=true")
 	URL johnP1MediaTypePlaintext;
 
 	@Test

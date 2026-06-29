@@ -120,7 +120,6 @@ public class DocumentEndpoint implements DocumentApi {
 		LOG.debug("getting metadata for {}", thisIri);
 
 		Transformation transformation = null;
-		Config config = null;
 		if (mediaType == null) {
 			// get the default transformation or return failure
 			transformation = transformations.get(TRANSFORMATION);
@@ -151,8 +150,7 @@ public class DocumentEndpoint implements DocumentApi {
 						// output method XML.
 						Serializer serializer = new Serializer();
 						serializer.setMethod(mediaType);
-						config = new Config();
-						config.setSerializer(serializer);
+						transformationConfig.setSerializer(serializer);
 					}
 					break;
 				}
@@ -165,7 +163,7 @@ public class DocumentEndpoint implements DocumentApi {
 			}
 		}
 		final Transformation finalTransformation = transformation; // final required for the lambda expression below
-		final Config finalConfig = config;
+		final Config finalConfig = transformationConfig;
 
 		// make RuntimeParameter object from parameters
 		RuntimeParameters params = new RuntimeParameters();
@@ -198,7 +196,7 @@ public class DocumentEndpoint implements DocumentApi {
 					})
 					.plug((s) -> {
 						return collectionMetadataProc.getResourceLocation(
-								s, GRAPH, finalConfig, crContext, thisIri.toString());
+								s, GRAPH, transformationConfig, crContext, thisIri.toString());
 					})
 					.onItem()
 					.transform((location -> {
