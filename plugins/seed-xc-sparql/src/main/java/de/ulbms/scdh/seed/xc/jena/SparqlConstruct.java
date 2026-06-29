@@ -13,6 +13,7 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.json.*;
 import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.NotFoundException;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -149,6 +150,11 @@ public class SparqlConstruct implements Transformation {
 				RDFDataMgr.write(dbgOut, resultModel, RDFFormat.TURTLE_PRETTY);
 				LOG.info("turtle result {}", dbgOut);
 			}
+			// check configured post-conditions
+			LOG.info("result encompasses {} triples", resultModel.size());
+			if (config != null && config.getEmpty404() != null && config.getEmpty404() && resultModel.isEmpty()) {
+				throw new TransformationException("404");
+			}
 			// write result back to the wire
 			ByteArrayOutputStream output = new ByteArrayOutputStream();
 			RDFFormat format = serializer.getFormat(transformationInfo.getMediaType(), systemId, request);
@@ -197,6 +203,9 @@ public class SparqlConstruct implements Transformation {
 			try {
 				return transform(parameters, config, systemId, sourceStream, resourceProvider, request);
 			} catch (TransformationPreparationException | TransformationException e) {
+				if (e.getMessage().equals("404")) {
+					throw new NotFoundException("not found");
+				}
 				throw new InternalServerErrorException(e.getMessage());
 			}
 		});
