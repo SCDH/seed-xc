@@ -2,10 +2,6 @@ package de.ulbms.scdh.seed.xc.dts.v1_0;
 
 import static de.ulbms.scdh.seed.xc.api.utils.ParameterValueFactory.pvOf;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.exc.StreamReadException;
-import com.fasterxml.jackson.databind.DatabindException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import de.ulbms.scdh.seed.xc.api.*;
 import de.ulbms.scdh.seed.xc.api.inject.TransformTimeProvider;
 import de.ulbms.scdh.seed.xc.dts.CollectionMetadataProcessor;
@@ -16,7 +12,10 @@ import io.smallrye.mutiny.Uni;
 import io.vertx.core.http.HttpServerRequest;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
-import java.io.IOException;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.InternalServerErrorException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -84,7 +83,7 @@ public class NavigationEndpoint implements NavigationApi {
 	 * @return The document or parts of it in the requested media type.
 	 */
 	@Override
-	public Uni<Navigation> navigation(
+	public Uni<byte[]> navigation(
 			String resource,
 			String ref,
 			String start,
@@ -148,28 +147,8 @@ public class NavigationEndpoint implements NavigationApi {
 					return resourceProvider.asyncOpenStream(r, request);
 				})
 				.plug((s) -> {
-					return transformation.transformAsync(params, config, resource, s, resourceProvider, request);
-				})
-				.onItem()
-				.transform((bs) -> {
-					// TODO: Can we get rid of this serialization ○ deserialization
-					// step? We could simple send the bytestream back to the
-					// client, but that would break the signature of the interface
-					// generated from OpenAPI specs. This extra step seems to be the
-					// cost of using OpenAPI specs.
-					try {
-						ObjectMapper om = new ObjectMapper(new JsonFactory());
-						return om.readValue(bs, Navigation.class);
-					} catch (DatabindException e) {
-						LOG.error(e.getMessage());
-						throw new jakarta.ws.rs.InternalServerErrorException(e.getMessage());
-					} catch (StreamReadException e) {
-						LOG.error(e.getMessage());
-						throw new jakarta.ws.rs.InternalServerErrorException(e.getMessage());
-					} catch (IOException e) {
-						LOG.error(e.getMessage());
-						throw new jakarta.ws.rs.InternalServerErrorException(e.getMessage());
-					}
+					return transformation.transformAsync(
+							params, transformationConfig, resource.toString(), s, resourceProvider, request);
 				});
 	}
 }

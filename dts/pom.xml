@@ -167,6 +167,7 @@
               <typeMappings>
                 <typeMapping>file=byte[]</typeMapping>
                 <typeMapping>Collection=byte[]</typeMapping>
+                <typeMapping>Navigation=byte[]</typeMapping>
               </typeMappings>
             </configuration>
           </execution>
