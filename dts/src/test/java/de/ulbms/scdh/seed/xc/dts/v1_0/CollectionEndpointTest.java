@@ -260,7 +260,7 @@ public class CollectionEndpointTest {
 	@TestHTTPResource("/collection/unknown?nav=parents")
 	URL urlUnknownParents;
 
-	@Disabled // see similar test on top
+	@Disabled // see similar test on top. 404 is better than empty graph
 	@Test
 	public void testUnknownParentsContent() throws IOException {
 		try (InputStream in = urlUnknownParents.openStream()) {
