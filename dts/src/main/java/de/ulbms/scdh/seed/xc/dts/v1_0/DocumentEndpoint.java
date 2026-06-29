@@ -11,6 +11,10 @@ import io.smallrye.mutiny.Uni;
 import io.vertx.core.http.HttpServerRequest;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.InternalServerErrorException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -82,7 +86,7 @@ public class DocumentEndpoint implements DocumentApi {
 	 */
 	@Override
 	public Uni<byte[]> document(
-			String resource,
+			URI resource,
 			String ref,
 			String start,
 			String end,
@@ -91,6 +95,29 @@ public class DocumentEndpoint implements DocumentApi {
 			Map<String, String> cr,
 			Map<String, String> cf,
 			Boolean direct) {
+
+		if (resource == null || resource.toString().isEmpty())
+			throw new BadRequestException("resource parameter is required");
+
+		Config transformationConfig = new Config();
+		transformationConfig.base(request.absoluteURI());
+
+		URI thisIri;
+		try {
+			URI rqUrl = new URI(request.absoluteURI());
+			// the IRI of the resource is the current request, but query part and fragment cut off
+			thisIri = new URI(
+					rqUrl.getScheme(),
+					rqUrl.getRawUserInfo(),
+					rqUrl.getHost(),
+					rqUrl.getPort(),
+					rqUrl.getPath(),
+					null,
+					null);
+		} catch (URISyntaxException e) {
+			throw new InternalServerErrorException("failed to make Base URI");
+		}
+		LOG.debug("getting metadata for {}", thisIri);
 
 		Transformation transformation = null;
 		Config config = null;
@@ -144,7 +171,7 @@ public class DocumentEndpoint implements DocumentApi {
 		RuntimeParameters params = new RuntimeParameters();
 		Map<String, ParameterValue> map = new HashMap<>();
 		if (mediaType != null) map.put("mediaType", pvOf(mediaType));
-		if (resource != null) map.put("resource", pvOf(resource));
+		map.put("resource", pvOf(resource));
 		if (ref != null) map.put("ref", pvOf(ref));
 		if (start != null) map.put("start", pvOf(start));
 		if (end != null) map.put("end", pvOf(end));
@@ -159,7 +186,7 @@ public class DocumentEndpoint implements DocumentApi {
 		Map<String, String> crContext = Collections.unmodifiableMap(cr);
 		Uni<ResourceInContext> uniRic;
 		if (RESOURCE_IS_PATH || (direct != null && direct)) {
-			ResourceInContext ric = new ResourceInContext(crContext, resource);
+			ResourceInContext ric = new ResourceInContext(crContext, resource.toString());
 			uniRic = Uni.createFrom().item(ric);
 		} else {
 			// get the resource location from the collection metadata
@@ -170,7 +197,8 @@ public class DocumentEndpoint implements DocumentApi {
 						return resourceProvider.asyncOpenStream(cic, request);
 					})
 					.plug((s) -> {
-						return collectionMetadataProc.getResourceLocation(s, GRAPH, finalConfig, crContext, resource);
+						return collectionMetadataProc.getResourceLocation(
+								s, GRAPH, finalConfig, crContext, thisIri.toString());
 					})
 					.onItem()
 					.transform((location -> {
@@ -180,6 +208,7 @@ public class DocumentEndpoint implements DocumentApi {
 
 		return uniRic.plug((r) -> resourceProvider.asyncOpenStream(r, request))
 				.plug((s) -> finalTransformation.transformAsync(
-						params, finalConfig, resource, s, resourceProvider, request));
+						// TODO: systemId from collectionMetadataProc
+						params, finalConfig, resource.toString(), s, resourceProvider, request));
 	}
 }
