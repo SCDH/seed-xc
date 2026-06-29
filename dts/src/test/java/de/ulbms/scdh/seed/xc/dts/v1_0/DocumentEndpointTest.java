@@ -15,6 +15,8 @@ import org.junit.jupiter.api.Test;
 @QuarkusTest
 public class DocumentEndpointTest {
 
+	private static final String BASE = "http://example.com/"; // "http%3A%2F%2Fexample.com%2F";
+
 	@Test
 	public void testNoParams() {
 		given().when().get("/document").then().statusCode(400);
@@ -22,46 +24,55 @@ public class DocumentEndpointTest {
 
 	@Test
 	public void testNonExistingPath() {
-		given().when().get("/document/asdf").then().statusCode(404);
+		given().when().get("/document/asdf&direct=true").then().statusCode(404);
 	}
 
 	@Test
 	public void testJohnXml200() {
-		given().when().get("/document?resource=john.xml").then().statusCode(200);
+		given().when().get("/document?resource=john.xml&direct=true").then().statusCode(200);
 	}
 
 	@Test
 	public void testJohnTei404() {
-		given().when().get("/document?resource=john.tei").then().statusCode(404);
+		given().when().get("/document?resource=john.tei&direct=true").then().statusCode(404);
 	}
 
 	@Test
 	public void testJohnXmlStartEndMembersNotFound() {
 		given().when()
-				.get("/document?resource=john.xml&start=eins&end=zwei")
+				.get("/document?resource=john.xml&start=eins&end=zwei&direct=true")
 				.then()
 				.statusCode(404);
 	}
 
 	@Test
 	public void testJohnXmlRefMembersNotFound() {
-		given().when().get("/document?resource=john.xml&ref=eins").then().statusCode(404);
+		given().when()
+				.get("/document?resource=john.xml&ref=eins&direct=true")
+				.then()
+				.statusCode(404);
 	}
 
 	@Test
 	public void testStartWithoutEnd() {
-		given().when().get("/document?resource=john.xml&start=John:1:1").then().statusCode(400);
+		given().when()
+				.get("/document?resource=john.xml&start=John:1:1&direct=true")
+				.then()
+				.statusCode(400);
 	}
 
 	@Test
 	public void testEndWithoutStart() {
-		given().when().get("/document?resource=john.xml&end=John:1:1").then().statusCode(400);
+		given().when()
+				.get("/document?resource=john.xml&end=John:1:1&direct=true")
+				.then()
+				.statusCode(400);
 	}
 
 	@Test
 	public void testStartEndWithRef() {
 		given().when()
-				.get("/document?resource=john.xml&start=John:1:1&end=John:1:2&ref=John:1")
+				.get("/document?resource=john.xml&start=John:1:1&end=John:1:2&ref=John:1&direct=true")
 				.then()
 				.statusCode(400);
 	}
@@ -69,7 +80,7 @@ public class DocumentEndpointTest {
 	@Test
 	public void testStartWithoutEndButRef() {
 		given().when()
-				.get("/document?resource=john.xml&start=John:1:1&ref=John:1")
+				.get("/document?resource=john.xml&start=John:1:1&ref=John:1&direct=true")
 				.then()
 				.statusCode(400);
 	}
@@ -78,7 +89,7 @@ public class DocumentEndpointTest {
 	// just assert the presence or absence of significant parts!
 
 	@TestHTTPEndpoint(DocumentEndpoint.class)
-	@TestHTTPResource("?resource=john.xml")
+	@TestHTTPResource("?resource=john.xml&direct=true")
 	URL johnPlain;
 
 	@Test
@@ -89,7 +100,18 @@ public class DocumentEndpointTest {
 	}
 
 	@TestHTTPEndpoint(DocumentEndpoint.class)
-	@TestHTTPResource("?resource=john.xml&ref=John:1:1")
+	@TestHTTPResource("?resource=" + BASE + "john.xml")
+	URL johnPlainIndirect;
+
+	@Test
+	public void testJohnPlainIndirect() throws IOException {
+		InputStream in = johnPlainIndirect.openStream();
+		String contents = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+		assertTrue(contents.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"));
+	}
+
+	@TestHTTPEndpoint(DocumentEndpoint.class)
+	@TestHTTPResource("?resource=john.xml&ref=John:1:1&direct=true")
 	URL john11;
 
 	@Test
@@ -103,7 +125,7 @@ public class DocumentEndpointTest {
 	}
 
 	@TestHTTPEndpoint(DocumentEndpoint.class)
-	@TestHTTPResource("?resource=john.xml&tree=page-hateoas&start=p.1.start&end=p.1.end")
+	@TestHTTPResource("?resource=john.xml&tree=page-hateoas&start=p.1.start&end=p.1.end&direct=true")
 	URL johnP1;
 
 	@Test
@@ -120,7 +142,7 @@ public class DocumentEndpointTest {
 	}
 
 	@TestHTTPEndpoint(DocumentEndpoint.class)
-	@TestHTTPResource("?resource=john.xml&tree=page-hateoas&ref=p.1")
+	@TestHTTPResource("?resource=john.xml&tree=page-hateoas&ref=p.1&direct=true")
 	URL johnP1ref;
 
 	@Test
@@ -139,7 +161,7 @@ public class DocumentEndpointTest {
 	@Test
 	public void testJohnXmlMediaTypeXml200() {
 		given().when()
-				.get("/document?resource=john.xml&mediaType=application/tei+xml")
+				.get("/document?resource=john.xml&mediaType=application/tei+xml&direct=true")
 				.then()
 				.statusCode(200);
 	}
@@ -147,7 +169,7 @@ public class DocumentEndpointTest {
 	@Test
 	public void testJohnXmlMediaTypeHtml200() {
 		given().when()
-				.get("/document?resource=john.xml&mediaType=text/html")
+				.get("/document?resource=john.xml&mediaType=text/html&direct=true")
 				.then()
 				.statusCode(400);
 	}
@@ -155,13 +177,13 @@ public class DocumentEndpointTest {
 	@Test
 	public void testJohnXmlMediaTypePlaintext200() {
 		given().when()
-				.get("/document?resource=john.xml&mediaType=text/plain")
+				.get("/document?resource=john.xml&mediaType=text/plain&direct=true")
 				.then()
 				.statusCode(200);
 	}
 
 	@TestHTTPEndpoint(DocumentEndpoint.class)
-	@TestHTTPResource("?resource=john.xml&mediaType=text/plain")
+	@TestHTTPResource("?resource=john.xml&mediaType=text/plain&direct=true")
 	URL johnMediaTypePlaintext;
 
 	@Test
@@ -185,7 +207,8 @@ public class DocumentEndpointTest {
 	}
 
 	@TestHTTPEndpoint(DocumentEndpoint.class)
-	@TestHTTPResource("?resource=john.xml&tree=page-hateoas&start=p.1.start&end=p.1.end&mediaType=text/plain")
+	@TestHTTPResource(
+			"?resource=john.xml&tree=page-hateoas&start=p.1.start&end=p.1.end&mediaType=text/plain&direct=true")
 	URL johnP1MediaTypePlaintext;
 
 	@Test

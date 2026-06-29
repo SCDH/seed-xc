@@ -4,6 +4,7 @@ import static de.ulbms.scdh.seed.xc.api.utils.ParameterValueFactory.pvOf;
 
 import de.ulbms.scdh.seed.xc.api.*;
 import de.ulbms.scdh.seed.xc.api.inject.TransformTimeProvider;
+import de.ulbms.scdh.seed.xc.dts.CollectionMetadataProcessor;
 import de.ulbms.scdh.seed.xc.dts.endpoints.DocumentApi;
 import de.ulbms.scdh.seed.xc.transformations.TransformationMap;
 import io.smallrye.mutiny.Uni;
@@ -43,6 +44,18 @@ public class DocumentEndpoint implements DocumentApi {
 	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.DocumentEndpoint.SETS_SERIALIZER", defaultValue = "true")
 	protected boolean SETS_SERIALIZER;
 
+	/**
+	 * Location of the collection metadata, same as for Collection endpoint.
+	 */
+	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.CollectionEndpoint.GRAPH", defaultValue = "collection.json")
+	protected String GRAPH;
+
+	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.NavigationEndpoint.RESOURCE_ID_PATH", defaultValue = "false")
+	protected boolean RESOURCE_IS_PATH;
+
+	@Inject
+	CollectionMetadataProcessor collectionMetadataProc;
+
 	@Inject
 	protected TransformationMap transformations;
 
@@ -64,6 +77,7 @@ public class DocumentEndpoint implements DocumentApi {
 	 * @param mediaType - See DTS specs. Passed as runtime parameter to the transformation.
 	 * @param cr - Context information for getting the resource as {@link Map<String,String>}. This hash map is passed to the resource provider.
 	 * @param cf - Context information for follow-up links as {@link Map<String,String>}. These are passed as runtime parameters to the transformation.
+	 * @param direct - Whether to interpret the resource parameter directly as a link to the resource
 	 * @return The document or parts of it in the requested media type.
 	 */
 	@Override
@@ -75,7 +89,8 @@ public class DocumentEndpoint implements DocumentApi {
 			String tree,
 			String mediaType,
 			Map<String, String> cr,
-			Map<String, String> cf) {
+			Map<String, String> cf,
+			Boolean direct) {
 
 		Transformation transformation = null;
 		Config config = null;
@@ -140,8 +155,28 @@ public class DocumentEndpoint implements DocumentApi {
 
 		// Create ResourceInContext from resource parameter and additional parameters
 		if (cr == null) cr = Map.of();
-		ResourceInContext ric = new ResourceInContext(Collections.unmodifiableMap(cr), resource);
-		Uni<ResourceInContext> uniRic = Uni.createFrom().item(ric);
+		LOG.info("additional parameters cr {}", cr);
+		Map<String, String> crContext = Collections.unmodifiableMap(cr);
+		Uni<ResourceInContext> uniRic;
+		if (RESOURCE_IS_PATH || (direct != null && direct)) {
+			ResourceInContext ric = new ResourceInContext(crContext, resource);
+			uniRic = Uni.createFrom().item(ric);
+		} else {
+			// get the resource location from the collection metadata
+			ResourceInContext collectionIc = new ResourceInContext(crContext, GRAPH);
+			uniRic = Uni.createFrom()
+					.item(collectionIc)
+					.plug((cic) -> {
+						return resourceProvider.asyncOpenStream(cic, request);
+					})
+					.plug((s) -> {
+						return collectionMetadataProc.getResourceLocation(s, GRAPH, crContext, resource);
+					})
+					.onItem()
+					.transform((location -> {
+						return new ResourceInContext(crContext, location);
+					}));
+		}
 
 		return uniRic.plug((r) -> resourceProvider.asyncOpenStream(r, request))
 				.plug((s) -> finalTransformation.transformAsync(
