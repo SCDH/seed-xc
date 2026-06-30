@@ -4,12 +4,17 @@ import static de.ulbms.scdh.seed.xc.api.utils.ParameterValueFactory.pvOf;
 
 import de.ulbms.scdh.seed.xc.api.*;
 import de.ulbms.scdh.seed.xc.api.inject.TransformTimeProvider;
+import de.ulbms.scdh.seed.xc.dts.CollectionMetadataProcessor;
 import de.ulbms.scdh.seed.xc.dts.endpoints.DocumentApi;
 import de.ulbms.scdh.seed.xc.transformations.TransformationMap;
 import io.smallrye.mutiny.Uni;
 import io.vertx.core.http.HttpServerRequest;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.InternalServerErrorException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -43,6 +48,18 @@ public class DocumentEndpoint implements DocumentApi {
 	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.DocumentEndpoint.SETS_SERIALIZER", defaultValue = "true")
 	protected boolean SETS_SERIALIZER;
 
+	/**
+	 * Location of the collection metadata, same as for Collection endpoint.
+	 */
+	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.CollectionEndpoint.GRAPH", defaultValue = "collection.json")
+	protected String GRAPH;
+
+	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.NavigationEndpoint.RESOURCE_ID_PATH", defaultValue = "false")
+	protected boolean RESOURCE_IS_PATH;
+
+	@Inject
+	CollectionMetadataProcessor collectionMetadataProc;
+
 	@Inject
 	protected TransformationMap transformations;
 
@@ -64,21 +81,45 @@ public class DocumentEndpoint implements DocumentApi {
 	 * @param mediaType - See DTS specs. Passed as runtime parameter to the transformation.
 	 * @param cr - Context information for getting the resource as {@link Map<String,String>}. This hash map is passed to the resource provider.
 	 * @param cf - Context information for follow-up links as {@link Map<String,String>}. These are passed as runtime parameters to the transformation.
+	 * @param direct - Whether to interpret the resource parameter directly as a link to the resource
 	 * @return The document or parts of it in the requested media type.
 	 */
 	@Override
 	public Uni<byte[]> document(
-			String resource,
+			URI resource,
 			String ref,
 			String start,
 			String end,
 			String tree,
 			String mediaType,
 			Map<String, String> cr,
-			Map<String, String> cf) {
+			Map<String, String> cf,
+			Boolean direct) {
+
+		if (resource == null || resource.toString().isEmpty())
+			throw new BadRequestException("resource parameter is required");
+
+		Config transformationConfig = new Config();
+		transformationConfig.base(request.absoluteURI());
+
+		URI thisIri;
+		try {
+			URI rqUrl = new URI(request.absoluteURI());
+			// the IRI of the resource is the current request, but query part and fragment cut off
+			thisIri = new URI(
+					rqUrl.getScheme(),
+					rqUrl.getRawUserInfo(),
+					rqUrl.getHost(),
+					rqUrl.getPort(),
+					rqUrl.getPath(),
+					null,
+					null);
+		} catch (URISyntaxException e) {
+			throw new InternalServerErrorException("failed to make Base URI");
+		}
+		LOG.debug("getting metadata for {}", thisIri);
 
 		Transformation transformation = null;
-		Config config = null;
 		if (mediaType == null) {
 			// get the default transformation or return failure
 			transformation = transformations.get(TRANSFORMATION);
@@ -109,8 +150,7 @@ public class DocumentEndpoint implements DocumentApi {
 						// output method XML.
 						Serializer serializer = new Serializer();
 						serializer.setMethod(mediaType);
-						config = new Config();
-						config.setSerializer(serializer);
+						transformationConfig.setSerializer(serializer);
 					}
 					break;
 				}
@@ -123,13 +163,13 @@ public class DocumentEndpoint implements DocumentApi {
 			}
 		}
 		final Transformation finalTransformation = transformation; // final required for the lambda expression below
-		final Config finalConfig = config;
+		final Config finalConfig = transformationConfig;
 
 		// make RuntimeParameter object from parameters
 		RuntimeParameters params = new RuntimeParameters();
 		Map<String, ParameterValue> map = new HashMap<>();
 		if (mediaType != null) map.put("mediaType", pvOf(mediaType));
-		if (resource != null) map.put("resource", pvOf(resource));
+		map.put("resource", pvOf(resource));
 		if (ref != null) map.put("ref", pvOf(ref));
 		if (start != null) map.put("start", pvOf(start));
 		if (end != null) map.put("end", pvOf(end));
@@ -140,11 +180,33 @@ public class DocumentEndpoint implements DocumentApi {
 
 		// Create ResourceInContext from resource parameter and additional parameters
 		if (cr == null) cr = Map.of();
-		ResourceInContext ric = new ResourceInContext(Collections.unmodifiableMap(cr), resource);
-		Uni<ResourceInContext> uniRic = Uni.createFrom().item(ric);
+		LOG.info("additional parameters cr {}", cr);
+		Map<String, String> crContext = Collections.unmodifiableMap(cr);
+		Uni<ResourceInContext> uniRic;
+		if (RESOURCE_IS_PATH || (direct != null && direct)) {
+			ResourceInContext ric = new ResourceInContext(crContext, resource.toString());
+			uniRic = Uni.createFrom().item(ric);
+		} else {
+			// get the resource location from the collection metadata
+			ResourceInContext collectionIc = new ResourceInContext(crContext, GRAPH);
+			uniRic = Uni.createFrom()
+					.item(collectionIc)
+					.plug((cic) -> {
+						return resourceProvider.asyncOpenStream(cic, request);
+					})
+					.plug((s) -> {
+						return collectionMetadataProc.getResourceLocation(
+								s, GRAPH, transformationConfig, crContext, thisIri.toString());
+					})
+					.onItem()
+					.transform((location -> {
+						return new ResourceInContext(crContext, location);
+					}));
+		}
 
 		return uniRic.plug((r) -> resourceProvider.asyncOpenStream(r, request))
 				.plug((s) -> finalTransformation.transformAsync(
-						params, finalConfig, resource, s, resourceProvider, request));
+						// TODO: systemId from collectionMetadataProc
+						params, finalConfig, resource.toString(), s, resourceProvider, request));
 	}
 }

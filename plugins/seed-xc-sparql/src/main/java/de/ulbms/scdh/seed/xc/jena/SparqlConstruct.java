@@ -13,6 +13,7 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.json.*;
 import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.NotFoundException;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -113,15 +114,13 @@ public class SparqlConstruct implements Transformation {
 			LOG.debug("trying to parse RDF data from {} as format {}", systemId, lang);
 			if (lang.equals(Lang.JSONLD11)) {
 				parserBuilder.set(TitaniumJsonLdOptions.JSONLD_OPTIONS, jsonLdOptions);
-				// configure IRI resolver for not resolving relative IRIs (issue #22), still a TODO
+				// configure IRI resolver for not resolving relative IRIs (issue #22)
 				IRIxResolver.Builder iriResolverBuilder =
 						IRIxResolver.create(IRIs.stdResolver().clone());
 				iriResolverBuilder.allowRelative(true);
-				// iriResolverBuilder.resolve(false); // fail
-				// parserBuilder.resolveURIs(false); // fail
-				// iriResolverBuilder.noBase(); // fail
-				// iriResolverBuilder.base("http://as.df/"); // requires to query for http://as.df/general !
-				// iriResolverBuilder.base(""); // resolves to file://...
+				if (config != null && config.getBase() != null) {
+					iriResolverBuilder.base(config.getBase());
+				}
 				parserBuilder.resolver(iriResolverBuilder.build());
 			}
 			Dataset graph = parserBuilder.lang(lang).toDataset();
@@ -150,6 +149,11 @@ public class SparqlConstruct implements Transformation {
 				StringWriter dbgOut = new StringWriter();
 				RDFDataMgr.write(dbgOut, resultModel, RDFFormat.TURTLE_PRETTY);
 				LOG.info("turtle result {}", dbgOut);
+			}
+			// check configured post-conditions
+			LOG.info("result encompasses {} triples", resultModel.size());
+			if (config != null && config.getEmpty404() != null && config.getEmpty404() && resultModel.isEmpty()) {
+				throw new TransformationException("404");
 			}
 			// write result back to the wire
 			ByteArrayOutputStream output = new ByteArrayOutputStream();
@@ -199,6 +203,9 @@ public class SparqlConstruct implements Transformation {
 			try {
 				return transform(parameters, config, systemId, sourceStream, resourceProvider, request);
 			} catch (TransformationPreparationException | TransformationException e) {
+				if (e.getMessage().equals("404")) {
+					throw new NotFoundException("not found");
+				}
 				throw new InternalServerErrorException(e.getMessage());
 			}
 		});

@@ -76,7 +76,8 @@
 	    "title": "The Book of matt",
 	    "@type": "Resource",
 	    "totalParents": 1,
-	    "totalChildren": 0
+	    "totalChildren": 0,
+		"seed:location": "matt.xml"
 	},
 	{
 	    "@id": "john.xml",
@@ -87,7 +88,8 @@
 	    "document": "/document?resource=john.xml{&ref,start,end,tree,mediaType}",
 	    "title": "The Book of John",
 	    "totalParents": 1,
-	    "totalChildren": 0
+	    "totalChildren": 0,
+		"seed:location": "john.xml"
 	},
 	{
 	    "@id": "4ezr.xml",
@@ -156,7 +158,8 @@
 	"https://scdh.github.io/dts-transformations/latest/xsl/context/modules/dct-nest.json",
 	"https://scdh.github.io/dts-transformations/latest/xsl/context/modules/1.0rc1.json",
         {
-			"@base": "http://example.com/",
+			"seed": "https://github.com/scdh/seed-xc/dts/semantics.ttl#",
+			"@base": null,
 	    	"extensions": "@nest"
 		}
     ]

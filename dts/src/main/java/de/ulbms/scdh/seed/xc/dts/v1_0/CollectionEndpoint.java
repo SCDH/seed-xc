@@ -10,6 +10,9 @@ import io.smallrye.mutiny.Uni;
 import io.vertx.core.http.HttpServerRequest;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.InternalServerErrorException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -63,12 +66,32 @@ public class CollectionEndpoint implements CollectionApi {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Uni<byte[]> collection(String id, String nav, Integer page, Map<String, String> cr, Map<String, String> cf) {
+	public Uni<byte[]> collection(URI id, String nav, Integer page, Map<String, String> cr, Map<String, String> cf) {
+		Config transformationsConfig = new Config();
+		transformationsConfig.empty404(true);
+
+		URI thisIri;
+		try {
+			URI rqUrl = new URI(request.absoluteURI());
+			// the IRI of the collection/resource is the current request, but query part and fragment cut off
+			thisIri = new URI(
+					rqUrl.getScheme(),
+					rqUrl.getRawUserInfo(),
+					rqUrl.getHost(),
+					rqUrl.getPort(),
+					rqUrl.getPath(),
+					null,
+					null);
+		} catch (URISyntaxException e) {
+			throw new InternalServerErrorException("failed to make Base URI");
+		}
+		LOG.info("getting metadata for {}", thisIri);
 
 		// make RuntimeParameter object from parameters
 		RuntimeParameters params = new RuntimeParameters();
 		Map<String, ParameterValue> map = new HashMap<>();
-		if (id != null) map.put("id", pvOf(id));
+		map.put("requested", pvOf(thisIri.toString())); // most important parameter!
+		if (id != null) map.put("id", pvOf(id.toString()));
 		if (nav != null) map.put("nav", pvOf(nav));
 		if (page != null) map.put("page", pvOf(page.toString()));
 		if (cf != null) for (String k : cf.keySet()) map.put(k, pvOf(cf));
@@ -78,6 +101,10 @@ public class CollectionEndpoint implements CollectionApi {
 				.toList();
 		LOG.debug("setting mediaTypes to {}", mediaTypes);
 		map.put("mediaTypes", pvOf(mediaTypes));
+		// set endpoint specific parameters
+		map.put("base", pvOf(thisIri));
+		// transformationsConfig.base(base.toString());
+		transformationsConfig.base(request.absoluteURI());
 		params.setGlobalParameters(map);
 
 		Transformation transformation;
@@ -113,6 +140,7 @@ public class CollectionEndpoint implements CollectionApi {
 		Uni<ResourceInContext> uniRic = Uni.createFrom().item(ric);
 
 		return uniRic.plug((r) -> resourceProvider.asyncOpenStream(r, request))
-				.plug((s) -> transformation.transformAsync(params, null, graph, s, resourceProvider, request));
+				.plug((s) -> transformation.transformAsync(
+						params, transformationsConfig, graph, s, resourceProvider, request));
 	}
 }

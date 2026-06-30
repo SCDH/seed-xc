@@ -3,7 +3,6 @@ package de.ulbms.scdh.seed.xc.dts.v1_0;
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.*;
 
-import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.common.http.TestHTTPResource;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.json.*;
@@ -13,25 +12,34 @@ import java.io.StringReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 @QuarkusTest
 public class CollectionEndpointTest {
 
 	private static final String[] GENERAL_MEMBERS = {
-		"\"http://example.com/agrapha\"",
-		"\"http://example.com/apocryphs\"",
-		"\"http://example.com/john.xml\"",
-		"\"http://example.com/matt.xml\"",
+		"/collection/agrapha", "ollection/apocryphs", "collection/john.xml", "collection/matt.xml",
 	};
 
 	@Test
 	public void testStatusGeneral() {
-		given().when().get("/collection?id=http://example.com/general").then().statusCode(200);
+		given().when().get("/collection/general").then().statusCode(200);
 	}
 
-	@TestHTTPEndpoint(CollectionEndpoint.class)
-	@TestHTTPResource("?id=http://example.com/general")
+	@Test
+	public void testStatusUnknown() {
+		given().when().get("/collection/unknown?nav=parents").then().statusCode(404);
+	}
+
+	@Disabled
+	@Test
+	public void testStatusDefault() {
+		given().when().get("/collection/").then().statusCode(200);
+	}
+
+	// @TestHTTPEndpoint(CollectionEndpoint.class)
+	@TestHTTPResource("/collection/general")
 	URL urlGeneral;
 
 	@Test
@@ -47,7 +55,7 @@ public class CollectionEndpointTest {
 			assertTrue(bodyObj.containsKey("@id"), "has @id");
 			assertEquals(
 					JsonValue.ValueType.STRING, ((JsonObject) body).get("@id").getValueType());
-			assertEquals("\"http://example.com/general\"", bodyObj.get("@id").toString());
+			assertTrue(bodyObj.getString("@id").endsWith("/collection/general"));
 			assertFalse(bodyObj.containsKey("mediaTypes"), "collection does not have mediaTypes");
 			assertTrue(bodyObj.containsKey("member"));
 			assertEquals(JsonValue.ValueType.ARRAY, bodyObj.get("member").getValueType());
@@ -56,8 +64,10 @@ public class CollectionEndpointTest {
 			members.forEach((m) -> {
 				assertEquals(JsonValue.ValueType.OBJECT, m.getValueType());
 				JsonObject member = (JsonObject) m;
-				String memberId = member.get("@id").toString();
-				assertTrue(Arrays.asList(GENERAL_MEMBERS).contains(memberId), memberId + " in members");
+				String memberId = member.getString("@id");
+				assertTrue(
+						Arrays.asList(GENERAL_MEMBERS).contains(memberId.substring(memberId.length() - 19)),
+						memberId + " in members");
 				if (memberId.endsWith(".xml")) {
 					assertTrue(member.containsKey("mediaTypes"), "has mediaTypes property");
 					assertEquals(
@@ -69,8 +79,8 @@ public class CollectionEndpointTest {
 		}
 	}
 
-	@TestHTTPEndpoint(CollectionEndpoint.class)
-	@TestHTTPResource("?nav=children&id=http://example.com/general") // default explicit
+	// @TestHTTPEndpoint(CollectionEndpoint.class)
+	@TestHTTPResource("/collection/general") // default explicit
 	URL urlGeneralChildren;
 
 	@Test
@@ -86,7 +96,7 @@ public class CollectionEndpointTest {
 			assertTrue(bodyObj.containsKey("@id"), "has @id");
 			assertEquals(
 					JsonValue.ValueType.STRING, ((JsonObject) body).get("@id").getValueType());
-			assertEquals("\"http://example.com/general\"", bodyObj.get("@id").toString());
+			assertTrue(bodyObj.getString("@id").endsWith("/collection/general"));
 			assertFalse(bodyObj.containsKey("mediaTypes"), "collection does not have mediaTypes");
 			assertTrue(bodyObj.containsKey("member"));
 			assertEquals(JsonValue.ValueType.ARRAY, bodyObj.get("member").getValueType());
@@ -95,14 +105,16 @@ public class CollectionEndpointTest {
 			members.forEach((m) -> {
 				assertEquals(JsonValue.ValueType.OBJECT, m.getValueType());
 				JsonObject member = (JsonObject) m;
-				String memberId = member.get("@id").toString();
-				assertTrue(Arrays.asList(GENERAL_MEMBERS).contains(memberId), memberId + " in members");
+				String memberId = member.getString("@id");
+				assertTrue(
+						Arrays.asList(GENERAL_MEMBERS).contains(memberId.substring(memberId.length() - 19)),
+						memberId + " in members");
 			});
 		}
 	}
 
-	@TestHTTPEndpoint(CollectionEndpoint.class)
-	@TestHTTPResource("?nav=parents&id=http://example.com/general") // default explicit
+	// @TestHTTPEndpoint(CollectionEndpoint.class)
+	@TestHTTPResource("collection/general?nav=parents") // default explicit
 	URL urlGeneralParents;
 
 	@Test
@@ -119,7 +131,7 @@ public class CollectionEndpointTest {
 			assertTrue(bodyObj.containsKey("@id"), "has @id");
 			assertEquals(
 					JsonValue.ValueType.STRING, ((JsonObject) body).get("@id").getValueType());
-			assertEquals("\"http://example.com/general\"", bodyObj.get("@id").toString());
+			assertTrue(bodyObj.getString("@id").contains("/collection/general"));
 			assertFalse(bodyObj.containsKey("mediaTypes"), "collection does not have mediaTypes");
 			assertFalse(bodyObj.containsKey("member"), "leave has no member");
 			//			if (bodyObj.containsKey("member")) {
@@ -130,8 +142,8 @@ public class CollectionEndpointTest {
 		}
 	}
 
-	@TestHTTPEndpoint(CollectionEndpoint.class)
-	@TestHTTPResource("?id=http://example.com/apocryphs")
+	// @TestHTTPEndpoint(CollectionEndpoint.class)
+	@TestHTTPResource("/collection/apocryphs")
 	URL urlCollection;
 
 	@Test
@@ -148,7 +160,7 @@ public class CollectionEndpointTest {
 			assertTrue(bodyObj.containsKey("@id"), "has @id");
 			assertEquals(
 					JsonValue.ValueType.STRING, ((JsonObject) body).get("@id").getValueType());
-			assertEquals("\"http://example.com/apocryphs\"", bodyObj.get("@id").toString());
+			assertTrue(bodyObj.getString("@id").endsWith("/collection/apocryphs"));
 			assertFalse(bodyObj.containsKey("mediaTypes"), "collection does not have mediaTypes");
 			assertTrue(bodyObj.containsKey("member"), "has member");
 			assertEquals(JsonValue.ValueType.ARRAY, bodyObj.get("member").getValueType());
@@ -157,8 +169,8 @@ public class CollectionEndpointTest {
 		}
 	}
 
-	@TestHTTPEndpoint(CollectionEndpoint.class)
-	@TestHTTPResource("?nav=parents&id=http://example.com/apocryphs")
+	// @TestHTTPEndpoint(CollectionEndpoint.class)
+	@TestHTTPResource("/collection/apocryphs?nav=parents")
 	URL urlCollectionParents;
 
 	@Test
@@ -175,7 +187,7 @@ public class CollectionEndpointTest {
 			assertTrue(bodyObj.containsKey("@id"), "has @id");
 			assertEquals(
 					JsonValue.ValueType.STRING, ((JsonObject) body).get("@id").getValueType());
-			assertEquals("\"http://example.com/apocryphs\"", bodyObj.get("@id").toString());
+			assertTrue(bodyObj.getString("@id").contains("/collection/apocryphs"));
 			assertFalse(bodyObj.containsKey("mediaTypes"), "collection does not have mediaTypes");
 			assertTrue(bodyObj.containsKey("member"), "has member");
 			assertEquals(JsonValue.ValueType.ARRAY, bodyObj.get("member").getValueType());
@@ -184,8 +196,8 @@ public class CollectionEndpointTest {
 		}
 	}
 
-	@TestHTTPEndpoint(CollectionEndpoint.class)
-	@TestHTTPResource("?id=http://example.com/matt.xml")
+	// @TestHTTPEndpoint(CollectionEndpoint.class)
+	@TestHTTPResource("/collection/matt.xml")
 	URL urlResource;
 
 	@Test
@@ -201,7 +213,7 @@ public class CollectionEndpointTest {
 			assertTrue(bodyObj.containsKey("@id"), "has @id");
 			assertEquals(
 					JsonValue.ValueType.STRING, ((JsonObject) body).get("@id").getValueType());
-			assertEquals("\"http://example.com/matt.xml\"", bodyObj.get("@id").toString());
+			assertTrue(bodyObj.getString("@id").endsWith("/collection/matt.xml"));
 			assertFalse(bodyObj.containsKey("member"), "has no member");
 			assertTrue(bodyObj.containsKey("mediaTypes"), "has mediaTypes property");
 			assertEquals(JsonValue.ValueType.ARRAY, bodyObj.get("mediaTypes").getValueType());
@@ -215,8 +227,8 @@ public class CollectionEndpointTest {
 		}
 	}
 
-	@TestHTTPEndpoint(CollectionEndpoint.class)
-	@TestHTTPResource("?nav=parents&id=http://example.com/matt.xml")
+	// @TestHTTPEndpoint(CollectionEndpoint.class)
+	@TestHTTPResource("/collection/matt.xml?nav=parents")
 	URL urlResourceParents;
 
 	@Test
@@ -232,7 +244,7 @@ public class CollectionEndpointTest {
 			assertTrue(bodyObj.containsKey("@id"), "has @id");
 			assertEquals(
 					JsonValue.ValueType.STRING, ((JsonObject) body).get("@id").getValueType());
-			assertEquals("\"http://example.com/matt.xml\"", bodyObj.get("@id").toString());
+			assertEquals(urlResource.toString(), bodyObj.getString("@id"));
 			assertTrue(bodyObj.containsKey("member"), "has member");
 			assertEquals(JsonValue.ValueType.ARRAY, bodyObj.get("member").getValueType());
 			JsonArray members = (JsonArray) bodyObj.get("member");
@@ -244,12 +256,13 @@ public class CollectionEndpointTest {
 		}
 	}
 
-	@TestHTTPEndpoint(CollectionEndpoint.class)
-	@TestHTTPResource("?nav=parents&id=http://example.com/unknown")
+	// @TestHTTPEndpoint(CollectionEndpoint.class)
+	@TestHTTPResource("/collection/unknown?nav=parents")
 	URL urlUnknownParents;
 
+	@Disabled // see similar test on top. 404 is better than empty graph
 	@Test
-	public void testUnknownParents() throws IOException {
+	public void testUnknownParentsContent() throws IOException {
 		try (InputStream in = urlUnknownParents.openStream()) {
 			String result = new String(in.readAllBytes(), StandardCharsets.UTF_8);
 			JsonReader reader = Json.createReader(new StringReader(result));
@@ -306,6 +319,19 @@ public class CollectionEndpointTest {
 			assertEquals(JsonValue.ValueType.OBJECT, bodyObj.get("extensions").getValueType());
 			JsonObject extensions = (JsonObject) bodyObj.get("extensions");
 			assertTrue(extensions.containsKey("requested"), "requested is nested in extensions");
+		}
+	}
+
+	@Disabled
+	@Test
+	public void testIdFromUrl() throws IOException {
+		try (InputStream in = urlCollectionParents.openStream()) {
+			String result = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+			JsonReader reader = Json.createReader(new StringReader(result));
+			JsonStructure body = reader.read();
+			assertEquals(JsonValue.ValueType.OBJECT, body.getValueType());
+			JsonObject bodyObj = (JsonObject) body;
+			assertEquals(urlCollectionParents.toString(), bodyObj.getString("@id"));
 		}
 	}
 }
