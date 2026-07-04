@@ -91,16 +91,16 @@ public class CollectionEndpoint implements CollectionApi {
 		RuntimeParameters params = new RuntimeParameters();
 		Map<String, ParameterValue> map = new HashMap<>();
 		map.put("requested", pvOf(thisIri.toString())); // most important parameter!
-		if (id != null) map.put("id", pvOf(id.toString()));
-		if (nav != null) map.put("nav", pvOf(nav));
-		if (page != null) map.put("page", pvOf(page.toString()));
+		if (id != null) map.put("idP", pvOf(id.toString()));
+		if (nav != null) map.put("navP", pvOf(nav));
+		if (page != null) map.put("pageP", pvOf(page.toString()));
 		if (cf != null) for (String k : cf.keySet()) map.put(k, pvOf(cf));
 		// set mediaTypes from available transformations
 		List<String> mediaTypes = transformations.getByType(MEDIA_TYPES_TRANSFORMATIONS).stream()
 				.map(Transformation::getOutputMediaType)
 				.toList();
 		LOG.debug("setting mediaTypes to {}", mediaTypes);
-		map.put("mediaTypes", pvOf(mediaTypes));
+		map.put("mediaTypesP", pvOf(mediaTypes));
 		// set endpoint specific parameters
 		map.put("base", pvOf(thisIri));
 		// transformationsConfig.base(base.toString());
