@@ -3,6 +3,7 @@ package de.ulbms.scdh.seed.xc.dts.v1_0;
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.*;
 
+import de.ulbms.scdh.seed.xc.dts.URITemplateBuilder;
 import io.quarkus.test.common.http.TestHTTPResource;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.json.*;
@@ -370,17 +371,20 @@ public class CollectionEndpointTest {
 			JsonObject bodyObj = (JsonObject) body;
 			assertTrue(bodyObj.getString("collection").contains("/collection/"));
 			assertTrue(
-					bodyObj.getString("collection").contains("/collection/" + resource + "{?nav"),
+					bodyObj.getString("collection")
+							.contains("/collection/" + resource + URITemplateBuilder.THIS_COLLECTION_TEMPLATE),
 					"collection URI template");
 			assertTrue(bodyObj.getString("collection").endsWith("}"));
 			assertTrue(bodyObj.getString("navigation").contains("/navigation/"));
 			assertTrue(
-					bodyObj.getString("navigation").contains("/navigation/" + resource + "{?tree,ref,start,end,down"),
+					bodyObj.getString("navigation")
+							.contains("/navigation/" + resource + URITemplateBuilder.THIS_NAVIGATION_TEMPLATE),
 					"navigation URI template");
 			assertTrue(bodyObj.getString("document").endsWith("}"));
 			assertTrue(bodyObj.getString("document").contains("/document/"));
 			assertTrue(
-					bodyObj.getString("document").endsWith("/document/" + resource + "{?tree,ref,start,end,mediaType}"),
+					bodyObj.getString("document")
+							.endsWith("/document/" + resource + URITemplateBuilder.THIS_DOCUMENT_TEMPLATE),
 					"document URI template");
 		}
 	}
