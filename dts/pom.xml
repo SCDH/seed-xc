@@ -262,7 +262,7 @@
                 <!-- this has to precede the OA generation which is in generate-sources -->
                 <phase>initialize</phase>
                 <configuration>
-                  <url>https://zivgitlab.uni-muenster.de/api/v4/projects/10389/packages/generic/scdh-apis/${dts-openapi.version}/facade-openapi.yaml</url>
+                  <url>https://raw.githubusercontent.com/SCDH/dts-openapi/refs/tags/${dts-openapi.version}/standalone/facade-openapi.yaml</url>
                   <unpack>false</unpack>
                   <outputDirectory>${openapi-specs.dir}</outputDirectory>
                 </configuration>
