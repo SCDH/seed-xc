@@ -3,6 +3,7 @@ package de.ulbms.scdh.seed.xc.dts.v1_0;
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.*;
 
+import de.ulbms.scdh.seed.xc.dts.URITemplateBuilder;
 import io.quarkus.test.common.http.TestHTTPResource;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.json.*;
@@ -57,6 +58,10 @@ public class CollectionEndpointTest {
 					JsonValue.ValueType.STRING, ((JsonObject) body).get("@id").getValueType());
 			assertTrue(bodyObj.getString("@id").endsWith("/collection/general"));
 			assertFalse(bodyObj.containsKey("mediaTypes"), "collection does not have mediaTypes");
+			assertTrue(bodyObj.containsKey("collection"), "collection must have collection URI template");
+			assertFalse(bodyObj.containsKey("navigation"), "collection must not have navigation URI template");
+			assertFalse(bodyObj.containsKey("document"), "collection must not have document URI template");
+			String collection = bodyObj.getString("collection");
 			assertTrue(bodyObj.containsKey("member"));
 			assertEquals(JsonValue.ValueType.ARRAY, bodyObj.get("member").getValueType());
 			JsonArray members = (JsonArray) bodyObj.get("member");
@@ -74,6 +79,18 @@ public class CollectionEndpointTest {
 							JsonValue.ValueType.ARRAY, member.get("mediaTypes").getValueType());
 					JsonArray mediaTypes = (JsonArray) member.get("mediaTypes");
 					assertFalse(mediaTypes.isEmpty(), "at least one transformation available");
+				}
+				assertTrue(member.containsKey("collection"), "collection must have collection URI template");
+				assertNotEquals(
+						collection,
+						member.getString("collection"),
+						"member's template URI differs from the collection");
+				if (member.getString("@type").equals("Resource")) {
+					assertTrue(member.containsKey("navigation"), "collection not have navigation URI template");
+					assertTrue(member.containsKey("document"), "collection not have document URI template");
+				} else {
+					assertFalse(member.containsKey("navigation"), "collection not have navigation URI template");
+					assertFalse(member.containsKey("document"), "collection not have document URI template");
 				}
 			});
 		}
@@ -133,6 +150,9 @@ public class CollectionEndpointTest {
 					JsonValue.ValueType.STRING, ((JsonObject) body).get("@id").getValueType());
 			assertTrue(bodyObj.getString("@id").contains("/collection/general"));
 			assertFalse(bodyObj.containsKey("mediaTypes"), "collection does not have mediaTypes");
+			assertTrue(bodyObj.containsKey("collection"), "collection must have collection URI template");
+			assertFalse(bodyObj.containsKey("navigation"), "collection must not have navigation URI template");
+			assertFalse(bodyObj.containsKey("document"), "collection must not have document URI template");
 			assertFalse(bodyObj.containsKey("member"), "leave has no member");
 			//			if (bodyObj.containsKey("member")) {
 			//				assertEquals(JsonValue.ValueType.ARRAY, bodyObj.get("member").getValueType());
@@ -218,6 +238,9 @@ public class CollectionEndpointTest {
 			assertTrue(bodyObj.containsKey("mediaTypes"), "has mediaTypes property");
 			assertEquals(JsonValue.ValueType.ARRAY, bodyObj.get("mediaTypes").getValueType());
 			JsonArray mediaTypes = (JsonArray) bodyObj.get("mediaTypes");
+			assertTrue(bodyObj.containsKey("collection"), "collection must have collection URI template");
+			assertTrue(bodyObj.containsKey("navigation"), "collection not have navigation URI template");
+			assertTrue(bodyObj.containsKey("document"), "collection not have document URI template");
 			assertFalse(mediaTypes.isEmpty(), "at least one transformation available");
 			//			if (bodyObj.containsKey("member")) {
 			//				assertEquals(JsonValue.ValueType.ARRAY, bodyObj.get("member").getValueType());
@@ -252,7 +275,9 @@ public class CollectionEndpointTest {
 			assertTrue(bodyObj.containsKey("mediaTypes"), "has mediaTypes property");
 			assertEquals(JsonValue.ValueType.ARRAY, bodyObj.get("mediaTypes").getValueType());
 			JsonArray mediaTypes = (JsonArray) bodyObj.get("mediaTypes");
-			assertFalse(mediaTypes.isEmpty(), "at least one transformation available");
+			assertTrue(bodyObj.containsKey("collection"), "collection must have collection URI template");
+			assertTrue(bodyObj.containsKey("navigation"), "collection not have navigation URI template");
+			assertTrue(bodyObj.containsKey("document"), "collection not have document URI template");
 		}
 	}
 
@@ -332,6 +357,35 @@ public class CollectionEndpointTest {
 			assertEquals(JsonValue.ValueType.OBJECT, body.getValueType());
 			JsonObject bodyObj = (JsonObject) body;
 			assertEquals(urlCollectionParents.toString(), bodyObj.getString("@id"));
+		}
+	}
+
+	@Test
+	public void testUriTemplates() throws IOException {
+		String resource = "matt.xml";
+		try (InputStream in = urlResource.openStream()) {
+			String result = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+			JsonReader reader = Json.createReader(new StringReader(result));
+			JsonStructure body = reader.read();
+			assertEquals(JsonValue.ValueType.OBJECT, body.getValueType());
+			JsonObject bodyObj = (JsonObject) body;
+			assertTrue(bodyObj.getString("collection").contains("/collection/"));
+			assertTrue(
+					bodyObj.getString("collection")
+							.contains("/collection/" + resource + URITemplateBuilder.THIS_COLLECTION_TEMPLATE),
+					"collection URI template");
+			assertTrue(bodyObj.getString("collection").endsWith("}"));
+			assertTrue(bodyObj.getString("navigation").contains("/navigation/"));
+			assertTrue(
+					bodyObj.getString("navigation")
+							.contains("/navigation/" + resource + URITemplateBuilder.THIS_NAVIGATION_TEMPLATE),
+					"navigation URI template");
+			assertTrue(bodyObj.getString("document").endsWith("}"));
+			assertTrue(bodyObj.getString("document").contains("/document/"));
+			assertTrue(
+					bodyObj.getString("document")
+							.endsWith("/document/" + resource + URITemplateBuilder.THIS_DOCUMENT_TEMPLATE),
+					"document URI template");
 		}
 	}
 }

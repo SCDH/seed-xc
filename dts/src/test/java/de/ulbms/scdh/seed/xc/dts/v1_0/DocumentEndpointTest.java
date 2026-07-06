@@ -108,6 +108,7 @@ public class DocumentEndpointTest {
 		InputStream in = johnPlainIndirect.openStream();
 		String contents = new String(in.readAllBytes(), StandardCharsets.UTF_8);
 		assertTrue(contents.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"));
+		assertTrue(contents.contains("<TEI"));
 	}
 
 	// @TestHTTPEndpoint(DocumentEndpoint.class)

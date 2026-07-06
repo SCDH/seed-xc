@@ -5,6 +5,7 @@ import static de.ulbms.scdh.seed.xc.api.utils.ParameterValueFactory.pvOf;
 import de.ulbms.scdh.seed.xc.api.*;
 import de.ulbms.scdh.seed.xc.api.inject.TransformTimeProvider;
 import de.ulbms.scdh.seed.xc.dts.CollectionMetadataProcessor;
+import de.ulbms.scdh.seed.xc.dts.URITemplateBuilder;
 import de.ulbms.scdh.seed.xc.dts.endpoints.NavigationApi;
 import de.ulbms.scdh.seed.xc.dts.model.Navigation;
 import de.ulbms.scdh.seed.xc.transformations.TransformationMap;
@@ -66,6 +67,9 @@ public class NavigationEndpoint implements NavigationApi {
 	@Inject
 	HttpServerRequest request;
 
+	@Inject
+	URITemplateBuilder uriTemplateBuilder;
+
 	/**
 	 * <P>Implementation of the DTS Navigation endpoint.</P>
 	 * <P>This first gets the resource using the resource provider and then transformes it.</P>
@@ -121,7 +125,7 @@ public class NavigationEndpoint implements NavigationApi {
 		// make RuntimeParameter object from parameters
 		RuntimeParameters params = new RuntimeParameters();
 		Map<String, ParameterValue> map = new HashMap<>();
-		map.put("resource", pvOf(resource));
+		map.put("resource", pvOf(request.absoluteURI())); // @id has URL with any parameters
 		if (down != null) map.put("down", pvOf(down.toString()));
 		if (tree != null) map.put("tree", pvOf(tree));
 		if (page != null) map.put("page", pvOf(page.toString()));
@@ -130,6 +134,16 @@ public class NavigationEndpoint implements NavigationApi {
 		if (end != null) map.put("end", pvOf(end));
 		// all cf (= Context Follow-ups) parameters are passed to the stylesheet
 		if (cf != null) for (String k : cf.keySet()) map.put(k, pvOf(cf));
+		// parameters for URI templates
+		try {
+			URI requestUri = new URI(request.absoluteURI());
+			map.put("collection-uri-template", pvOf(uriTemplateBuilder.resourceTemplate(requestUri, "collection")));
+			map.put("navigation-uri-template", pvOf(uriTemplateBuilder.resourceTemplate(requestUri, "navigation")));
+			map.put("document-uri-template", pvOf(uriTemplateBuilder.resourceTemplate(requestUri, "document")));
+		} catch (URISyntaxException e) {
+			throw new InternalServerErrorException(e.getMessage());
+		}
+		// make global parameters from the map
 		params.globalParameters(map);
 
 		// get the transformation or return failure
