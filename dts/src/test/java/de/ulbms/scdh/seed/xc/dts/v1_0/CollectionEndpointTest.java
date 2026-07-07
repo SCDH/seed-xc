@@ -38,6 +38,27 @@ public class CollectionEndpointTest {
 		given().when().get("/collection").then().statusCode(200);
 	}
 
+	@TestHTTPResource("collection")
+	URL urlDefault;
+
+	@Test
+	public void testDefault() throws IOException {
+		try (InputStream in = urlDefault.openStream()) {
+			String result = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+			JsonReader reader = Json.createReader(new StringReader(result));
+			JsonStructure body = reader.read();
+			assertEquals(JsonValue.ValueType.OBJECT, body.getValueType());
+			JsonObject bodyObj = (JsonObject) body;
+			assertFalse(bodyObj.containsKey("@graph"), "has no @graph");
+			assertTrue(bodyObj.containsKey("@context"), "has @context");
+			assertTrue(bodyObj.containsKey("@id"), "has @id");
+			assertEquals(
+					JsonValue.ValueType.STRING, ((JsonObject) body).get("@id").getValueType());
+			assertTrue(bodyObj.getString("@id").endsWith("/collection/general"));
+			// more assertions on the content see below
+		}
+	}
+
 	// @TestHTTPEndpoint(CollectionEndpoint.class)
 	@TestHTTPResource("/collection/general")
 	URL urlGeneral;
