@@ -14,5 +14,5 @@ public interface ResourceProviderManager {
 	 * @param base - the base URI
 	 * @return a resource provider
 	 */
-	ResourceProvider get(String id, URI base);
+	ResourceProvider get(String id, URI base) throws ResourceProviderConfigurationException;
 }
