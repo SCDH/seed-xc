@@ -24,6 +24,7 @@ As a result, relative IRIs will be used by through `{resource}` and `{id}` in th
 
 Absolute IRIs in the collection metadata file are simply processed untouched.
 
+
 ## URL structure
 
 ### URI templates
