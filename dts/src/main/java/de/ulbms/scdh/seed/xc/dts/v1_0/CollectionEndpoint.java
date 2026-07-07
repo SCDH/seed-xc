@@ -86,7 +86,7 @@ public class CollectionEndpoint implements CollectionApi {
 			throw new InternalServerErrorException("failed to make Base URI");
 		}
 		LOG.info("getting metadata for default collection {}", thisIri);
-		return collection(thisIri, defaultCollection, null, null, cr, cf);
+		return collection(thisIri.toString(), thisIri, defaultCollection, null, null, cr, cf);
 	}
 
 	/**
@@ -112,11 +112,11 @@ public class CollectionEndpoint implements CollectionApi {
 		}
 		LOG.info("getting metadata for {}", thisIri);
 
-		return collection(thisIri, id, nav, page, cr, cf);
+		return collection(request.absoluteURI(), thisIri, id, nav, page, cr, cf);
 	}
 
 	protected Uni<byte[]> collection(
-			URI iri, URI id, String nav, Integer page, Map<String, String> cr, Map<String, String> cf) {
+			String baseIri, URI iri, URI id, String nav, Integer page, Map<String, String> cr, Map<String, String> cf) {
 		Config transformationsConfig = new Config();
 		transformationsConfig.empty404(true);
 
@@ -137,7 +137,7 @@ public class CollectionEndpoint implements CollectionApi {
 		// set endpoint specific parameters
 		map.put("base", pvOf(iri));
 		// transformationsConfig.base(base.toString());
-		transformationsConfig.base(request.absoluteURI());
+		transformationsConfig.base(baseIri);
 		params.setGlobalParameters(map);
 
 		Transformation transformation;
