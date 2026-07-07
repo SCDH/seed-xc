@@ -33,10 +33,9 @@ public class CollectionEndpointTest {
 		given().when().get("/collection/unknown?nav=parents").then().statusCode(404);
 	}
 
-	@Disabled
 	@Test
 	public void testStatusDefault() {
-		given().when().get("/collection/").then().statusCode(200);
+		given().when().get("/collection").then().statusCode(200);
 	}
 
 	// @TestHTTPEndpoint(CollectionEndpoint.class)

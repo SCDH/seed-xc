@@ -52,6 +52,9 @@ public class CollectionEndpoint implements CollectionApi {
 	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.DocumentEndpoint.TYPE", defaultValue = "DtsDocumentProcessor")
 	protected String MEDIA_TYPES_TRANSFORMATIONS;
 
+	@ConfigProperty(name = "dts-default-collection", defaultValue = "general")
+	protected URI defaultCollection;
+
 	@Inject
 	protected TransformationMap transformations;
 
@@ -66,9 +69,31 @@ public class CollectionEndpoint implements CollectionApi {
 	 * {@inheritDoc}
 	 */
 	@Override
+	public Uni<byte[]> collectionDefault(Map<String, String> cr, Map<String, String> cf) {
+		URI thisIri;
+		try {
+			URI rqUrl = new URI(request.absoluteURI());
+			// the IRI of the collection/resource is the current request, but query part and fragment cut off
+			thisIri = new URI(
+					rqUrl.getScheme(),
+					rqUrl.getRawUserInfo(),
+					rqUrl.getHost(),
+					rqUrl.getPort(),
+					rqUrl.getPath() + "/" + defaultCollection,
+					null,
+					null);
+		} catch (URISyntaxException e) {
+			throw new InternalServerErrorException("failed to make Base URI");
+		}
+		LOG.info("getting metadata for default collection {}", thisIri);
+		return collection(thisIri, defaultCollection, null, null, cr, cf);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public Uni<byte[]> collection(URI id, String nav, Integer page, Map<String, String> cr, Map<String, String> cf) {
-		Config transformationsConfig = new Config();
-		transformationsConfig.empty404(true);
 
 		URI thisIri;
 		try {
@@ -87,10 +112,18 @@ public class CollectionEndpoint implements CollectionApi {
 		}
 		LOG.info("getting metadata for {}", thisIri);
 
+		return collection(thisIri, id, nav, page, cr, cf);
+	}
+
+	protected Uni<byte[]> collection(
+			URI iri, URI id, String nav, Integer page, Map<String, String> cr, Map<String, String> cf) {
+		Config transformationsConfig = new Config();
+		transformationsConfig.empty404(true);
+
 		// make RuntimeParameter object from parameters
 		RuntimeParameters params = new RuntimeParameters();
 		Map<String, ParameterValue> map = new HashMap<>();
-		map.put("requested", pvOf(thisIri.toString())); // most important parameter!
+		map.put("requested", pvOf(iri.toString())); // most important parameter!
 		if (id != null) map.put("idP", pvOf(id.toString()));
 		if (nav != null) map.put("navP", pvOf(nav));
 		if (page != null) map.put("pageP", pvOf(page.toString()));
@@ -102,7 +135,7 @@ public class CollectionEndpoint implements CollectionApi {
 		LOG.debug("setting mediaTypes to {}", mediaTypes);
 		map.put("mediaTypesP", pvOf(mediaTypes));
 		// set endpoint specific parameters
-		map.put("base", pvOf(thisIri));
+		map.put("base", pvOf(iri));
 		// transformationsConfig.base(base.toString());
 		transformationsConfig.base(request.absoluteURI());
 		params.setGlobalParameters(map);
