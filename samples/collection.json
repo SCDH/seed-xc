@@ -3,10 +3,7 @@
 	{
 	    "@id": "general",
 	    "@type": "Collection",
-	    "collection": "/collection{?id,page,nav}",
-	    "dtsVersion": "1.0rc1",
-	    "totalParents": 0,
-	    "totalChildren": 2,
+		"dtsVersion": "1.0rc1",
 	    "title": "Sample Collection of DTS Transformations",
 	    "dublinCore": {
 		"title": [
@@ -37,16 +34,13 @@
 	{
 	    "@id": "apocryphs",
 	    "@type": "Collection",
-	    "collection": "/collection?id=apogryphs{&page,nav}",
 	    "dtsVersion": "1.0rc1",
-	    "totalParents": 1,
-	    "totalChildren": 2,
-	    "title": "Collection of Apocryphical Books",
+	    "title": "Collection of apocryphical Books",
 	    "dublinCore": {
 		"title": [
 		    {
 			"lang": "en",
-			"value": "Collection of Apocryphical Books"
+			"value": "Collection of apocryphical Books"
 		    }
 		],
 		"identifier": [
@@ -70,34 +64,20 @@
 	    "@id": "matt.xml",
 	    "@type": "Resource",
 	    "dtsVersion": "1.0rc1",
-	    "collection": "/collection?id=matt.xml{&nav}",
-	    "navigation": "/navigation?resource=matt.xml{&ref,start,end,tree}",
-	    "document": "/document?resource=matt.xml{&ref,start,end,tree,mediaType}",
 	    "title": "The Book of matt",
-	    "@type": "Resource",
-	    "totalParents": 1,
-	    "totalChildren": 0,
 		"seed:location": "matt.xml"
 	},
 	{
 	    "@id": "john.xml",
 	    "@type": "Resource",
 	    "dtsVersion": "1.0rc1",
-	    "collection": "/collection?id=john.xml{&nav}",
-	    "navigation": "/navigation?resource=john.xml{&ref,start,end,tree}",
-	    "document": "/document?resource=john.xml{&ref,start,end,tree,mediaType}",
 	    "title": "The Book of John",
-	    "totalParents": 1,
-	    "totalChildren": 0,
 		"seed:location": "john.xml"
 	},
 	{
 	    "@id": "4ezr.xml",
 	    "@type": "Resource",
 	    "dtsVersion": "1.0rc1",
-	    "collection": "/collection?id=4ezr.xml{&nav}",
-	    "navigation": "/navigation?resource=john.xml{&ref,start,end,tree}",
-	    "document": "/document?resource=john.xml{&ref,start,end,tree,mediaType}",
 	    "title": "The 4th Book of Esra",
 	    "dublinCore": {
 		"title": [
@@ -116,18 +96,13 @@
 		    "value": "TEI-XML edition of the 4th book of Esra based on ..."
 		}
 	    },
-	    "totalParents": 1,
-	    "totalChildren": 0,
 	    "download": "4ezr.xml",
 		"seed:location": "4ezr.xml"
 	},
 	{
 	    "@id": "agrapha",
 	    "@type": "Collection",
-	    "collection": "/collection?id=agrapha{&page,nav}",
 	    "dtsVersion": "1.0rc1",
-	    "totalParents": 1,
-	    "totalChildren": 1,
 	    "title": "Collection of Agrapha",
 	    "dublinCore": {
 		"title": [
@@ -147,12 +122,7 @@
 	    "@id": "agraphai.xml",
 	    "@type": "Resource",
 	    "dtsVersion": "1.0rc1",
-	    "collection": "/collection?id=agraphai.xml{&nav}",
-	    "navigation": "/navigation?resource=agraphai.xml{&ref,start,end,tree}",
-	    "document": "/document?resource=agraphai.xml{&ref,start,end,tree,mediaType}",
 	    "title": "Book of Non-Written Stuff I",
-	    "totalParents": 1,
-	    "totalChildren": 0,
 		"seed:location": "agraphai.xml"
 	}
     ],
