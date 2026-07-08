@@ -10,10 +10,10 @@ import io.smallrye.mutiny.Uni;
 import io.vertx.core.http.HttpServerRequest;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,9 +46,6 @@ public class CollectionEndpoint implements CollectionApi {
 	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.CollectionEndpoint.GRAPH", defaultValue = "collection.json")
 	protected String GRAPH;
 
-	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.CollectionEndpoint.CR_GRAPH_KEY", defaultValue = "graph")
-	protected String CR_GRAPH_KEY;
-
 	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.DocumentEndpoint.TYPE", defaultValue = "DtsDocumentProcessor")
 	protected String MEDIA_TYPES_TRANSFORMATIONS;
 
@@ -60,7 +57,7 @@ public class CollectionEndpoint implements CollectionApi {
 
 	@TransformTimeProvider
 	@Inject
-	ResourceProvider resourceProvider;
+	ResourceProviderManager resourceProviderManager;
 
 	@Inject
 	HttpServerRequest request;
@@ -69,7 +66,7 @@ public class CollectionEndpoint implements CollectionApi {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Uni<byte[]> collectionDefault(Map<String, String> cr, Map<String, String> cf) {
+	public Uni<byte[]> collectionDefault(URI provider, URI location) {
 		URI thisIri;
 		try {
 			URI rqUrl = new URI(request.absoluteURI());
@@ -86,14 +83,14 @@ public class CollectionEndpoint implements CollectionApi {
 			throw new InternalServerErrorException("failed to make Base URI");
 		}
 		LOG.info("getting metadata for default collection {}", thisIri);
-		return collection(thisIri.toString(), thisIri, defaultCollection, null, null, cr, cf);
+		return collection(provider, location, thisIri.toString(), thisIri, defaultCollection, null, null);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Uni<byte[]> collection(URI id, String nav, Integer page, Map<String, String> cr, Map<String, String> cf) {
+	public Uni<byte[]> collection(URI provider, URI location, URI id, String nav, Integer page) {
 
 		URI thisIri;
 		try {
@@ -112,11 +109,11 @@ public class CollectionEndpoint implements CollectionApi {
 		}
 		LOG.info("getting metadata for {}", thisIri);
 
-		return collection(request.absoluteURI(), thisIri, id, nav, page, cr, cf);
+		return collection(provider, location, request.absoluteURI(), thisIri, id, nav, page);
 	}
 
 	protected Uni<byte[]> collection(
-			String baseIri, URI iri, URI id, String nav, Integer page, Map<String, String> cr, Map<String, String> cf) {
+			URI provider, URI location, String baseIri, URI iri, URI id, String nav, Integer page) {
 		Config transformationsConfig = new Config();
 		transformationsConfig.empty404(true);
 
@@ -127,7 +124,6 @@ public class CollectionEndpoint implements CollectionApi {
 		if (id != null) map.put("idP", pvOf(id.toString()));
 		if (nav != null) map.put("navP", pvOf(nav));
 		if (page != null) map.put("pageP", pvOf(page.toString()));
-		if (cf != null) for (String k : cf.keySet()) map.put(k, pvOf(cf));
 		// set mediaTypes from available transformations
 		List<String> mediaTypes = transformations.getByType(MEDIA_TYPES_TRANSFORMATIONS).stream()
 				.map(Transformation::getOutputMediaType)
@@ -161,19 +157,23 @@ public class CollectionEndpoint implements CollectionApi {
 			}
 		}
 
-		// determine collection metadata graph file and make resource in context from it
-		if (cr == null) cr = Map.of();
-		String graph;
-		if (cr.containsKey(CR_GRAPH_KEY)) {
-			graph = cr.get(CR_GRAPH_KEY);
-		} else {
-			graph = GRAPH;
+		ResourceProvider resourceProvider;
+		try {
+			ResourceProviderBuilder resourceProviderBuilder = resourceProviderManager.get(provider.toString());
+			resourceProvider = resourceProviderBuilder.withBase(location);
+		} catch (ResourceProviderConfigurationException e) {
+			LOG.error("cannot find resource provider builder type {}", provider);
+			throw new BadRequestException("unknown resource provider: " + provider);
+		} catch (ResourceException e) {
+			LOG.error("cannot open base location {} with {} resource provider: {}", location, provider, e.getMessage());
+			throw new BadRequestException("cannot open base location: " + e.getMessage());
 		}
-		ResourceInContext ric = new ResourceInContext(Collections.unmodifiableMap(cr), graph);
+
+		ResourceInContext ric = new ResourceInContext(Map.of(), GRAPH);
 		Uni<ResourceInContext> uniRic = Uni.createFrom().item(ric);
 
 		return uniRic.plug((r) -> resourceProvider.asyncOpenStream(r, request))
 				.plug((s) -> transformation.transformAsync(
-						params, transformationsConfig, graph, s, resourceProvider, request));
+						params, transformationsConfig, GRAPH, s, resourceProvider, request));
 	}
 }
