@@ -1,14 +1,11 @@
 package de.ulbms.scdh.seed.xc.dts.v1_0;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.exc.StreamReadException;
-import com.fasterxml.jackson.databind.DatabindException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import de.ulbms.scdh.seed.xc.api.ResourceInContext;
-import de.ulbms.scdh.seed.xc.api.ResourceProvider;
-import de.ulbms.scdh.seed.xc.api.RuntimeParameters;
-import de.ulbms.scdh.seed.xc.api.Transformation;
+import static de.ulbms.scdh.seed.xc.api.utils.ParameterValueFactory.pvOf;
+
+import de.ulbms.scdh.seed.xc.api.*;
 import de.ulbms.scdh.seed.xc.api.inject.TransformTimeProvider;
+import de.ulbms.scdh.seed.xc.dts.CollectionMetadataProcessor;
+import de.ulbms.scdh.seed.xc.dts.URITemplateBuilder;
 import de.ulbms.scdh.seed.xc.dts.endpoints.NavigationApi;
 import de.ulbms.scdh.seed.xc.dts.model.Navigation;
 import de.ulbms.scdh.seed.xc.transformations.TransformationMap;
@@ -16,8 +13,10 @@ import io.smallrye.mutiny.Uni;
 import io.vertx.core.http.HttpServerRequest;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
-import java.io.IOException;
-import java.util.Collections;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.InternalServerErrorException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -43,57 +42,103 @@ public class NavigationEndpoint implements NavigationApi {
 	@ConfigProperty(
 			name = "de.ulbms.scdh.seed.xc.dts.NavigationEndpoint.TRANSFORMATION",
 			defaultValue = "dts-transformations-xsl-navigation")
-	private String TRANSFORMATION;
+	protected String TRANSFORMATION;
+
+	/**
+	 * Location of the collection metadata, same as for Collection endpoint.
+	 */
+	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.CollectionEndpoint.GRAPH", defaultValue = "collection.json")
+	protected String GRAPH;
+
+	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.NavigationEndpoint.RESOURCE_ID_PATH", defaultValue = "false")
+	protected boolean RESOURCE_IS_PATH;
 
 	@Inject
-	TransformationMap transformations;
+	protected CollectionMetadataProcessor collectionMetadataProc;
+
+	@Inject
+	protected TransformationMap transformations;
 
 	@TransformTimeProvider
 	@Inject
-	ResourceProvider resourceProvider;
+	protected ResourceProviderManager resourceProviderManager;
 
 	@Inject
-	HttpServerRequest request;
+	protected HttpServerRequest request;
+
+	@Inject
+	protected URITemplateBuilder uriTemplateBuilder;
 
 	/**
 	 * <P>Implementation of the DTS Navigation endpoint.</P>
 	 * <P>This first gets the resource using the resource provider and then transformes it.</P>
 	 *
-	 * @param resource - Resource identifer. Passed as runtime parameter to the transformation and also to the resource provider.
+	 * @param provider - the type of resource provider
+	 * @param location - the base location accessed by the resource provider
+	 * @param resource - Resource identifier. Passed as runtime parameter to the transformation and also to the resource provider.
 	 * @param ref - See DTS specs. Passed as runtime parameter to the transformation.
 	 * @param start - See DTS specs. Passed as runtime parameter to the transformation.
 	 * @param end - See DTS specs. Passed as runtime parameter to the transformation.
 	 * @param down - See DTS specs. Passed as runtime parameter to the transformation.
 	 * @param tree - See DTS specs. Passed as runtime parameter to the transformation.
 	 * @param page - See DTS specs. Passed as runtime parameter to the transformation.
-	 * @param cr - Context information for getting the resource as {@link Map<String,String>}. This hash map is passed to the resource provider.
-	 * @param cf - Context information for follow-up links as {@link Map<String,String>}. These are passed as runtime parameters to the transformation.
 	 * @return The document or parts of it in the requested media type.
 	 */
 	@Override
-	public Uni<Navigation> navigation(
-			String resource,
+	public Uni<byte[]> navigation(
+			URI resource,
+			URI provider,
+			URI location,
 			String ref,
 			String start,
 			String end,
 			Integer down,
 			String tree,
-			Integer page,
-			Map<String, String> cr,
-			Map<String, String> cf) {
+			Integer page) {
+
+		if (resource == null || resource.toString().isEmpty())
+			throw new BadRequestException("resource parameter is required");
+
+		Config transformationConfig = new Config();
+		transformationConfig.base(request.absoluteURI());
+
+		URI thisIri;
+		try {
+			URI rqUrl = new URI(request.absoluteURI());
+			// the IRI of the resource is the current request, but query part and fragment cut off
+			thisIri = new URI(
+					rqUrl.getScheme(),
+					rqUrl.getRawUserInfo(),
+					rqUrl.getHost(),
+					rqUrl.getPort(),
+					rqUrl.getPath(),
+					null,
+					null);
+		} catch (URISyntaxException e) {
+			throw new InternalServerErrorException("failed to make Base URI");
+		}
+		LOG.debug("getting metadata for {}", thisIri);
 
 		// make RuntimeParameter object from parameters
 		RuntimeParameters params = new RuntimeParameters();
-		Map<String, String> map = new HashMap<String, String>();
-		if (resource != null) map.put("resource", resource);
-		if (down != null) map.put("down", down.toString());
-		if (tree != null) map.put("tree", tree);
-		if (page != null) map.put("page", page.toString());
-		if (ref != null) map.put("ref", ref);
-		if (start != null) map.put("start", start);
-		if (end != null) map.put("end", end);
-		// all cf (= Context Follow ups) parameters are passed to the stylesheet
-		if (cf != null) map.putAll(cf);
+		Map<String, ParameterValue> map = new HashMap<>();
+		map.put("resource", pvOf(request.absoluteURI())); // @id has URL with any parameters
+		if (down != null) map.put("down", pvOf(down.toString()));
+		if (tree != null) map.put("tree", pvOf(tree));
+		if (page != null) map.put("page", pvOf(page.toString()));
+		if (ref != null) map.put("ref", pvOf(ref));
+		if (start != null) map.put("start", pvOf(start));
+		if (end != null) map.put("end", pvOf(end));
+		// parameters for URI templates
+		try {
+			URI requestUri = new URI(request.absoluteURI());
+			map.put("collection-uri-template", pvOf(uriTemplateBuilder.resourceTemplate(requestUri, "collection")));
+			map.put("navigation-uri-template", pvOf(uriTemplateBuilder.resourceTemplate(requestUri, "navigation")));
+			map.put("document-uri-template", pvOf(uriTemplateBuilder.resourceTemplate(requestUri, "document")));
+		} catch (URISyntaxException e) {
+			throw new InternalServerErrorException(e.getMessage());
+		}
+		// make global parameters from the map
 		params.globalParameters(map);
 
 		// get the transformation or return failure
@@ -104,37 +149,48 @@ public class NavigationEndpoint implements NavigationApi {
 					.failure(new jakarta.ws.rs.BadRequestException("transformation not available: " + TRANSFORMATION));
 		}
 
+		ResourceProvider resourceProvider;
+		try {
+			ResourceProviderBuilder resourceProviderBuilder = resourceProviderManager.get(provider.toString());
+			resourceProvider = resourceProviderBuilder.withBase(location);
+		} catch (ResourceProviderConfigurationException e) {
+			LOG.error("cannot find resource provider builder type {}", provider);
+			throw new BadRequestException("unknown resource provider: " + provider);
+		} catch (ResourceException e) {
+			LOG.error("cannot open base location {} with {} resource provider: {}", location, provider, e.getMessage());
+			throw new BadRequestException("cannot open base location: " + e.getMessage());
+		}
+
 		// Create ResourceInContext from resource parameter and additional parameters
-		if (cr == null) cr = Map.of();
-		ResourceInContext ric = new ResourceInContext(Collections.unmodifiableMap(cr), resource);
-		Uni<ResourceInContext> uniRic = Uni.createFrom().item(ric);
+		Map<String, String> crContext = Map.of();
+		Uni<ResourceInContext> uniRic;
+		if (RESOURCE_IS_PATH) {
+			ResourceInContext ric = new ResourceInContext(crContext, resource.toString());
+			uniRic = Uni.createFrom().item(ric);
+		} else {
+			// get the resource location from the collection metadata
+			ResourceInContext collectionIc = new ResourceInContext(crContext, GRAPH);
+			uniRic = Uni.createFrom()
+					.item(collectionIc)
+					.plug((cic) -> {
+						return resourceProvider.asyncOpenStream(cic, request);
+					})
+					.plug((s) -> {
+						return collectionMetadataProc.getResourceLocation(
+								s, GRAPH, transformationConfig, crContext, thisIri.toString());
+					})
+					.onItem()
+					.transform((resourceLocation -> {
+						return new ResourceInContext(crContext, resourceLocation);
+					}));
+		}
 
 		return uniRic.plug((r) -> {
 					return resourceProvider.asyncOpenStream(r, request);
 				})
 				.plug((s) -> {
-					return transformation.transformAsync(params, null, resource, s, resourceProvider, request);
-				})
-				.onItem()
-				.transform((bs) -> {
-					// TODO: Can we get rid of this serialization ○ deserialization
-					// step? We could simple send the bytestream back to the
-					// client, but that would break the signature of the interface
-					// generated from OpenAPI specs. This extra step seems to be the
-					// cost of using OpenAPI specs.
-					try {
-						ObjectMapper om = new ObjectMapper(new JsonFactory());
-						return om.readValue(bs, Navigation.class);
-					} catch (DatabindException e) {
-						LOG.error(e.getMessage());
-						throw new jakarta.ws.rs.InternalServerErrorException(e.getMessage());
-					} catch (StreamReadException e) {
-						LOG.error(e.getMessage());
-						throw new jakarta.ws.rs.InternalServerErrorException(e.getMessage());
-					} catch (IOException e) {
-						LOG.error(e.getMessage());
-						throw new jakarta.ws.rs.InternalServerErrorException(e.getMessage());
-					}
+					return transformation.transformAsync(
+							params, transformationConfig, resource.toString(), s, resourceProvider, request);
 				});
 	}
 }

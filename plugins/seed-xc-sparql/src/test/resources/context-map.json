@@ -1,0 +1,9 @@
+{
+  "https://example.com/context/dcterms/nest.json": {
+    "path": "context/dct-nest.json"
+  },
+  "https://example.com/broken.json": {
+    "path": "context/not-available.json"
+  }
+
+}

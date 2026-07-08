@@ -6,12 +6,12 @@ import java.util.Set;
 /**
  * The {@link TransformationMap} is a registry of all the
  * transformations available on the web service. It maps
- * transformation IDs to {@link Transformation} objects.
+ * transformation IDs to {@link Transformation} objects.<P/>
  *
- * Implementations are {@link ApplicationScoped}, because there is
- * only one instance during the services lifecycle. This is what we
+ * Implementations are {@link jakarta.enterprise.context.ApplicationScoped}, because there is
+ * only one instance during the service's lifecycle. This is what we
  * want when we want to compile a stylesheet only once and then use it
- * throughout the services lifecycle.
+ * throughout the service's lifecycle.
  */
 public interface TransformationMap {
 
@@ -45,4 +45,11 @@ public interface TransformationMap {
 	 * @return a {@link Set} view of the transformation identifiers
 	 */
 	Set<String> keySet();
+
+	/**
+	 * Returns a set of {@link Transformation} objects that are tagged by a given <code>type</code>.
+	 * @param type - The transformation type, e.g. <code>DTSDocumentProcessor</code>
+	 * @return Transformation
+	 */
+	Set<Transformation> getByType(String type);
 }

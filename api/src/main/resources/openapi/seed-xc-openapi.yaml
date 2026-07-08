@@ -344,13 +344,19 @@ components:
           description: Whether or not the output is to be indented.
           type: boolean
     config:
-      description: Configuration for the transformation request.
+      description: Configuration for the transformation request. These parameters are sent to the transformer instance, but not to the transformation.
       type: object
       properties:
         parser:
           $ref: '#/components/schemas/parser'
         serializer:
           $ref: '#/components/schemas/serializer'
+        base:
+          type: string
+          description: Base URI for URI/IRI resolution.
+        empty404:
+          type: boolean
+          description: return 404 status code on empty result set
     runtimeParameters:
       description: How the transformation is to be called, with a set of global parameters and optionally the initial callable (template or function) and the parameters for it.
       type: object
@@ -400,7 +406,9 @@ components:
       type: string
     parameterValue:
       description: A parameter value
-      type: string
+      type: array
+      items:
+        type: string
     typedParameter:
       description: A parameter value
       type: object
@@ -420,13 +428,28 @@ components:
     context:
       description: Options of the JSON-LD context
       type: object
-      required:
-        - location
       properties:
         location:
           type: string
           format: uri
           description: The URI of the initial active context
+        document:
+          type: object
+          description: A JSON-LD Context document.
+      anyOf:
+        - required: [location]
+        - required: [document]
+    resourceMapping:
+      description: A mapping of URIs to local resources (static assets).
+      type: object
+      additionalProperties:
+        type: object
+        required:
+          - path
+        properties:
+          path:
+            type: string
+            description: Path to the local resource.
     transformationInfo:
       description: Information about the transformation resource and its runtime parameters
       type: object

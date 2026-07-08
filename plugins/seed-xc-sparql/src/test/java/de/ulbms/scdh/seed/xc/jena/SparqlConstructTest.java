@@ -2,6 +2,7 @@ package de.ulbms.scdh.seed.xc.jena;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.apicatalog.jsonld.JsonLdOptions;
 import de.ulbms.scdh.seed.xc.api.*;
 import io.vertx.core.http.HttpServerRequest;
 import jakarta.inject.Inject;
@@ -13,6 +14,9 @@ import org.junit.jupiter.api.Test;
 
 class SparqlConstructTest {
 
+	private static final String CONTEXT_MAP =
+			Paths.get("src", "test", "resources", "context-map.json").toFile().getAbsolutePath();
+
 	private static final File DATA_DIR =
 			Paths.get("src", "test", "resources", "data").toFile();
 
@@ -21,8 +25,8 @@ class SparqlConstructTest {
 	private static final File RQ_DIR =
 			Paths.get("src", "test", "resources", "rq").toFile();
 
-	private static final File FRAME =
-			Paths.get("src", "test", "resources", "context", "person.json").toFile();
+	private static final File FRAME = Paths.get("src", "test", "resources", "META-INF", "resources", "person.json")
+			.toFile();
 
 	private static final File CONFIG = RQ_DIR;
 
@@ -81,16 +85,29 @@ class SparqlConstructTest {
 		info.setPropertyClass(SparqlConstruct.TRANSFORMATION_TYPE);
 		info.setLocation(new File(RQ_DIR, "qc1.rq").getAbsolutePath());
 		info.setMediaType("application/ld+json");
-		info.setContext(new Context(FRAME.getAbsoluteFile().toURI()));
+		Context context = new Context();
+		context.setLocation(FRAME.getAbsoluteFile().toURI());
+		info.setContext(context);
 		QC1_JSONLD_WITH_CONTEXT = info;
 	}
 
 	SparqlConstruct transformation;
 
+	private static final JsonLdOptions JSON_LD_OPTIONS;
+
+	static {
+		ConfiguredJsonLdOptions optsFactory = new ConfiguredJsonLdOptions();
+		optsFactory.uriValidationPolicy = "full";
+		optsFactory.documentLoader = ConfiguredJsonLdLoader.createJsonLdLoader(CONTEXT_MAP, 10000);
+		JSON_LD_OPTIONS = optsFactory.getJsonLdOptions();
+	}
+
 	@BeforeEach
 	public void setup() {
 		transformation = new SparqlConstruct();
 		transformation.serializer = new Serializer();
+		transformation.jsonLdContextFactory = new JsonLdContext();
+		transformation.jsonLdOptions = JSON_LD_OPTIONS;
 	}
 
 	@Test

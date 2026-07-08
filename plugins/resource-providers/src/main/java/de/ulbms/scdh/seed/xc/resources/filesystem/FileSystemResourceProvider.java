@@ -71,7 +71,16 @@ public class FileSystemResourceProvider implements ResourceProvider {
 			LOG.error("invalid path for FileSystemResourceProvider: {}", e.getMessage());
 			error = e;
 		}
-		LOG.info("file system provider based on {}", this.path);
+		LOG.debug("file system provider based on {}", this.path);
+	}
+
+	/**
+	 * Constructor for direct setup via builder.
+	 * @param path - the base path
+	 */
+	public FileSystemResourceProvider(Path path) {
+		LOG.debug("setting up file system resource provider with base path {}", path);
+		this.path = path;
 	}
 
 	public Exception getError() {

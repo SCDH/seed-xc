@@ -12,12 +12,13 @@
   <name>SEED DTS</name>
 
   <properties>
-    <dts-openapi.version>0.1.1</dts-openapi.version>
+    <dts-openapi.version>0.4.0</dts-openapi.version>
     <openapi-specs.dir>${project.build.directory}</openapi-specs.dir>
 
     <!-- service configuration -->
     <seed-dts.config>${project.build.directory}/dependencies/dts-transformations.yaml</seed-dts.config>
     <seed-dts.saxon-config>${project.build.directory}/dependencies/dts-transformations/saxon.he.xml</seed-dts.saxon-config>
+    <seed-dts.jsonld-context-map>${project.build.directory}/dependencies/dts-transformations/context-map.json</seed-dts.jsonld-context-map>
     <seed-dts.accessible-path>${project.basedir}/../</seed-dts.accessible-path>
     <seed-dts.filesystem>${project.basedir}/../samples/</seed-dts.filesystem>
   </properties>
@@ -32,6 +33,12 @@
       <groupId>${project.groupId}</groupId>
       <artifactId>seed-xc-transformations</artifactId>
       <version>${revision}${changelist}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>resources</artifactId>
+      <version>${revision}${changelist}</version>
+      <scope>${plugins.scope}</scope>
     </dependency>
     <!--
       Add plugins to the classpath
@@ -55,6 +62,18 @@
       <version>${revision}${changelist}</version>
       <scope>${plugins.scope}</scope>
     </dependency>
+    <!-- for handling collection metadata -->
+    <dependency>
+      <groupId>org.apache.jena</groupId>
+      <artifactId>jena-arq</artifactId>
+      <version>${jena.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.apicatalog</groupId>
+      <artifactId>titanium-json-ld</artifactId>
+      <version>${titanium.version}</version>
+    </dependency>
+
     <!-- for the annotations in the model and in the api -->
     <dependency>
       <groupId>io.quarkus</groupId>
@@ -145,7 +164,7 @@
                 <dateLibrary>java8</dateLibrary>
                 <hideGenerationTimestamp>true</hideGenerationTimestamp>
                 <disallowAdditionalPropertiesIfNotPresent>false</disallowAdditionalPropertiesIfNotPresent>
-                <useTags>false</useTags>
+                <useTags>true</useTags>
                 <useSwaggerAnnotations>false</useSwaggerAnnotations>
                 <useMicroProfileOpenAPIAnnotations>true</useMicroProfileOpenAPIAnnotations>
                 <openApiNullable>false</openApiNullable>
@@ -153,6 +172,8 @@
               </configOptions>
               <typeMappings>
                 <typeMapping>file=byte[]</typeMapping>
+                <typeMapping>Collection=byte[]</typeMapping>
+                <typeMapping>Navigation=byte[]</typeMapping>
               </typeMappings>
             </configuration>
           </execution>
@@ -247,7 +268,7 @@
                 <!-- this has to precede the OA generation which is in generate-sources -->
                 <phase>initialize</phase>
                 <configuration>
-                  <url>https://zivgitlab.uni-muenster.de/api/v4/projects/10389/packages/generic/scdh-apis/${dts-openapi.version}/facade-openapi.yaml</url>
+                  <url>https://raw.githubusercontent.com/SCDH/dts-openapi/refs/tags/${dts-openapi.version}/standalone/facade-openapi.yaml</url>
                   <unpack>false</unpack>
                   <outputDirectory>${openapi-specs.dir}</outputDirectory>
                 </configuration>

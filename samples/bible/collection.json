@@ -1,0 +1,138 @@
+{
+    "@graph":  [
+	{
+	    "@id": "general",
+	    "@type": "Collection",
+		"dtsVersion": "1.0rc1",
+	    "title": "Sample Collection of DTS Transformations",
+	    "dublinCore": {
+		"title": [
+		    {
+			"lang": "en",
+			"value": "Sample Collection of DTS Transformations"
+		    }
+		],
+		"description": {
+		    "en": "This is a sample collection for Distributed Text Services (DTS)"
+		}
+	    },
+	    "member": [
+		{
+		    "@id": "matt.xml"
+		},
+		{
+		    "@id": "john.xml"
+		},
+		{
+		    "@id": "agrapha"
+		},
+		{
+		    "@id": "apocryphs"
+		}
+	    ]
+	},
+	{
+	    "@id": "apocryphs",
+	    "@type": "Collection",
+	    "dtsVersion": "1.0rc1",
+	    "title": "Collection of apocryphical Books",
+	    "dublinCore": {
+		"title": [
+		    {
+			"lang": "en",
+			"value": "Collection of apocryphical Books"
+		    }
+		],
+		"identifier": [
+		    {
+			"lang": "en",
+			"value": "APC"
+		    }
+		]
+
+	    },
+	    "member": [
+		{
+		    "@id": "4ezr.xml"
+		},
+		{
+		    "@id": "agrapha"
+		}
+	    ]
+	},
+	{
+	    "@id": "matt.xml",
+	    "@type": "Resource",
+	    "dtsVersion": "1.0rc1",
+	    "title": "The Book of matt",
+		"seed:location": "matt.xml"
+	},
+	{
+	    "@id": "john.xml",
+	    "@type": "Resource",
+	    "dtsVersion": "1.0rc1",
+	    "title": "The Book of John",
+		"seed:location": "john.xml"
+	},
+	{
+	    "@id": "4ezr.xml",
+	    "@type": "Resource",
+	    "dtsVersion": "1.0rc1",
+	    "title": "The 4th Book of Esra",
+	    "dublinCore": {
+		"title": [
+		    {
+			"@language": "en",
+			"@value": "Esra IV"
+		    }
+		],
+		"identifier": [
+		    {
+			"lang": "en",
+			"value": "4Ezr"
+		    }
+		],
+		"description": {
+		    "value": "TEI-XML edition of the 4th book of Esra based on ..."
+		}
+	    },
+	    "download": "4ezr.xml",
+		"seed:location": "4ezr.xml"
+	},
+	{
+	    "@id": "agrapha",
+	    "@type": "Collection",
+	    "dtsVersion": "1.0rc1",
+	    "title": "Collection of Agrapha",
+	    "dublinCore": {
+		"title": [
+		    {
+			"lang": "en",
+			"value": "Collection of Agrapha"
+		    }
+		]
+	    },
+	    "member": [
+		{
+		    "@id": "agraphai.xml"
+		}
+	    ]
+	},
+	{
+	    "@id": "agraphai.xml",
+	    "@type": "Resource",
+	    "dtsVersion": "1.0rc1",
+	    "title": "Book of Non-Written Stuff I",
+		"seed:location": "agraphai.xml"
+	}
+    ],
+    "@context": [
+	"https://scdh.github.io/dts-transformations/latest/xsl/context/modules/dct-nest.json",
+	"https://scdh.github.io/dts-transformations/latest/xsl/context/modules/1.0rc1.json",
+		{
+			"seed": "https://github.com/scdh/seed-xc/dts/semantics.ttl#",
+			"@base": null,
+	    	"extensions": "@nest"
+		}
+    ]
+}
