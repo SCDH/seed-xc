@@ -36,6 +36,15 @@
       <version>${jena.version}</version>
     </dependency>
     <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-jakarta-jsonp</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.apicatalog</groupId>
+      <artifactId>titanium-json-ld</artifactId>
+      <version>${titanium.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <version>${slf4j.version}</version>
