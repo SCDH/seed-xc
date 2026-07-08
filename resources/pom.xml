@@ -8,7 +8,7 @@
   </parent>
 
   <artifactId>resources</artifactId>
-  <name>Resource Provider Manager</name>
+  <name>SEED XC  Resource Provider Manager</name>
   <description>Provides a resource provider manager</description>
 
   <properties>
