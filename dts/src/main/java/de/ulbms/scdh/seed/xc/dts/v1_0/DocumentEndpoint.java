@@ -85,9 +85,9 @@ public class DocumentEndpoint implements DocumentApi {
 	 */
 	@Override
 	public Uni<byte[]> document(
+			URI resource,
 			URI provider,
 			URI location,
-			URI resource,
 			String ref,
 			String start,
 			String end,

@@ -90,7 +90,7 @@ public class CollectionEndpoint implements CollectionApi {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Uni<byte[]> collection(URI provider, URI location, URI id, String nav, Integer page) {
+	public Uni<byte[]> collection(URI id, URI provider, URI location, String nav, Integer page) {
 
 		URI thisIri;
 		try {

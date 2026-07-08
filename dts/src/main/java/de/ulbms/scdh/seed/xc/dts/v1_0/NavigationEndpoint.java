@@ -87,9 +87,9 @@ public class NavigationEndpoint implements NavigationApi {
 	 */
 	@Override
 	public Uni<byte[]> navigation(
+			URI resource,
 			URI provider,
 			URI location,
-			URI resource,
 			String ref,
 			String start,
 			String end,

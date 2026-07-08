@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 public class CollectionMetadataProcessorTest {
 
 	private static final File COLLECTION =
-			Paths.get("src", "test", "resources", "collection.json").toFile();
+			Paths.get("src", "test", "resources", "sample", "collection.json").toFile();
 
 	private static final String BASE = "http://example.com/";
 

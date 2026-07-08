@@ -25,20 +25,20 @@ public class CollectionEndpointTest {
 
 	@Test
 	public void testStatusGeneral() {
-		given().when().get("/collection/general").then().statusCode(200);
+		given().when().get("/file/sample/collection/general").then().statusCode(200);
 	}
 
 	@Test
 	public void testStatusUnknown() {
-		given().when().get("/collection/unknown?nav=parents").then().statusCode(404);
+		given().when().get("/file/sample/collection/unknown?nav=parents").then().statusCode(404);
 	}
 
 	@Test
 	public void testStatusDefault() {
-		given().when().get("/collection").then().statusCode(200);
+		given().when().get("/file/sample/collection").then().statusCode(200);
 	}
 
-	@TestHTTPResource("collection")
+	@TestHTTPResource("/file/sample/collection")
 	URL urlDefault;
 
 	@Test
@@ -60,7 +60,7 @@ public class CollectionEndpointTest {
 	}
 
 	// @TestHTTPEndpoint(CollectionEndpoint.class)
-	@TestHTTPResource("/collection/general")
+	@TestHTTPResource("/file/sample/collection/general")
 	URL urlGeneral;
 
 	@Test
@@ -117,7 +117,7 @@ public class CollectionEndpointTest {
 	}
 
 	// @TestHTTPEndpoint(CollectionEndpoint.class)
-	@TestHTTPResource("/collection/general") // default explicit
+	@TestHTTPResource("/file/sample/collection/general") // default explicit
 	URL urlGeneralChildren;
 
 	@Test
@@ -151,7 +151,7 @@ public class CollectionEndpointTest {
 	}
 
 	// @TestHTTPEndpoint(CollectionEndpoint.class)
-	@TestHTTPResource("collection/general?nav=parents") // default explicit
+	@TestHTTPResource("/file/sample/collection/general?nav=parents") // default explicit
 	URL urlGeneralParents;
 
 	@Test
@@ -183,7 +183,7 @@ public class CollectionEndpointTest {
 	}
 
 	// @TestHTTPEndpoint(CollectionEndpoint.class)
-	@TestHTTPResource("/collection/apocryphs")
+	@TestHTTPResource("/file/sample/collection/apocryphs")
 	URL urlCollection;
 
 	@Test
@@ -210,7 +210,7 @@ public class CollectionEndpointTest {
 	}
 
 	// @TestHTTPEndpoint(CollectionEndpoint.class)
-	@TestHTTPResource("/collection/apocryphs?nav=parents")
+	@TestHTTPResource("/file/sample/collection/apocryphs?nav=parents")
 	URL urlCollectionParents;
 
 	@Test
@@ -237,7 +237,7 @@ public class CollectionEndpointTest {
 	}
 
 	// @TestHTTPEndpoint(CollectionEndpoint.class)
-	@TestHTTPResource("/collection/matt.xml")
+	@TestHTTPResource("/file/sample/collection/matt.xml")
 	URL urlResource;
 
 	@Test
@@ -271,7 +271,7 @@ public class CollectionEndpointTest {
 	}
 
 	// @TestHTTPEndpoint(CollectionEndpoint.class)
-	@TestHTTPResource("/collection/matt.xml?nav=parents")
+	@TestHTTPResource("/file/sample/collection/matt.xml?nav=parents")
 	URL urlResourceParents;
 
 	@Test
@@ -302,7 +302,7 @@ public class CollectionEndpointTest {
 	}
 
 	// @TestHTTPEndpoint(CollectionEndpoint.class)
-	@TestHTTPResource("/collection/unknown?nav=parents")
+	@TestHTTPResource("/file/sample/collection/unknown?nav=parents")
 	URL urlUnknownParents;
 
 	@Disabled // see similar test on top. 404 is better than empty graph

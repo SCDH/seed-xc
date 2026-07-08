@@ -63,7 +63,7 @@ public class FileSystemResourceProviderTest {
 
 	@Test
 	public void nullPath() {
-		FileSystemResourceProvider provider = new FileSystemResourceProvider(null);
+		FileSystemResourceProvider provider = new FileSystemResourceProvider((String) null);
 		assertNotNull(provider.getError());
 	}
 
