@@ -8,7 +8,7 @@ The Service requires a file named `collection.json` at the base location of a pr
 
 This file is very similar to the metadata returned by the collection endpoint. But all metadata is merged into a single JSON-LD file, members are not embedded but linked by ID.
 
-Examples are present in [`samples/collection.json`](../samples/collection.json) and––in an ever current state––in the [tests of the dts module](../dts/src/test/resources).
+Examples are present in [`samples/bible/collection.json`](../samples/bible/collection.json) and––in an ever current state––in the [tests of the dts module](../dts/src/test/resources).
 
 For each resource (document), there must be a property (`seed:location`) that points to a file. The service uses this property to get the file location.
 
