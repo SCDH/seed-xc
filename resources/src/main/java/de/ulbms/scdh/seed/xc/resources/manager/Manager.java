@@ -3,6 +3,7 @@ package de.ulbms.scdh.seed.xc.resources.manager;
 import de.ulbms.scdh.seed.xc.api.ResourceProviderBuilder;
 import de.ulbms.scdh.seed.xc.api.ResourceProviderConfigurationException;
 import de.ulbms.scdh.seed.xc.api.ResourceProviderManager;
+import de.ulbms.scdh.seed.xc.api.inject.TransformTimeProvider;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 /**
  * An {@link ResourceProviderManager} implementation that looks up providers registered as plugins with the SPI.
  */
+@TransformTimeProvider
 @ApplicationScoped
 public class Manager implements ResourceProviderManager {
 

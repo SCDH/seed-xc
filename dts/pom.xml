@@ -38,6 +38,7 @@
       <groupId>${project.groupId}</groupId>
       <artifactId>resources</artifactId>
       <version>${revision}${changelist}</version>
+      <scope>${plugins.scope}</scope>
     </dependency>
     <!--
       Add plugins to the classpath

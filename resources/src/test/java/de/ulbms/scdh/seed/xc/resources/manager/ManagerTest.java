@@ -6,6 +6,7 @@ import de.ulbms.scdh.seed.xc.api.ResourceProvider;
 import de.ulbms.scdh.seed.xc.api.ResourceProviderBuilder;
 import de.ulbms.scdh.seed.xc.api.ResourceProviderConfigurationException;
 import de.ulbms.scdh.seed.xc.api.ResourceProviderManager;
+import de.ulbms.scdh.seed.xc.api.inject.TransformTimeProvider;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import java.net.URI;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.Test;
 @QuarkusTest
 public class ManagerTest {
 
+	@TransformTimeProvider
 	@Inject
 	protected ResourceProviderManager manager;
 
