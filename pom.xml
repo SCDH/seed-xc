@@ -34,6 +34,7 @@
   <modules>
     <module>api</module>
     <module>plugins</module>
+    <module>resources</module>
     <module>compiler</module>
     <module>transformations</module>
     <module>transformer</module>

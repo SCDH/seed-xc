@@ -16,7 +16,6 @@ import jakarta.ws.rs.InternalServerErrorException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -65,7 +64,7 @@ public class DocumentEndpoint implements DocumentApi {
 
 	@TransformTimeProvider
 	@Inject
-	ResourceProvider resourceProvider;
+	ResourceProviderManager resourceProviderManager;
 
 	@Inject
 	HttpServerRequest request;
@@ -73,28 +72,26 @@ public class DocumentEndpoint implements DocumentApi {
 	/**
 	 * Implementation of the DTS Document endpoint. This first gets the resource using the resource provider and then transforms it.
 	 *
+	 * @param provider - the type of resource provider
+	 * @param location - the base location accessed by the resource provider
 	 * @param resource - Resource identifier. Passed as runtime parameter to the transformation and also to the resource provider.
 	 * @param ref - See DTS specs. Passed as runtime parameter to the transformation.
 	 * @param start - See DTS specs. Passed as runtime parameter to the transformation.
 	 * @param end - See DTS specs. Passed as runtime parameter to the transformation.
 	 * @param tree - See DTS specs. Passed as runtime parameter to the transformation.
 	 * @param mediaType - See DTS specs. Passed as runtime parameter to the transformation.
-	 * @param cr - Context information for getting the resource as {@link Map<String,String>}. This hash map is passed to the resource provider.
-	 * @param cf - Context information for follow-up links as {@link Map<String,String>}. These are passed as runtime parameters to the transformation.
-	 * @param direct - Whether to interpret the resource parameter directly as a link to the resource
 	 * @return The document or parts of it in the requested media type.
 	 */
 	@Override
 	public Uni<byte[]> document(
 			URI resource,
+			URI provider,
+			URI location,
 			String ref,
 			String start,
 			String end,
 			String tree,
-			String mediaType,
-			Map<String, String> cr,
-			Map<String, String> cf,
-			Boolean direct) {
+			String mediaType) {
 
 		if (resource == null || resource.toString().isEmpty())
 			throw new BadRequestException("resource parameter is required");
@@ -174,16 +171,25 @@ public class DocumentEndpoint implements DocumentApi {
 		if (start != null) map.put("start", pvOf(start));
 		if (end != null) map.put("end", pvOf(end));
 		if (tree != null) map.put("tree", pvOf(tree));
-		if (cf != null) for (String k : cf.keySet()) map.put(k, pvOf(cf));
 		params.globalParameters(map);
 		LOG.info("parameters: {}", map);
 
+		ResourceProvider resourceProvider;
+		try {
+			ResourceProviderBuilder resourceProviderBuilder = resourceProviderManager.get(provider.toString());
+			resourceProvider = resourceProviderBuilder.withBase(location);
+		} catch (ResourceProviderConfigurationException e) {
+			LOG.error("cannot find resource provider builder type {}", provider);
+			throw new BadRequestException("unknown resource provider: " + provider);
+		} catch (ResourceException e) {
+			LOG.error("cannot open base location {} with {} resource provider: {}", location, provider, e.getMessage());
+			throw new BadRequestException("cannot open base location: " + e.getMessage());
+		}
+
 		// Create ResourceInContext from resource parameter and additional parameters
-		if (cr == null) cr = Map.of();
-		LOG.info("additional parameters cr {}", cr);
-		Map<String, String> crContext = Collections.unmodifiableMap(cr);
+		Map<String, String> crContext = Map.of();
 		Uni<ResourceInContext> uniRic;
-		if (RESOURCE_IS_PATH || (direct != null && direct)) {
+		if (RESOURCE_IS_PATH) {
 			ResourceInContext ric = new ResourceInContext(crContext, resource.toString());
 			uniRic = Uni.createFrom().item(ric);
 		} else {
@@ -199,9 +205,9 @@ public class DocumentEndpoint implements DocumentApi {
 								s, GRAPH, transformationConfig, crContext, thisIri.toString());
 					})
 					.onItem()
-					.transform((location -> {
-						return new ResourceInContext(crContext, location);
-					}));
+					.transform(resourceLocation -> {
+						return new ResourceInContext(crContext, resourceLocation);
+					});
 		}
 
 		return uniRic.plug((r) -> resourceProvider.asyncOpenStream(r, request))

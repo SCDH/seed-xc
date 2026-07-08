@@ -17,7 +17,6 @@ import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -43,7 +42,7 @@ public class NavigationEndpoint implements NavigationApi {
 	@ConfigProperty(
 			name = "de.ulbms.scdh.seed.xc.dts.NavigationEndpoint.TRANSFORMATION",
 			defaultValue = "dts-transformations-xsl-navigation")
-	private String TRANSFORMATION;
+	protected String TRANSFORMATION;
 
 	/**
 	 * Location of the collection metadata, same as for Collection endpoint.
@@ -55,25 +54,27 @@ public class NavigationEndpoint implements NavigationApi {
 	protected boolean RESOURCE_IS_PATH;
 
 	@Inject
-	CollectionMetadataProcessor collectionMetadataProc;
+	protected CollectionMetadataProcessor collectionMetadataProc;
 
 	@Inject
-	TransformationMap transformations;
+	protected TransformationMap transformations;
 
 	@TransformTimeProvider
 	@Inject
-	ResourceProvider resourceProvider;
+	protected ResourceProviderManager resourceProviderManager;
 
 	@Inject
-	HttpServerRequest request;
+	protected HttpServerRequest request;
 
 	@Inject
-	URITemplateBuilder uriTemplateBuilder;
+	protected URITemplateBuilder uriTemplateBuilder;
 
 	/**
 	 * <P>Implementation of the DTS Navigation endpoint.</P>
 	 * <P>This first gets the resource using the resource provider and then transformes it.</P>
 	 *
+	 * @param provider - the type of resource provider
+	 * @param location - the base location accessed by the resource provider
 	 * @param resource - Resource identifier. Passed as runtime parameter to the transformation and also to the resource provider.
 	 * @param ref - See DTS specs. Passed as runtime parameter to the transformation.
 	 * @param start - See DTS specs. Passed as runtime parameter to the transformation.
@@ -81,23 +82,19 @@ public class NavigationEndpoint implements NavigationApi {
 	 * @param down - See DTS specs. Passed as runtime parameter to the transformation.
 	 * @param tree - See DTS specs. Passed as runtime parameter to the transformation.
 	 * @param page - See DTS specs. Passed as runtime parameter to the transformation.
-	 * @param cr - Context information for getting the resource as {@link Map<String,String>}. This hash map is passed to the resource provider.
-	 * @param cf - Context information for follow-up links as {@link Map<String,String>}. These are passed as runtime parameters to the transformation.
-	 * @param direct - Whether to interpret the resource parameter directly as a link to the resource
 	 * @return The document or parts of it in the requested media type.
 	 */
 	@Override
 	public Uni<byte[]> navigation(
 			URI resource,
+			URI provider,
+			URI location,
 			String ref,
 			String start,
 			String end,
 			Integer down,
 			String tree,
-			Integer page,
-			Map<String, String> cr,
-			Map<String, String> cf,
-			Boolean direct) {
+			Integer page) {
 
 		if (resource == null || resource.toString().isEmpty())
 			throw new BadRequestException("resource parameter is required");
@@ -132,8 +129,6 @@ public class NavigationEndpoint implements NavigationApi {
 		if (ref != null) map.put("ref", pvOf(ref));
 		if (start != null) map.put("start", pvOf(start));
 		if (end != null) map.put("end", pvOf(end));
-		// all cf (= Context Follow-ups) parameters are passed to the stylesheet
-		if (cf != null) for (String k : cf.keySet()) map.put(k, pvOf(cf));
 		// parameters for URI templates
 		try {
 			URI requestUri = new URI(request.absoluteURI());
@@ -154,12 +149,22 @@ public class NavigationEndpoint implements NavigationApi {
 					.failure(new jakarta.ws.rs.BadRequestException("transformation not available: " + TRANSFORMATION));
 		}
 
+		ResourceProvider resourceProvider;
+		try {
+			ResourceProviderBuilder resourceProviderBuilder = resourceProviderManager.get(provider.toString());
+			resourceProvider = resourceProviderBuilder.withBase(location);
+		} catch (ResourceProviderConfigurationException e) {
+			LOG.error("cannot find resource provider builder type {}", provider);
+			throw new BadRequestException("unknown resource provider: " + provider);
+		} catch (ResourceException e) {
+			LOG.error("cannot open base location {} with {} resource provider: {}", location, provider, e.getMessage());
+			throw new BadRequestException("cannot open base location: " + e.getMessage());
+		}
+
 		// Create ResourceInContext from resource parameter and additional parameters
-		if (cr == null) cr = Map.of();
-		LOG.info("additional parameters cr {}", cr);
-		Map<String, String> crContext = Collections.unmodifiableMap(cr);
+		Map<String, String> crContext = Map.of();
 		Uni<ResourceInContext> uniRic;
-		if (RESOURCE_IS_PATH || (direct != null && direct)) {
+		if (RESOURCE_IS_PATH) {
 			ResourceInContext ric = new ResourceInContext(crContext, resource.toString());
 			uniRic = Uni.createFrom().item(ric);
 		} else {
@@ -175,8 +180,8 @@ public class NavigationEndpoint implements NavigationApi {
 								s, GRAPH, transformationConfig, crContext, thisIri.toString());
 					})
 					.onItem()
-					.transform((location -> {
-						return new ResourceInContext(crContext, location);
+					.transform((resourceLocation -> {
+						return new ResourceInContext(crContext, resourceLocation);
 					}));
 		}
 
