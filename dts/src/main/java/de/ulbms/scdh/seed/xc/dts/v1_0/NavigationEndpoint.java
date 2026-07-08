@@ -82,7 +82,6 @@ public class NavigationEndpoint implements NavigationApi {
 	 * @param down - See DTS specs. Passed as runtime parameter to the transformation.
 	 * @param tree - See DTS specs. Passed as runtime parameter to the transformation.
 	 * @param page - See DTS specs. Passed as runtime parameter to the transformation.
-	 * @param direct - Whether to interpret the resource parameter directly as a link to the resource
 	 * @return The document or parts of it in the requested media type.
 	 */
 	@Override
@@ -95,8 +94,7 @@ public class NavigationEndpoint implements NavigationApi {
 			String end,
 			Integer down,
 			String tree,
-			Integer page,
-			Boolean direct) {
+			Integer page) {
 
 		if (resource == null || resource.toString().isEmpty())
 			throw new BadRequestException("resource parameter is required");
@@ -166,7 +164,7 @@ public class NavigationEndpoint implements NavigationApi {
 		// Create ResourceInContext from resource parameter and additional parameters
 		Map<String, String> crContext = Map.of();
 		Uni<ResourceInContext> uniRic;
-		if (RESOURCE_IS_PATH || (direct != null && direct)) {
+		if (RESOURCE_IS_PATH) {
 			ResourceInContext ric = new ResourceInContext(crContext, resource.toString());
 			uniRic = Uni.createFrom().item(ric);
 		} else {

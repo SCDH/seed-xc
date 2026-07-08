@@ -15,6 +15,8 @@ import org.junit.jupiter.api.Test;
 @QuarkusTest
 public class DocumentEndpointTest {
 
+	// legacy ?direct parameters are simple ignored
+
 	private static final String BASE = "http://example.com/"; // "http%3A%2F%2Fexample.com%2F";
 
 	@Disabled

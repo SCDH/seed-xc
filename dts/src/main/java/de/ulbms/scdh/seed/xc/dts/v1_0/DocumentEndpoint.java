@@ -80,7 +80,6 @@ public class DocumentEndpoint implements DocumentApi {
 	 * @param end - See DTS specs. Passed as runtime parameter to the transformation.
 	 * @param tree - See DTS specs. Passed as runtime parameter to the transformation.
 	 * @param mediaType - See DTS specs. Passed as runtime parameter to the transformation.
-	 * @param direct - Whether to interpret the resource parameter directly as a link to the resource
 	 * @return The document or parts of it in the requested media type.
 	 */
 	@Override
@@ -92,8 +91,7 @@ public class DocumentEndpoint implements DocumentApi {
 			String start,
 			String end,
 			String tree,
-			String mediaType,
-			Boolean direct) {
+			String mediaType) {
 
 		if (resource == null || resource.toString().isEmpty())
 			throw new BadRequestException("resource parameter is required");
@@ -191,7 +189,7 @@ public class DocumentEndpoint implements DocumentApi {
 		// Create ResourceInContext from resource parameter and additional parameters
 		Map<String, String> crContext = Map.of();
 		Uni<ResourceInContext> uniRic;
-		if (RESOURCE_IS_PATH || (direct != null && direct)) {
+		if (RESOURCE_IS_PATH) {
 			ResourceInContext ric = new ResourceInContext(crContext, resource.toString());
 			uniRic = Uni.createFrom().item(ric);
 		} else {
