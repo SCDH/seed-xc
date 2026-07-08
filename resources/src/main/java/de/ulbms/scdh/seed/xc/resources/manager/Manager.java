@@ -1,12 +1,11 @@
 package de.ulbms.scdh.seed.xc.resources.manager;
 
-import de.ulbms.scdh.seed.xc.api.ResourceProvider;
+import de.ulbms.scdh.seed.xc.api.ResourceProviderBuilder;
 import de.ulbms.scdh.seed.xc.api.ResourceProviderConfigurationException;
 import de.ulbms.scdh.seed.xc.api.ResourceProviderManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import java.net.URI;
 import java.util.Iterator;
 import java.util.ServiceLoader;
 import org.slf4j.Logger;
@@ -21,27 +20,27 @@ public class Manager implements ResourceProviderManager {
 	private static final Logger LOG = LoggerFactory.getLogger(Manager.class);
 
 	@Inject
-	Instance<ResourceProvider> resourceProviderSelector;
+	Instance<ResourceProviderBuilder> resourceProviderSelector;
 
-	private final ServiceLoader<ResourceProvider> resourceProviderLoader = ServiceLoader.load(ResourceProvider.class);
+	private final ServiceLoader<ResourceProviderBuilder> resourceProviderLoader =
+			ServiceLoader.load(ResourceProviderBuilder.class);
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public ResourceProvider get(String id, URI base) throws ResourceProviderConfigurationException {
+	public ResourceProviderBuilder get(String id) throws ResourceProviderConfigurationException {
 
-		Iterator<ResourceProvider> services = resourceProviderLoader.iterator();
+		Iterator<ResourceProviderBuilder> services = resourceProviderLoader.iterator();
 		while (services.hasNext()) {
-			ResourceProvider service = services.next();
+			ResourceProviderBuilder service = services.next();
 			if (service.getId().equals(id)) {
 				// dynamically create a bean, this is idiomatic
-				Instance<? extends ResourceProvider> resourceProviderInstance =
+				Instance<? extends ResourceProviderBuilder> resourceProviderInstance =
 						resourceProviderSelector.select(service.getClass());
-				ResourceProvider resourceProvider = resourceProviderInstance.get();
+				ResourceProviderBuilder builder = resourceProviderInstance.get();
 				// setup with base URI
-				resourceProvider.setup(base);
-				return resourceProvider;
+				return builder;
 			}
 		}
 		LOG.error("resource provider {} not found", id);

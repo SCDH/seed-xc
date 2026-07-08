@@ -79,14 +79,6 @@ public class FileSystemResourceProvider implements ResourceProvider {
 	}
 
 	@Override
-	public String getId() {
-		return "file";
-	}
-
-	@Override
-	public void setup(URI base) {}
-
-	@Override
 	public InputStream openStream(URI uri)
 			throws ResourceProviderConfigurationException, ResourceNotFoundException, ResourceException {
 		LOG.debug("getting source {} by resolving against {}", uri, path);

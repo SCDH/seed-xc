@@ -19,19 +19,6 @@ import java.net.URI;
 public interface ResourceProvider {
 
 	/**
-	 * Returns the identifier of the resource provider, e.g. <code>urn</code> or <code>file</code>.
-	 * It may be used as a segment of an URL path.
-	 * @return the type.
-	 */
-	String getId();
-
-	/**
-	 * Sets up the provider with a base URI.
-	 * @param base - the base URI against which all requests for resources will be resolved against.
-	 */
-	void setup(URI base);
-
-	/**
 	 * Tries to open an input stream for a given {@link URI}.<P/>
 	 *
 	 * It is up to the user to close the stream when done.
