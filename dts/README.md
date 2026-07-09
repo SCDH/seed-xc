@@ -18,7 +18,9 @@ is selected by the [`FRONT`](../documetation/dts.md#front) part of the
 requested URL. Different document storage systems can be [plugged
 in](../plugins/README.md#resource-provider-plugins), e.g. InvenioRDM,
 RDBMS, http file servers, lookup per URN, or simply the local file
-system.
+system. The storage is not integrated into the SEED DTS service, which
+is a micro service providing the DTS community API alone. This design
+aims at reducing deployment costs on the long run.
 
 [OpenAPI specs](https://github.com/SCDH/dts-openapi/blob/main/facade-openapi.yaml)
 
@@ -101,7 +103,8 @@ curl -X 'GET' \
 #### Where do the Documents live?
 
 Everywhere and nowhere! The service connects to a persistence layer by
-a [resource provider plugin](../plugins/resource-providers). You can
+a [resource provider
+plugin](../plugins/README.md#resource-provider-plugins). You can
 connect every store you like, ranging from local filesystem, to RDBMS,
 the web, XML-database, Invenio RDM (Zenodo), etc.
 
