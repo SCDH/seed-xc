@@ -21,9 +21,10 @@
 
 Notes:
 
-1. [Xerces}(https://xerces.apache.org/xerces2-j/) is the default parser for XML input, but the [HTML tagsoup
-   parser](https://about.validator.nu/htmlparser/) can be selected instead. Xerces can be configured to
-   parse XInclude aware.
+1. [Xerces](https://xerces.apache.org/xerces2-j/) is the default
+   parser for XML input, but the [HTML tagsoup
+   parser](https://about.validator.nu/htmlparser/) can be selected
+   instead. Xerces can be configured to parse XInclude aware.
 2. As input and output, any RDF serialization format known by [Apache
    Jena](https://jena.apache.org/documentation/io/) can be processed,
    including JSON-LD 1.1 via [Titanium JSON
