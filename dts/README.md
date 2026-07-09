@@ -1,23 +1,46 @@
 # DTS
 
-This is an implementation of the API endpoints specified
-for [distributed text services](https://dtsapi.org/specifications/)
-(DTS):
+SEED DTS Server is a versatile level 1 DTS Server following [DTS
+conformance](https://dtsapi.org/specifications/versions/v1.0/#conformance)
+rules.
 
-- ❗entry: [Must be placed somewhere else!](#what-happend-to-the-entry-endpoint)
-- 🚧 collection
-- ✅ navigation 
-- ✅ document
 
-[OpenAPI specs](https://zivgitlab.uni-muenster.de/SCDH/apis/dts-openapi-specs/-/blob/main/facade-openapi.yaml?ref_type=heads)
+| endpoint   | implementation | URI template                                                          |
+|:-----------|:---------------|:----------------------------------------------------------------------|
+| entry      | ✅             | `BASE_URL/FRONT/entry`                                                |
+| collection | ✅             | `BASE_URL/FRONT/collection/{id}{?nav}`                                |
+| navigation | ✅             | `BASE_URL/FRONT/navigation/{resource}{?tree,ref,start,end,down}`      |
+| document   | ✅             | `BASE_URL/FRONT/navigation/{resource}{?tree,ref,start,end,mediaType}` |
 
-The DTS business logic is implemented in XSLT. It can be found on
-SCDH's github space: [DTS
+SEED DTS Server is designed for 1:n deployment, i.e., one service
+instance can serve a multitude of projects (entry points). A project
+is selected by the [`FRONT`](../documetation/dts.md#front) part of the
+requested URL. Different document storage systems can be [plugged
+in](../plugins/README.md#resource-provider-plugins), e.g. InvenioRDM,
+RDBMS, http file servers, lookup per URN, or simply the local file
+system.
+
+[OpenAPI specs](https://github.com/SCDH/dts-openapi/blob/main/facade-openapi.yaml)
+
+The creation of the endpoints' response bodies is done through
+transformations. The default setup offers advanced XSLT processing of
+TEI-XML documents, based on [DTS
 Transformations](https://github.com/scdh/dts-transformations). These
-packages are used by default, but can be replaced by other
-transformations.
+transformations conform to the DTS and TEI specs and are extensible
+for getting content types (media types) other than
+`application/tei+xml`. However, users can replace the transformations
+completely with their own transformations using one of the [supported
+transformations of SEED
+XC](../plugins/README.md#transformation-plugins): XSLT,
+XQuery, SPARQL. Thus, it is possible to serve any kind of documents
+with SEED DTS, not only TEI-XML.
+
 
 ## Getting started
+
+### Docker
+
+TODO
 
 ### Dev Server
 
@@ -48,7 +71,8 @@ Swagger UI is available under
 [http://localhost:8080/q/dev-ui/quarkus-smallrye-openapi/swagger-ui](http://localhost:8080/q/dev-ui/quarkus-smallrye-openapi/swagger-ui).
 
 Per default, the service serves files from the [`samples`](../samples)
-directory, which currently has only a single document, `john.xml`.
+directory. Use `file` as value for the **provider** path parameter,
+and `bible` for **location**.
 
 To serve TEI files from an other local directory, use the
 `seed-dts.filesystem` property like so, where `PATH` must be an
@@ -74,54 +98,12 @@ curl -X 'GET' \
 
 ## FAQ
 
-#### What Happend to the Entry Endpoint?
-
-The entry endpoint is the killer feature of DTS. It's a service
-registry with links to other services! These links come as URI
-templates, which is  the other killer feature of DTS.
-
-These two features give the freedom to distribute DTS endpoints to
-different base URLs.
-
-So: Don't look for the entry endpoint in the SEED DTS implementation,
-but rather put your entry endpoint as static asset on some site and
-link it to endpoints of an instance of the SEED DTS service.
-
 #### Where do the Documents live?
 
 Everywhere and nowhere! The service connects to a persistence layer by
 a [resource provider plugin](../plugins/resource-providers). You can
 connect every store you like, ranging from local filesystem, to RDBMS,
 the web, XML-database, Invenio RDM (Zenodo), etc.
-
-#### How is the Resource Provider Plugins configured?
-
-You can determine the resource provider plugin by a bean
-mechanism. The `cr` parameters can be used to pass information through
-URLs. Everything else is up to the plugin. See [Wiki](../../wiki).
-
-#### Why do you break the API with these `c*` Parameters?
-
-No, these parameters do not break the specs. The specs gives you the
-freedom to define URI templates with a set of certain
-parameters. There may be other query and path parameters in the URL.
-
-#### How to get Follow Up Links?
-
-You can use the `cf` parameters for passing information to your
-transformation that runs the endpoint. User for passing information
-directly or indirectly into the transformation. You will need a
-specialized module to evaluate it.
-
-#### What about `mediaType`?
-
-The `mediaType` parameter of the document endpoint will soon be
-supported. Selecting a `mediaType` will select a different
-transformation. DTS Transformations offers some static
-[`media-type-*` stylesheet
-parameters](https://github.com/SCDH/dts-transformations/blob/main/xsl/document.xsl)
-that can be used to get different compiled transformations on top of
-the `document.xsl` machinery.
 
 #### Can I use my own XSLT?
 
