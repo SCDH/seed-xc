@@ -14,7 +14,7 @@ rules.
 
 SEED DTS Server is designed for 1:n deployment, i.e., one service
 instance can serve a multitude of projects (entry points). A project
-is selected by the [`FRONT`](../documetation/dts.md#front) part of the
+is selected by the [`FRONT`](../doc/dts.md#front) part of the
 requested URL. Different document storage systems can be [plugged
 in](../plugins/README.md#resource-provider-plugins), e.g. InvenioRDM,
 RDBMS, http file servers, lookup per URN, or simply the local file
