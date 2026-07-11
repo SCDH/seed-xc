@@ -1,6 +1,8 @@
 package de.ulbms.scdh.seed.xc.jena;
 
+import com.apicatalog.jsonld.http.DefaultHttpClient;
 import io.quarkus.runtime.annotations.RegisterForReflection;
+import org.glassfish.json.JsonProviderImpl;
 
 @RegisterForReflection(
 		targets = {
@@ -10,6 +12,8 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 			JsonLdContext.class,
 			ParameterInjector.class,
 			Serializer.class,
-			StaticDocumentLoader.class
+			StaticDocumentLoader.class,
+			DefaultHttpClient.class,
+			JsonProviderImpl.class
 		})
 public class ReflectionConfiguration {}
