@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Path;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public class UrlResourceProviderTest {
@@ -81,4 +82,15 @@ public class UrlResourceProviderTest {
 			InputStream input = provider.openStream(new URI("../../../pom.xml"));
 		});
 	}
+
+	@Disabled
+	@Test
+	public void testConnectionTimeout() throws ResourceProviderConfigurationException {
+		config.connectTimeout = 0;
+		UrlResourceProvider provider2 = new UrlResourceProvider(RESOURCES, config);
+		assertThrows(ResourceNotFoundException.class, () -> {
+			InputStream input = provider2.openStream(new URI("samples/hello.xml"));
+		});
+	}
+
 }

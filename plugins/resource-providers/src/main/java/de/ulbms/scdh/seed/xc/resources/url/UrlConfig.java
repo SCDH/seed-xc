@@ -19,4 +19,13 @@ public class UrlConfig {
 			name = "de.ulbms.scdh.seed.xc.resources.filesystem.FileSystemResourceProvider.path",
 			defaultValue = "/")
 	protected String allowedFilePath;
+
+	@ConfigProperty(name = "url-connect-timeout", defaultValue = "10000")
+	int connectTimeout;
+
+	@ConfigProperty(name = "url-read-timeout", defaultValue = "10000")
+	int readTimeout;
+
+	@ConfigProperty(name = "resouce-max-size", defaultValue = "1048576")
+	long resourceMaxSize;
 }

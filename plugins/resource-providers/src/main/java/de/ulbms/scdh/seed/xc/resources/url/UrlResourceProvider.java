@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Paths;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
@@ -82,14 +83,15 @@ public class UrlResourceProvider extends UrlValidator implements ResourceProvide
 		if (base == null) {
 			throw new ResourceProviderConfigurationException("no base URL configured");
 		}
-		LOG.info("uri {}, resolving on {}", uri, base);
 		URI resolved = base.resolve(uri);
-		LOG.info("resolved {}", resolved);
 		check(resolved);
-		LOG.info("reading {}", resolved);
 		try {
 			URL resolvedUrl = resolved.toURL();
-			return resolvedUrl.openStream();
+			URLConnection conn = resolvedUrl.openConnection();
+			conn.setConnectTimeout(config.connectTimeout);
+			conn.setReadTimeout(config.readTimeout);
+			conn.connect();
+			return conn.getInputStream();
 		} catch (MalformedURLException e) {
 			throw new ResourceException(e.getMessage());
 		} catch (IOException e) {
