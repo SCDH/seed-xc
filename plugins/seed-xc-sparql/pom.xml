@@ -4,7 +4,7 @@
   <parent>
     <groupId>de.ulbms.scdh.seed.xc</groupId>
     <artifactId>seed-xc-plugins</artifactId>
-    <version>${revision}${changelist}</version>
+    <version>0.0.1</version>
   </parent>
 
   <artifactId>seed-xc-sparql</artifactId>
@@ -22,12 +22,12 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>seed-xc-api</artifactId>
-      <version>${revision}${changelist}</version>
+      <version>0.0.1</version>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>seed-resource-providers</artifactId>
-      <version>${revision}${changelist}</version>
+      <version>0.0.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>

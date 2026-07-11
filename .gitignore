@@ -11,3 +11,4 @@ target
 # local maven repo in CI/CD
 # must be ignored for formatting test
 /.m2
+.mvn/.develocity/
