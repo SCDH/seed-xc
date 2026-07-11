@@ -19,9 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @TransformTimeProvider
-@LookupIfProperty(
-		name = "de.ulbms.scdh.seed.xc.api.ResourceProvider",
-		stringValue = "de.ulbms.scdh.seed.xc.resources.url.UrlResourceProvider")
+@LookupIfProperty(name = "seed-resource-provider", stringValue = "url")
 @RequestScoped
 public class UrlResourceProvider extends UrlValidator implements ResourceProvider {
 
@@ -33,7 +31,8 @@ public class UrlResourceProvider extends UrlValidator implements ResourceProvide
 	 * Constructor used by the {@link UrlResourceProviderBuilder}.
 	 */
 	protected UrlResourceProvider(
-			URI base, String allowedProtocols, String domainWhiteList, String domainBlackList, String allowedFilePath) throws ResourceProviderConfigurationException {
+			URI base, String allowedProtocols, String domainWhiteList, String domainBlackList, String allowedFilePath)
+			throws ResourceProviderConfigurationException {
 		this.base = base;
 		this.allowedProtocols = allowedProtocols;
 		this.domainWhiteList = domainWhiteList;

@@ -41,9 +41,7 @@ import org.slf4j.LoggerFactory;
  * resolved against the current user directory.
  */
 @TransformTimeProvider
-@LookupIfProperty(
-		name = "de.ulbms.scdh.seed.xc.api.ResourceProvider",
-		stringValue = "de.ulbms.scdh.seed.xc.resources.filesystem.FileSystemResourceProvider")
+@LookupIfProperty(name = "seed-resource-provider", stringValue = "file")
 @ApplicationScoped
 public class FileSystemResourceProvider implements ResourceProvider {
 
