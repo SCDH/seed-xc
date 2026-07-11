@@ -92,5 +92,4 @@ public class UrlResourceProviderTest {
 			InputStream input = provider2.openStream(new URI("samples/hello.xml"));
 		});
 	}
-
 }
