@@ -35,6 +35,8 @@ public class EntryEndpoint implements EntryApi {
 			resourceProvider = resourceProviderBuilder.withBase(location);
 		} catch (ResourceProviderConfigurationException e) {
 			throw new BadRequestException("no resource provider type " + provider);
+		} catch (ResourceNotFoundException e) {
+			throw new NotFoundException("not found");
 		} catch (ResourceException e) {
 			throw new BadRequestException(e.getMessage());
 		}

@@ -6,6 +6,7 @@ import de.ulbms.scdh.seed.xc.transformations.TransformationMap;
 import io.smallrye.mutiny.Uni;
 import io.vertx.core.http.HttpServerRequest;
 import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import java.io.InputStream;
@@ -27,7 +28,9 @@ public class TransformService implements TransformApi {
 
 	@TransformTimeProvider
 	@Inject
-	ResourceProvider resourceProvider;
+	// Since resource provider beans are disambiguated by @LookupIfProperty,
+	// lookup via Instance<ResourceProvider> is required
+	Instance<ResourceProvider> resourceProvider;
 
 	@Inject
 	HttpServerRequest request;
@@ -45,12 +48,12 @@ public class TransformService implements TransformApi {
 		Uni<ResourceInContext> uniRic = Uni.createFrom().item(ric);
 
 		return uniRic.plug((r) -> {
-					return resourceProvider.asyncOpenStream(r, request);
+					return resourceProvider.get().asyncOpenStream(r, request);
 				})
 				.onItem()
 				.transform((s) -> {
 					try {
-						return transformation.transform(parameters, config, url, s, resourceProvider, request);
+						return transformation.transform(parameters, config, url, s, resourceProvider.get(), request);
 					} catch (TransformationPreparationException e) {
 						LOG.error(e.getMessage());
 						throw new BadRequestException(e.getMessage());
@@ -81,7 +84,7 @@ public class TransformService implements TransformApi {
 
 		return Uni.createFrom().item(source).onItem().transform((s) -> {
 			try {
-				return transformation.transform(parameters, config, url, s, resourceProvider, request);
+				return transformation.transform(parameters, config, url, s, resourceProvider.get(), request);
 			} catch (TransformationPreparationException e) {
 				LOG.error(e.getMessage());
 				throw new BadRequestException(e.getMessage());

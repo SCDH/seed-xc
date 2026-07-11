@@ -12,6 +12,7 @@ import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.NotFoundException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -164,6 +165,9 @@ public class CollectionEndpoint implements CollectionApi {
 		} catch (ResourceProviderConfigurationException e) {
 			LOG.error("cannot find resource provider builder type {}", provider);
 			throw new BadRequestException("unknown resource provider: " + provider);
+		} catch (ResourceNotFoundException e) {
+			LOG.error("not found: {}", location);
+			throw new NotFoundException("not found");
 		} catch (ResourceException e) {
 			LOG.error("cannot open base location {} with {} resource provider: {}", location, provider, e.getMessage());
 			throw new BadRequestException("cannot open base location: " + e.getMessage());

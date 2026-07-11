@@ -1,1 +1,2 @@
 de.ulbms.scdh.seed.xc.resources.filesystem.FileSystemResourceProvider
+de.ulbms.scdh.seed.xc.resources.url.UrlResourceProvider

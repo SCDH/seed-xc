@@ -18,5 +18,6 @@ public interface ResourceProviderBuilder {
 	 * Sets up the provider with a base URI.
 	 * @param base - the base URI against which all requests for resources will be resolved against.
 	 */
-	ResourceProvider withBase(URI base) throws ResourceException;
+	ResourceProvider withBase(URI base)
+			throws ResourceException, ResourceNotFoundException, ResourceProviderConfigurationException;
 }
