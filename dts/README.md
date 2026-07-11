@@ -82,19 +82,53 @@ absolute path.
 
 ```shell
 ./mvnw -Dseed-dts.filesystem=PATH -Pdts quarkus:dev
-
 ```
 
 Have a look at
 [`src/main/resources/application.properties`](src/main/resources/application.properties)
 for more config options.
 
+### Native Executable
+
+A native executable is a build artifact, that can be run without a
+Java virtual machine. It is simply a linux executable, compiled from
+Java by a special compiler called GraalVM. And, since it is statically
+linked for a minimal attack surface, its size is huge: about
+170MB. Everything is in there compiled to native machine code: the
+Saxon XSLT processor, the Apache Jena SPARQL engine, the web server,
+the APIs.
+
+If you want to build the native executable locally on your system: Be
+aware, that the compilation takes some amount of time: about 10
+Minutes on my Intel i7 with 32GB RAM.
+
+Here is what to do: Docker is required, because the build uses GraalVM
+and OpenJDK from a docker container:
+
+```shell
+./mvnw -Pdownload-openapi generate-sources
+./mvnw generate-sources package
+./mvnw -Ddts-native install
+```
+
+This produces `seed-dts-VERSION-runner` in `dts/target/`.
+
+Alternatively, you can download the native executable from the release
+assets.
+
+The service starts up lightning fast. Just call the native executable:
+
+```shell
+dts/target/seed-dts-0.0.1-SNAPSHOT-runner
+```
+
+Swagger UI is available at http://localhost:8080/q/swagger-ui
 
 ### Testing with cURL
 
 ```shell
 curl -X 'GET' \
-  'http://localhost:8080/navigation?resource=john.xml' \
+  'http://localhost:8080/file/bible/entry' \
   -H 'accept: application/ld+json'
 ```
 
