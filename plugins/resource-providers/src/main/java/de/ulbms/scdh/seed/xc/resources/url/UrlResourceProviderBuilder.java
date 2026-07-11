@@ -2,6 +2,7 @@ package de.ulbms.scdh.seed.xc.resources.url;
 
 import de.ulbms.scdh.seed.xc.api.*;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.net.URI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,9 @@ import org.slf4j.LoggerFactory;
 public class UrlResourceProviderBuilder extends UrlValidator implements ResourceProviderBuilder {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UrlResourceProviderBuilder.class);
+
+	@Inject
+	UrlConfig config;
 
 	/**
 	 * {@inheritDoc}
@@ -29,8 +33,8 @@ public class UrlResourceProviderBuilder extends UrlValidator implements Resource
 	@Override
 	public ResourceProvider withBase(URI base)
 			throws ResourceException, ResourceProviderConfigurationException, ResourceNotFoundException {
-		configure();
+		configure(config);
 		check(base);
-		return new UrlResourceProvider(base, allowedProtocols, domainWhiteList, domainBlackList, allowedFilePath);
+		return new UrlResourceProvider(base, config);
 	}
 }

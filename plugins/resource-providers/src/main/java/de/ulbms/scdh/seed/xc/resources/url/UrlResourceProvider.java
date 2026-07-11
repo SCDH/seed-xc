@@ -13,8 +13,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Paths;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,34 +26,47 @@ public class UrlResourceProvider extends UrlValidator implements ResourceProvide
 
 	private static final Logger LOG = LoggerFactory.getLogger(UrlResourceProvider.class);
 
+	@Inject
+	protected UrlConfig config;
+
 	private final URI base;
+
+	/**
+	 * Stores errors in early phase.
+	 */
+	private Exception error = null;
 
 	/**
 	 * Constructor used by the {@link UrlResourceProviderBuilder}.
 	 */
-	protected UrlResourceProvider(
-			URI base, String allowedProtocols, String domainWhiteList, String domainBlackList, String allowedFilePath)
-			throws ResourceProviderConfigurationException {
+	protected UrlResourceProvider(URI base, UrlConfig config) throws ResourceProviderConfigurationException {
 		this.base = base;
-		this.allowedProtocols = allowedProtocols;
-		this.domainWhiteList = domainWhiteList;
-		this.domainBlackList = domainBlackList;
-		this.allowedFilePath = allowedFilePath;
-		configure();
+		this.config = config;
+		configure(config);
 	}
 
-	@Inject
-	protected HttpServerRequest request;
-
 	/**
-	 * Constructor for bean manager.
+	 * Constructor used by bean manager. This sets the base to the file URI of the allowed system path.
+	 * @param path - allowed file system path
 	 */
-	public UrlResourceProvider() {
+	@Inject
+	public UrlResourceProvider(
+			@ConfigProperty(
+							name = "de.ulbms.scdh.seed.xc.resources.filesystem.FileSystemResourceProvider.path",
+							defaultValue = "/")
+					String path) {
+		LOG.debug("setting up file system resource provider with path {}", path);
 		try {
-			base = new URI(request.absoluteURI());
-		} catch (URISyntaxException e) {
-			throw new InternalServerErrorException(e.getMessage());
+			// resolving relative paths against the current
+			// user directory with getAbsoluteFile()
+			// simplifies testing and configuration.
+			this.base = Paths.get(path).toAbsolutePath().normalize().toUri();
+			LOG.debug("file system provider based on {}", this.base);
+		} catch (Exception e) {
+			LOG.error("invalid path for FileSystemResourceProvider: {}", e.getMessage());
+			error = e;
 		}
+		throw new RuntimeException("too bad!");
 	}
 
 	/**
@@ -61,7 +75,10 @@ public class UrlResourceProvider extends UrlValidator implements ResourceProvide
 	@Override
 	public InputStream openStream(URI uri)
 			throws ResourceProviderConfigurationException, ResourceNotFoundException, ResourceException {
-		configure();
+		configure(config);
+		if (error != null) {
+			throw new ResourceProviderConfigurationException(error.getMessage());
+		}
 		if (base == null) {
 			throw new ResourceProviderConfigurationException("no base URL configured");
 		}
@@ -72,7 +89,6 @@ public class UrlResourceProvider extends UrlValidator implements ResourceProvide
 		LOG.info("reading {}", resolved);
 		try {
 			URL resolvedUrl = resolved.toURL();
-			// return new ByteArrayInputStream(".sdf".getBytes(Charset.defaultCharset()));
 			return resolvedUrl.openStream();
 		} catch (MalformedURLException e) {
 			throw new ResourceException(e.getMessage());

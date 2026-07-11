@@ -16,26 +16,22 @@ public class UrlResourceProviderTest {
 
 	private static final URI RESOURCES = Path.of("src", "test", "resources").toUri();
 
-	private static final String DOMAINS_WHITE_MS = "^.*\\.uni-muenster.de$";
-
-	private static final String DOMAINS_WHITE_RUB = "^.*\\.ruhr-uni-bochum.de$";
-
-	private static final String DOMAINS_WHITE_ALL = "";
-
-	private static final String DOMAINS_BLACK_COM = ".*\\.com$";
-
 	UrlResourceProviderBuilder builder;
 
 	ResourceProvider provider;
 
+	UrlConfig config;
+
 	@BeforeEach
 	public void createProvider()
 			throws ResourceException, ResourceProviderConfigurationException, ResourceNotFoundException {
+		config = new UrlConfig();
+		config.allowedProtocols = "file";
+		config.domainWhiteList = ".*";
+		config.domainBlackList = "asdf";
+		config.allowedFilePath = RESOURCES.getSchemeSpecificPart();
 		builder = new UrlResourceProviderBuilder();
-		builder.allowedProtocols = "file";
-		builder.domainWhiteList = ".*";
-		builder.domainBlackList = "asdf";
-		builder.allowedFilePath = RESOURCES.getSchemeSpecificPart();
+		builder.config = config;
 		provider = builder.withBase(RESOURCES);
 		// provider = new UrlResourceProvider(RESOURCES);
 	}
@@ -54,8 +50,8 @@ public class UrlResourceProviderTest {
 
 	@Test
 	public void testBadScheme() throws ResourceProviderConfigurationException {
-		UrlResourceProvider provider2 =
-				new UrlResourceProvider(RESOURCES, "https", ".*", ".*", RESOURCES.getSchemeSpecificPart());
+		config.allowedProtocols = "https";
+		UrlResourceProvider provider2 = new UrlResourceProvider(RESOURCES, config);
 		assertThrows(ResourceException.class, () -> {
 			provider2.openStream(new URI("samples/hello.xml"));
 		});
@@ -63,8 +59,7 @@ public class UrlResourceProviderTest {
 
 	@Test
 	public void testFileScheme() throws ResourceProviderConfigurationException {
-		UrlResourceProvider provider2 =
-				new UrlResourceProvider(RESOURCES, "file", ".*", ".*", RESOURCES.getSchemeSpecificPart());
+		UrlResourceProvider provider2 = new UrlResourceProvider(RESOURCES, config);
 		assertDoesNotThrow(() -> {
 			InputStream input = provider2.openStream(new URI("samples/hello.xml"));
 		});

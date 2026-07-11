@@ -28,10 +28,17 @@ public class UrlResourceProviderBuilderTest {
 
 	ResourceProvider provider;
 
+	UrlConfig config;
+
 	@BeforeEach
 	public void createBuilder() {
+		config = new UrlConfig();
+		config.allowedProtocols = "file";
+		config.domainWhiteList = ".*";
+		config.domainBlackList = "asdf";
+		config.allowedFilePath = RESOURCES.getSchemeSpecificPart();
 		builder = new UrlResourceProviderBuilder();
-		builder.allowedFilePath = RESOURCES.getSchemeSpecificPart();
+		builder.config = config;
 	}
 
 	@Test
@@ -56,9 +63,9 @@ public class UrlResourceProviderBuilderTest {
 
 	@Test
 	public void testWhiteMS() throws URISyntaxException {
-		builder.allowedProtocols = "https";
-		builder.domainWhiteList = DOMAINS_WHITE_MS;
-		builder.domainBlackList = "";
+		config.allowedProtocols = "https";
+		config.domainWhiteList = DOMAINS_WHITE_MS;
+		config.domainBlackList = "";
 		assertDoesNotThrow(
 				() -> {
 					provider = builder.withBase(new URI("https://zivgitlab.uni-muenster.de"));
@@ -80,9 +87,9 @@ public class UrlResourceProviderBuilderTest {
 
 	@Test
 	public void testWhiteMSRUB() throws URISyntaxException {
-		builder.allowedProtocols = "https";
-		builder.domainWhiteList = DOMAINS_WHITE_MS + "," + DOMAINS_WHITE_RUB;
-		builder.domainBlackList = "";
+		config.allowedProtocols = "https";
+		config.domainWhiteList = DOMAINS_WHITE_MS + "," + DOMAINS_WHITE_RUB;
+		config.domainBlackList = "";
 		assertDoesNotThrow(
 				() -> {
 					provider = builder.withBase(new URI("https://zivgitlab.uni-muenster.de"));
@@ -103,9 +110,10 @@ public class UrlResourceProviderBuilderTest {
 
 	@Test
 	public void testBlackComOnly() throws URISyntaxException {
-		builder.allowedProtocols = "https";
-		builder.domainWhiteList = "";
-		builder.domainBlackList = DOMAINS_BLACK_COM;
+		config.allowedProtocols = "https";
+		config.domainWhiteList = "";
+		config.domainBlackList = DOMAINS_BLACK_COM;
+		builder.config = config;
 		assertDoesNotThrow(
 				() -> {
 					provider = builder.withBase(new URI("https://zivgitlab.uni-muenster.de"));
