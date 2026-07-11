@@ -6,17 +6,31 @@ import jakarta.ws.rs.InternalServerErrorException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Dependent
 public class URITemplateBuilder {
 
+	public static final String DTS_VERSION = "1.0";
+
 	public static final String THIS_COLLECTION_TEMPLATE = "{?nav}";
+
+	public static final String COLLECTION_TEMPLATE = "collection/{id}" + THIS_COLLECTION_TEMPLATE;
 
 	public static final String THIS_DOCUMENT_TEMPLATE = "{?tree,ref,start,end,mediaType}";
 
+	public static final String DOCUMENT_TEMPLATE = "document/{resource}" + THIS_DOCUMENT_TEMPLATE;
+
 	public static final String THIS_NAVIGATION_TEMPLATE = "{?tree,ref,start,end,down,page}";
+
+	public static final String NAVIGATION_TEMPLATE = "navigation/{resource}" + THIS_NAVIGATION_TEMPLATE;
+
+	@ConfigProperty(
+			name = "dts-entry-context",
+			defaultValue = "https://distributed-text-services.github.io/specifications/context/1.0.json")
+	protected String entryContext;
 
 	public static final Map<String, String> RESOURCE_TEMPLATE = Map.of(
 			"collection",
@@ -84,5 +98,9 @@ public class URITemplateBuilder {
 		} catch (URISyntaxException e) {
 			throw new InternalServerErrorException("failed to make template from " + request);
 		}
+	}
+
+	public String getEntryContext() {
+		return entryContext;
 	}
 }

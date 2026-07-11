@@ -10,8 +10,7 @@ components for building them.
 
 - [SEED XML Transformer](transformer): A RESTful webservice for
   transforming XML (and even HTML tag soup) with XSLT, XQuery, etc.
-- [DTS](dts): A RESTful webservice implementing a subset of the
-  endpoints of [Distributed Text
+- [DTS](dts): A level 1 implementation of [Distributed Text
   Services](https://github.com/distributed-text-services/specifications)
 - [SEED XSLT Compiler](compiler): Compiles XSLT to
   [SEF](https://www.saxonica.com/saxonjs/documentation3/index.html)
@@ -34,8 +33,8 @@ components for building them.
   query against a serialized RDF graph
 - ResourceProviders: Plugins for accessing resources (source
   documents) from different storage types
-  - [local filesystem](plugins/resource-providers): activated per default in dev mode
-  - URL (planned)
+  - [local filesystem](plugins/resource-providers): activated per default in tests
+  - [URL](plugins/resource-providers): activated per default
   - URN (planned)
   - InvenioRDM by DOI (planned)
   - RDBMS (planned)

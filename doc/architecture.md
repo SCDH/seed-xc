@@ -136,6 +136,36 @@ transformation.
 
 ### Resource Providers
 
+The above diagram does not reveal every aspect of resource providers,
+especially not their selection, creation and configuration.
+
+Some REST API endpoints allow the selection of the resource provider
+type by request parameter. This is the case e.g. for the
+[DTS](../dts).  endpoints. If selection is possible, two parameters
+are passed which will be evaluated by a `ResourceProviderManager` bean to create a resource provider in a 2 stage process:
+
+1. The manager selects a `ResourceProviderBuilder` by resource
+   provider type, which is e.g. `file` for a file system resource
+   provider. The builder usually comes with configuration properties,
+   e.g. the file system resource provider only allows access to a
+   configured directory of the file system.
+2. The builder has a `withBase(URI)` method for getting a resource
+   provider instance. The builder returns a provider for the requested
+   provider type with a configured base URI. E.g., for the file system
+   resource provider, the relative URI passed in the `withBase(URI)`
+   is resolved against the allowed directory and makes up the base
+   path for relative paths evaluated by the resource provider. For the
+   `url` provider for content on the web, the URI passed in via
+   `withBase(URI)` is typically an absolute URL (`https://...`). The
+   builder returns a provider, if the requested base URL passes the
+   white and black listed URL patterns configured for the builder.
+
+Caching is realized within this 2 stage creation.
+
+The `ResourceProviderManager` bean is application scoped. The creation
+of the builder in stage 1 is a bean creation, while the creation of
+the provider in stage 2 is a Pojo construction.
+
 ### Transformations
 
 

@@ -51,8 +51,6 @@ BASE/FRONT/document/{resource}{?tree,ref,start,end,mediaType}
 
 ### `FRONT`
 
-**state: not yet implemented**, see issue #32.
-
 Since this implementation of DTS is a microservice which does not store documents in a persistence layer, but fetches them from a remote location, the URL also has to contain information about this remote location.
 
 So, `FRONT` is 2 path segments in the path part of the URL. The first segment, `PROVIDER` is the type of the location, the second the location. `PROVIDER is internally used to select a resource provider that is able to dereference the location. The location MUST be an url encoded string.
@@ -73,6 +71,10 @@ PROVIDER      := PROVIDER_TYPE [ SEP OPTIONS ]
 PROVIDER_TYPE := 'url' | 'urn' | 'doi' | 'file'
 SEP           := ':'
 ```
+
+See the [list of resource
+providers](../plugins/README.md#resource-provider-plugins) for valid
+values of `PROVIDER_TYPE`.
 
 
 ## Linked Open Data
