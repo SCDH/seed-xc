@@ -1,7 +1,13 @@
 *~
+*.class
+*.jar
 *.eld
 /.idea
 
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+# maven
 target
 .flattened-pom.xml
 .classpath
@@ -12,3 +18,10 @@ target
 # must be ignored for formatting test
 /.m2
 .mvn/.develocity/
+
+## gradle
+.gradle
+**/build/
+**/buildScr/
+!gradle-wrapper.jar
+.gradletasknamecache
