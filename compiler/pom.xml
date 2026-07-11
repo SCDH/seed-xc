@@ -5,7 +5,7 @@
   <parent>
     <groupId>de.ulbms.scdh.seed.xc</groupId>
     <artifactId>seed-xc</artifactId>
-    <version>0.0.1</version>
+    <version>${revision}${changelist}</version>
   </parent>
 
   <artifactId>seed-xslt-compiler</artifactId>
@@ -16,12 +16,12 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>seed-xc-api</artifactId>
-      <version>0.0.1</version>
+      <version>${revision}${changelist}</version>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>seed-xc-saxon</artifactId>
-      <version>0.0.1</version>
+      <version>${revision}${changelist}</version>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
