@@ -2,13 +2,13 @@
 
 ## Resource Provider Plugins
 
-| Storage     | State   | Provider ID | Location Example  | Module                                        | important config                     |
-|:------------|---------|:------------|:------------------|-----------------------------------------------|:-------------------------------------|
-| file system | ✅      | `file`      | `projects%20hsde` | [seed-resource-providers](resource-providers) | base path for file system protection |
-| web via URL | planned | `url`       |                   |                                               | black and white lists                |
-| web via URN | planned | `urn:RES`   |                   |                                               |                                      |
-| InvenioRDM  | planned | `doi`       |                   |                                               |                                      |
-| RDBMS       | planned |             |                   |                                               |                                      |
+| Storage     | State   | Provider ID | Location Example                                   | Module                                        | important config                                               |
+|:------------|---------|:------------|:---------------------------------------------------|-----------------------------------------------|:---------------------------------------------------------------|
+| file system | ✅      | `file`      | `projects%20hsde`                                  | [seed-resource-providers](resource-providers) | base path for file system protection                           |
+| web via URL | ✅      | `url`       | `https%3A%2F%2Fscdh.github.io%2Fsample-edition%2F` | [seed-resource-providers](resource-providers) | black lists, white lists, allowed protocols, allowed file path |
+| web via URN | planned | `urn:RES`   |                                                    |                                               |                                                                |
+| InvenioRDM  | planned | `doi`       |                                                    |                                               |                                                                |
+| RDBMS       | planned |             |                                                    |                                               |                                                                |
 
 ## Transformation Plugins
 
