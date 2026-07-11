@@ -6,12 +6,15 @@ import de.ulbms.scdh.seed.xc.api.ResourceException;
 import de.ulbms.scdh.seed.xc.api.ResourceProvider;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.regex.Pattern;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class UrlResourceProviderBuilderTest {
+
+	private static final URI RESOURCES = Paths.get("src", "test", "resource").toUri();
 
 	private static final String DOMAINS_WHITE_MS = "^.*\\.uni-muenster.de$";
 
@@ -28,6 +31,7 @@ public class UrlResourceProviderBuilderTest {
 	@BeforeEach
 	public void createBuilder() {
 		builder = new UrlResourceProviderBuilder();
+		builder.allowedFilePath = RESOURCES.getSchemeSpecificPart();
 	}
 
 	@Test

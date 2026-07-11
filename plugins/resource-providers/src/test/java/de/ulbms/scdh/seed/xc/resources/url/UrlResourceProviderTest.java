@@ -47,13 +47,13 @@ public class UrlResourceProviderTest {
 
 	@Test
 	public void testSplitString() {
-		String[] splits = {"a", "b"};
 		assertEquals(2, "a,b".split(",").length);
+		assertEquals("a", "a,b".split(",")[0]);
 		assertEquals(1, "ab".split(",").length);
 	}
 
 	@Test
-	public void testBadScheme() {
+	public void testBadScheme() throws ResourceProviderConfigurationException {
 		UrlResourceProvider provider2 =
 				new UrlResourceProvider(RESOURCES, "https", ".*", ".*", RESOURCES.getSchemeSpecificPart());
 		assertThrows(ResourceException.class, () -> {
@@ -62,7 +62,7 @@ public class UrlResourceProviderTest {
 	}
 
 	@Test
-	public void testFileScheme() {
+	public void testFileScheme() throws ResourceProviderConfigurationException {
 		UrlResourceProvider provider2 =
 				new UrlResourceProvider(RESOURCES, "file", ".*", ".*", RESOURCES.getSchemeSpecificPart());
 		assertDoesNotThrow(() -> {

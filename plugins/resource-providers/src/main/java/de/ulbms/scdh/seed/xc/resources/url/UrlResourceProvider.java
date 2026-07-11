@@ -33,12 +33,13 @@ public class UrlResourceProvider extends UrlValidator implements ResourceProvide
 	 * Constructor used by the {@link UrlResourceProviderBuilder}.
 	 */
 	protected UrlResourceProvider(
-			URI base, String allowedProtocols, String domainWhiteList, String domainBlackList, String allowedFilePath) {
+			URI base, String allowedProtocols, String domainWhiteList, String domainBlackList, String allowedFilePath) throws ResourceProviderConfigurationException {
 		this.base = base;
 		this.allowedProtocols = allowedProtocols;
 		this.domainWhiteList = domainWhiteList;
 		this.domainBlackList = domainBlackList;
 		this.allowedFilePath = allowedFilePath;
+		configure();
 	}
 
 	@Inject
