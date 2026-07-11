@@ -3,7 +3,9 @@ package de.ulbms.scdh.seed.xc.resources.url;
 import static org.junit.jupiter.api.Assertions.*;
 
 import de.ulbms.scdh.seed.xc.api.ResourceException;
+import de.ulbms.scdh.seed.xc.api.ResourceNotFoundException;
 import de.ulbms.scdh.seed.xc.api.ResourceProvider;
+import de.ulbms.scdh.seed.xc.api.ResourceProviderConfigurationException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Path;
@@ -27,11 +29,13 @@ public class UrlResourceProviderTest {
 	ResourceProvider provider;
 
 	@BeforeEach
-	public void createProvider() throws ResourceException {
+	public void createProvider()
+			throws ResourceException, ResourceProviderConfigurationException, ResourceNotFoundException {
 		builder = new UrlResourceProviderBuilder();
 		builder.allowedProtocols = "file";
 		builder.domainWhiteList = ".*";
 		builder.domainBlackList = "asdf";
+		builder.allowedFilePath = RESOURCES.getSchemeSpecificPart();
 		provider = builder.withBase(RESOURCES);
 		// provider = new UrlResourceProvider(RESOURCES);
 	}
@@ -50,7 +54,8 @@ public class UrlResourceProviderTest {
 
 	@Test
 	public void testBadScheme() {
-		UrlResourceProvider provider2 = new UrlResourceProvider(RESOURCES, "https", ".*", ".*");
+		UrlResourceProvider provider2 =
+				new UrlResourceProvider(RESOURCES, "https", ".*", ".*", RESOURCES.getSchemeSpecificPart());
 		assertThrows(ResourceException.class, () -> {
 			provider2.openStream(new URI("samples/hello.xml"));
 		});
@@ -58,9 +63,27 @@ public class UrlResourceProviderTest {
 
 	@Test
 	public void testFileScheme() {
-		UrlResourceProvider provider2 = new UrlResourceProvider(RESOURCES, "file", ".*", ".*");
+		UrlResourceProvider provider2 =
+				new UrlResourceProvider(RESOURCES, "file", ".*", ".*", RESOURCES.getSchemeSpecificPart());
 		assertDoesNotThrow(() -> {
 			InputStream input = provider2.openStream(new URI("samples/hello.xml"));
+		});
+	}
+
+	@Test
+	public void testFileForbiddenEtcPasswd() {
+		assertThrows(
+				ResourceNotFoundException.class,
+				() -> {
+					InputStream input = provider.openStream(new URI("/etc/passwd"));
+				},
+				"access to forbidden file paths cause NotFound for not leaking internal information");
+	}
+
+	@Test
+	public void testFileForbiddenRelative() {
+		assertThrows(ResourceNotFoundException.class, () -> {
+			InputStream input = provider.openStream(new URI("../../../pom.xml"));
 		});
 	}
 }

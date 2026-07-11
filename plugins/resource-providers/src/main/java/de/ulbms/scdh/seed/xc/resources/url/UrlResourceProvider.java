@@ -31,13 +31,14 @@ public class UrlResourceProvider extends UrlValidator implements ResourceProvide
 
 	/**
 	 * Constructor used by the {@link UrlResourceProviderBuilder}.
-	 * @param base - the base URL (in DTS provided by request parameter)
 	 */
-	protected UrlResourceProvider(URI base, String allowedProtocols, String domainWhiteList, String domainBlackList) {
+	protected UrlResourceProvider(
+			URI base, String allowedProtocols, String domainWhiteList, String domainBlackList, String allowedFilePath) {
 		this.base = base;
 		this.allowedProtocols = allowedProtocols;
 		this.domainWhiteList = domainWhiteList;
 		this.domainBlackList = domainBlackList;
+		this.allowedFilePath = allowedFilePath;
 	}
 
 	@Inject

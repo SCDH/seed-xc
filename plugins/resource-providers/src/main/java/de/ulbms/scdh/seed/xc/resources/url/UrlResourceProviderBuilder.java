@@ -1,8 +1,6 @@
 package de.ulbms.scdh.seed.xc.resources.url;
 
-import de.ulbms.scdh.seed.xc.api.ResourceException;
-import de.ulbms.scdh.seed.xc.api.ResourceProvider;
-import de.ulbms.scdh.seed.xc.api.ResourceProviderBuilder;
+import de.ulbms.scdh.seed.xc.api.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.net.URI;
 import org.slf4j.Logger;
@@ -29,9 +27,10 @@ public class UrlResourceProviderBuilder extends UrlValidator implements Resource
 	 * {@inheritDoc}
 	 */
 	@Override
-	public ResourceProvider withBase(URI base) throws ResourceException {
+	public ResourceProvider withBase(URI base)
+			throws ResourceException, ResourceProviderConfigurationException, ResourceNotFoundException {
 		configure();
 		check(base);
-		return new UrlResourceProvider(base, allowedProtocols, domainWhiteList, domainBlackList);
+		return new UrlResourceProvider(base, allowedProtocols, domainWhiteList, domainBlackList, allowedFilePath);
 	}
 }
