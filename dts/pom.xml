@@ -344,10 +344,12 @@
 
         <!-- service configuration -->
         <!-- these paths should match the setup in the container image -->
-        <native-workdir>/work/resources</native-workdir>
-        <seed-xml-transformer.config>${native-workdir}/seed-config.yaml</seed-xml-transformer.config>
-        <seed-xml-transformer.saxon-config>${native-workdir}/saxon-config.xml</seed-xml-transformer.saxon-config>
-        <seed-xml-transformer.accessible-path>${native-workdir}</seed-xml-transformer.accessible-path>
+        <native-resource-dir>/work/resources</native-resource-dir>
+        <seed-dts.config>${native-resource-dir}/dts-transformations-testing.yaml</seed-dts.config>
+        <seed-dts.saxon-config>${native-resource-dir}/dts-transformations/saxon.he.seed.xml</seed-dts.saxon-config>
+        <seed-dts.accessible-path>${native-resource-dir}/</seed-dts.accessible-path>
+        <seed-dts.jsonld-context-map>${native-resource-dir}/dts-transformations/context-map.json</seed-dts.jsonld-context-map>
+        <seed-dts.filesystem>/work/projects/</seed-dts.filesystem>
 
         <quarkus.package.type>native</quarkus.package.type>
         <!-- enable ConfigMaps as configuration source, see https://quarkus.io/guides/kubernetes-config -->
