@@ -4,6 +4,7 @@
 
 plugins {
     id("buildlogic.java-conventions")
+    id("de.undercouch.download")
 }
 
 dependencies {
@@ -14,6 +15,16 @@ dependencies {
     }
     api(libs.io.quarkus.quarkus.rest)
     api(libs.io.quarkus.quarkus.mutiny)
+}
+
+tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("generate") {
+    inputSpec("$rootDir/src/main/resources/openapi/seed-xc-openapi.yaml")
+}
+
+tasks.register<de.undercouch.gradle.tasks.download.Download>("download-openapi") {
+    src("https://raw.githubusercontent.com/SCDH/dts-openapi/refs/tags/${dts-openapi.version}/standalone/facade-openapi.yaml")
+    dest(layout.buildDirectory.dir("openapi"))
+    overwrite(false)
 }
 
 description = "SEED XC API"
