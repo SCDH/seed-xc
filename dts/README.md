@@ -88,7 +88,7 @@ Have a look at
 [`src/main/resources/application.properties`](src/main/resources/application.properties)
 for more config options.
 
-### Native Executable
+### Native Executable and Docker Image
 
 A native executable is a build artifact, that can be run without a
 Java virtual machine. It is simply a linux executable, compiled from
@@ -107,22 +107,26 @@ and OpenJDK from a docker container:
 
 ```shell
 ./mvnw -Pdownload-openapi generate-sources
-./mvnw generate-sources package
 ./mvnw -Ddts-native install
 ```
 
-This produces `seed-dts-VERSION-runner` in `dts/target/`.
+This produces `seed-dts-VERSION-runner` in `dts/target/`. It has
+properties set for operating in a container image. So let's build it:
 
-Alternatively, you can download the native executable from the release
-assets.
+```shell
+docker build -f dts/src/main/docker/Dockerfile.native-micro -t scdh/dts-testing .
+```
 
 The service starts up lightning fast. Just call the native executable:
 
 ```shell
-dts/target/seed-dts-0.0.1-SNAPSHOT-runner
+docker run -i --rm -p 8080:8080 scdh/dts-testing
 ```
 
 Swagger UI is available at http://localhost:8080/q/swagger-ui
+
+You can mount-bind your own transformations into `/work/resources/`
+and your own files into `/work/projects/`.
 
 ### Testing with cURL
 
