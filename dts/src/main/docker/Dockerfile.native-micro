@@ -1,6 +1,6 @@
 ## Container image with DTS Transformations preinstalled.
 
-FROM quay.io/quarkus/ubi9-quarkus-micro-image:2.0
+FROM quay.io/quarkus/ubi9-quarkus-micro-image
 WORKDIR /work/
 RUN mkdir -p /work/resources
 RUN mkdir -p /work/projects
