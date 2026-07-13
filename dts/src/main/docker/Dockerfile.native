@@ -1,0 +1,21 @@
+## Container image with DTS Transformations preinstalled based on RedHat UBI 9 Minimal
+
+FROM registry.access.redhat.com/ubi9/ubi-minimal
+
+RUN microdnf install  --setopt install_weak_deps=0 --nodocs -y tar gzip
+
+WORKDIR /work/
+RUN mkdir -p /work/resources
+RUN mkdir -p /work/projects
+RUN chown -R 1001 /work \
+    && chmod -R "g+rwX" /work \
+    && chown -R 1001:root /work
+COPY --chown=1001:root --chmod=555 dts/target/*-runner /work/application
+
+COPY  --chown=1001:root dts/target/dependencies/ /work/resources/
+
+COPY --chown=1001:root dts/src/main/docker/entrypoint.sh /work/
+
+USER 1001
+
+ENTRYPOINT ["./entrypoint.sh", "-Dquarkus.http.host=0.0.0.0"]
