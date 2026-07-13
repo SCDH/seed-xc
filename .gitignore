@@ -1,6 +1,9 @@
 *~
 *.eld
 /.idea
+**/build/
+**/.gradle
+**/.develocity
 
 target
 .flattened-pom.xml
