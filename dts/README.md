@@ -8,9 +8,9 @@ rules.
 | endpoint   | implementation | URI template                                                          |
 |:-----------|:---------------|:----------------------------------------------------------------------|
 | entry      | ✅             | `BASE_URL/FRONT/entry`                                                |
-| collection | ✅             | `BASE_URL/FRONT/collection/{id}{?nav}`                                |
-| navigation | ✅             | `BASE_URL/FRONT/navigation/{resource}{?tree,ref,start,end,down}`      |
-| document   | ✅             | `BASE_URL/FRONT/navigation/{resource}{?tree,ref,start,end,mediaType}` |
+| collection | ✅             | `BASE_URL/FRONT/collection/{id}{?nav,page}`                           |
+| navigation | ✅             | `BASE_URL/FRONT/navigation/{resource}{?tree,ref,start,end,down,page}` |
+| document   | ✅             | `BASE_URL/FRONT/document/{resource}{?tree,ref,start,end,mediaType}`   |
 
 SEED DTS Server is designed for 1:n deployment, i.e., one service
 instance can serve a multitude of projects (entry points). A project

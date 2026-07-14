@@ -31,6 +31,13 @@ Absolute IRIs in the collection metadata file are simply processed untouched.
 
 The URI templates define the identifiers of collections and resources as a path parameter, while the other parameters are passed in as query parameters:
 
+#### entry
+
+```
+BASE/FRONT/entry
+```
+
+
 #### collection
 
 ```
