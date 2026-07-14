@@ -114,7 +114,7 @@ This produces `seed-dts-VERSION-runner` in `dts/target/`. It has
 properties set for operating in a container image. So let's build it:
 
 ```shell
-docker build -f dts/src/main/docker/Dockerfile.native-micro -t scdh/dts-testing .
+docker build -f dts/src/main/docker/Dockerfile.native -t scdh/dts-testing .
 ```
 
 The service starts up lightning fast. Just call the native executable:
@@ -125,8 +125,12 @@ docker run -i --rm -p 8080:8080 scdh/dts-testing
 
 Swagger UI is available at http://localhost:8080/q/swagger-ui
 
-You can mount-bind your own transformations into `/work/resources/`
-and your own files into `/work/projects/`.
+You can your own files into `/work/projects/`. Have a look at the docs
+for [customizing the
+transformations](../doc/dts.md#customizing-transformations).
+
+If you want to look, what's inside the container, do ` docker run -it
+scdh/dts-testing bash -c "ls -l /"`.
 
 ### Testing with cURL
 
