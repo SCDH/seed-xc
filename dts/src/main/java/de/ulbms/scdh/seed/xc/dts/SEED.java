@@ -5,7 +5,8 @@ import org.apache.jena.rdf.model.impl.PropertyImpl;
 
 public class SEED {
 
-	public static final String NAMESPACE = "https://github.com/scdh/seed-xc/dts/semantics.ttl#";
+	public static final String NAMESPACE =
+			"https://raw.githubusercontent.com/SCDH/seed-xc/refs/heads/main/dts/src/main/resources/META-INF/resources/semantics/";
 
 	public static final Property location = new PropertyImpl(NAMESPACE, "location");
 }
