@@ -1,0 +1,24 @@
+{
+  "@context": [
+    {
+      "seed": "https://scdh.github.io/seed-xc/dts/src/main/resources/META-INF/resources/semantics/seed#",
+      "seed:location": {
+        "@id": "seed:location",
+        "@context": {
+          "Path": {
+            "@id": "seed:Path"
+          },
+          "Zip": {
+            "@id": "seed:Zip"
+          },
+          "path": {
+            "@id": "seed:path"
+          },
+          "zipEntry": {
+            "@id": "seed:zipEntry"
+          }
+        }
+      }
+    }
+  ]
+}
