@@ -120,7 +120,7 @@ public class CollectionMetadataProcessorTest {
 	}
 
 	@Test
-	public void testMatt() {
+	public void testLocationStringMatt() {
 		Uni<String> result =
 				proc.getResourceLocation(input, COLLECTION.toString(), config, Map.of(), BASE + "matt.xml");
 		result.subscribe()
@@ -130,6 +130,20 @@ public class CollectionMetadataProcessorTest {
 						},
 						e -> {
 							assertEquals(0, 1, "must return path to matt.xml");
+						});
+	}
+
+	@Test
+	public void testLocationPathWithJohn() {
+		Uni<String> result =
+				proc.getResourceLocation(input, COLLECTION.toString(), config, Map.of(), BASE + "john.xml");
+		result.subscribe()
+				.with(
+						s -> {
+							assertEquals("john.xml", s, "path to matt.xml");
+						},
+						e -> {
+							assertEquals(0, 1, "must return path to john.xml");
 						});
 	}
 }

@@ -71,16 +71,39 @@ public class CollectionMetadataProcessor {
 			Resource resource = graph.getResource(id);
 			// graph.getModel(id) creates missing, but does not yet add!
 			if (!graph.containsResource(resource)) {
+				LOG.info("no such resource");
 				throw new NotFoundException("not found: " + id);
 			} else {
+				if (!resource.hasProperty(RDF.type, DTS.Resource))
+					throw new BadRequestException(id + " is not a dts:Resource");
+				LOG.info("is dts:Resource");
 				Statement locationStmt = resource.getProperty(SEED.location);
-				if (locationStmt != null && locationStmt.getObject().isLiteral()) {
+				if (locationStmt == null) {
+					LOG.info("no seed:location");
+					throw new NotFoundException(
+							"invalid collection metadata: " + id + " seed:location ? . Property not present");
+				}
+				if (locationStmt.getObject().isLiteral()) {
+					LOG.info("literal");
+					// deprecated: putting in a simple path literal is deprecated!
 					return locationStmt.getObject().asLiteral().getString();
+				} else if (locationStmt.getObject().isResource()) {
+					LOG.info("resource");
+					Resource locationResource = locationStmt.getObject().asResource();
+					if (locationResource.hasProperty(RDF.type, SEED.Path)) {
+						Statement pathStatement = locationResource.getProperty(SEED.path);
+						if (pathStatement != null && pathStatement.getObject().isLiteral()) {
+							return pathStatement.getObject().asLiteral().getString();
+						} else {
+							throw new NotFoundException("invalid collection metadata: " + id
+									+ " seed:location.seed:path Property not present or not a literal");
+						}
+					} else {
+						throw new NotFoundException("not yet implemented");
+					}
 				} else {
-					if (!resource.hasProperty(RDF.type, DTS.Resource))
-						throw new BadRequestException(id + " is not a dts:Resource");
-					throw new NotFoundException("invalid collection metadata: " + id
-							+ " seed:location ? . Property not present or not a literal");
+					throw new NotFoundException(
+							"invalid collection metadata: " + id + " seed:location not of supported type");
 				}
 			}
 		}));

@@ -89,7 +89,10 @@
 	    "title": "The Book of John",
 	    "totalParents": 1,
 	    "totalChildren": 0,
-		"seed:location": "john.xml"
+		"seed:location": {
+			"@type": "Path",
+			"path": "john.xml"
+		}
 	},
 	{
 	    "@id": "4ezr.xml",

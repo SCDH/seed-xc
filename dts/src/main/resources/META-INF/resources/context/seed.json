@@ -1,7 +1,7 @@
 {
   "@context": [
     {
-      "seed": "https://scdh.github.io/seed-xc/dts/src/main/resources/META-INF/resources/semantics/seed#",
+      "seed": "https://raw.githubusercontent.com/SCDH/seed-xc/refs/heads/main/dts/src/main/resources/META-INF/resources/semantics/",
       "seed:location": {
         "@id": "seed:location",
         "@context": {
