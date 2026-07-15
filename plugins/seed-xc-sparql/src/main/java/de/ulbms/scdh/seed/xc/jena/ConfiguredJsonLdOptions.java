@@ -27,6 +27,19 @@ public class ConfiguredJsonLdOptions {
 	protected String uriValidationPolicy;
 
 	/**
+	 * Returns a {@link ConfiguredJsonLdOptions} for a loader and a URI validation policy.
+	 * @param loader - a document loader
+	 * @param uriValidationPolicy - a URI validation policy
+	 * @return the instance
+	 */
+	public static ConfiguredJsonLdOptions of(DocumentLoader loader, String uriValidationPolicy) {
+		ConfiguredJsonLdOptions opts = new ConfiguredJsonLdOptions();
+		opts.documentLoader = loader;
+		opts.uriValidationPolicy = uriValidationPolicy;
+		return opts;
+	}
+
+	/**
 	 * This produces the {@link JsonLdOptions} for injection with {@link Inject}.
 	 * @return the configured options
 	 */

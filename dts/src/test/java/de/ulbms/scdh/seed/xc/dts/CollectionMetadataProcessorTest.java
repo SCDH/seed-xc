@@ -3,8 +3,11 @@ package de.ulbms.scdh.seed.xc.dts;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.apicatalog.jsonld.JsonLdOptions;
+import com.apicatalog.jsonld.loader.DocumentLoader;
 import com.apicatalog.jsonld.uri.UriValidationPolicy;
 import de.ulbms.scdh.seed.xc.api.Config;
+import de.ulbms.scdh.seed.xc.jena.ConfiguredJsonLdLoader;
+import de.ulbms.scdh.seed.xc.jena.ConfiguredJsonLdOptions;
 import io.smallrye.mutiny.Uni;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
@@ -22,6 +25,14 @@ public class CollectionMetadataProcessorTest {
 	private static final File COLLECTION =
 			Paths.get("src", "test", "resources", "sample", "collection.json").toFile();
 
+	private static final File TRANSFORMATIONS_CONTEXT_MAP = Paths.get(
+					"target", "dependencies", "dts-transformations", "context-map.json")
+			.toFile();
+
+	private static final File SEED_CONTEXT_MAP = Paths.get(
+					"src", "main", "resources", "META-INF", "resources", "context-map.json")
+			.toFile();
+
 	private static final String BASE = "http://example.com/";
 
 	private Uni<InputStream> input;
@@ -38,7 +49,10 @@ public class CollectionMetadataProcessorTest {
 	@BeforeEach
 	public void createProcessor() {
 		proc = new CollectionMetadataProcessor();
-		JsonLdOptions options = new JsonLdOptions();
+		DocumentLoader loader = ConfiguredJsonLdLoader.createJsonLdLoader(
+				TRANSFORMATIONS_CONTEXT_MAP.toString() + "," + SEED_CONTEXT_MAP.toString(), 100);
+		ConfiguredJsonLdOptions opts = ConfiguredJsonLdOptions.of(loader, "none");
+		JsonLdOptions options = opts.getJsonLdOptions();
 		options.setUriValidation(UriValidationPolicy.None);
 		proc.jsonLdOptions = options;
 	}
