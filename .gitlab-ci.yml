@@ -12,7 +12,9 @@ variables:
     --no-transfer-progress
     -DinstallAtEnd=true
     -DdeployAtEnd=true
-
+  DOCKER_HOST: "tcp://docker:2375"
+  DOCKER_TLS_CERTDIR: ""
+  DOCKER_DRIVER: overlay2
 
 .release_tag: &release-tag
   rules:
@@ -24,7 +26,9 @@ cache:
     - $CI_PROJECT_DIR/.m2/repository
 
 services:
-  - docker:dind
+  - name: docker:dind
+    alias: docker
+    command: ["--tls=false"]
 
 stages:
   - test
