@@ -9,6 +9,7 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Map;
@@ -108,7 +109,14 @@ public class CollectionMetadataProcessor {
 				}
 				parserBuilder.resolver(iriResolverBuilder.build());
 			}
+			// according to docs, the parser will close the stream
 			Model graph = parserBuilder.lang(lang).toModel();
+			try {
+				inputStream.close();
+				LOG.debug("closed collection metadata stream");
+			} catch (IOException e) {
+				LOG.debug("collection metadata stream was already closed");
+			}
 			// get the location from the graph
 			Resource resource = graph.getResource(id.toString());
 			// graph.getModel(id) creates missing, but does not yet add!
