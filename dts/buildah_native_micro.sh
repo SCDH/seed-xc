@@ -3,7 +3,7 @@
 # Note: The ID of the working container is stored to ./buildah-container-id
 
 # USAGE EXAMPLE:
-# ./buildah_native_micro.sh
+# dts/buildah_native_micro.sh
 # ctr=$(< buildah-container-id)
 # echo "making image from container $ctr"
 # img=$(buildah commit $ctr $CI_REGISTRY_IMAGE:$IMAGE_TAG)
@@ -11,16 +11,19 @@
 # buildah push $img docker://$CI_REGISTRY_IMAGE:$IMAGE_TAG
 # buildah logout $CI_REGISTRY
 
+# Note: This script must be run vom the project root with dts/buildah_native_micro.sh!
 
 FROM_IMAGE=quay.io/quarkus/quarkus-micro-image:2.0
 
 UBI_VERSION=8
 
-APPLICATION='target/*-runner'
+APPLICATION='dts/target/*-runner'
 
-TRNSFORMATIONS='target/dependencies/'
+TRNSFORMATIONS='dts/target/dependencies/'
 
-META_INF_RESOURCES='src/main/resources/META-INF/resources/'
+META_INF_RESOURCES='dts/src/main/resources/META-INF/resources/'
+
+ENTRYPOINT_SH='dts/src/main/docker/entrypoint.sh'
 
 # create a new working container based on FROM_IMAGE
 ctr=$(buildah from $FROM_IMAGE)
@@ -67,7 +70,7 @@ buildah config --user 1001 $ctr
 # configure container to start application
 
 # 1. copy script for advanced entry point
-buildah add --chown 1001:root --chmod 555 $ctr 'src/main/docker/entrypoint.sh' '/work/entrypoint.sh'
+buildah add --chown 1001:root --chmod 555 $ctr $ENTRYPOINT_SH '/work/entrypoint.sh'
 
 # 2. set entrypoint and cmd
 # array format allowed but undocumented,
