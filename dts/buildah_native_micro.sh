@@ -20,6 +20,8 @@ APPLICATION='target/*-runner'
 
 TRNSFORMATIONS='target/dependencies/'
 
+META_INF_RESOURCES='src/main/resources/META-INF/resources/'
+
 # create a new working container based on FROM_IMAGE
 ctr=$(buildah from $FROM_IMAGE)
 mnt=$(buildah mount $ctr)
@@ -39,7 +41,7 @@ yum clean all --installroot $mnt
 buildah config --workingdir='/work' $ctr
 
 # create required folder structure
-buildah run $ctr -- mkdir -p /work/resources
+buildah run $ctr -- mkdir -p /work/resources/seed-dts
 buildah run $ctr -- mkdir -p /work/projects
 
 # set owner and permissions of workdir
@@ -51,6 +53,9 @@ buildah add --chown 1001:root $ctr $APPLICATION '/work/application'
 
 # copy default transformations
 buildah add --chown 1001:root $ctr $TRNSFORMATIONS '/work/resources/'
+
+# copy resources from META-INF
+buildah add --chown 1001:root $ctr $META_INF_RESOURCES '/work/resources/seed-dts/'
 
 # expose port
 buildah config --port 8080 $ctr

@@ -350,6 +350,7 @@
         <seed-dts.saxon-config>${native-resource-dir}/dts-transformations/saxon.he.seed.xml</seed-dts.saxon-config>
         <seed-dts.accessible-path>${native-resource-dir}/</seed-dts.accessible-path>
         <seed-dts.jsonld-context-map>${native-resource-dir}/dts-transformations/context-map.json</seed-dts.jsonld-context-map>
+        <seed-dts.seed-context-map>${native-resource-dir}/seed-dts/context-map.json</seed-dts.seed-context-map>
         <seed-dts.filesystem>/work/projects/</seed-dts.filesystem>
 
         <quarkus.package.type>native</quarkus.package.type>
