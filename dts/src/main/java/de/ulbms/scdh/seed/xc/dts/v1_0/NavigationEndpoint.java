@@ -45,15 +45,6 @@ public class NavigationEndpoint implements NavigationApi {
 			defaultValue = "dts-transformations-xsl-navigation")
 	protected String TRANSFORMATION;
 
-	/**
-	 * Location of the collection metadata, same as for Collection endpoint.
-	 */
-	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.CollectionEndpoint.GRAPH", defaultValue = "collection.json")
-	protected String GRAPH;
-
-	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.NavigationEndpoint.RESOURCE_ID_PATH", defaultValue = "false")
-	protected boolean RESOURCE_IS_PATH;
-
 	@Inject
 	protected CollectionMetadataProcessor collectionMetadataProc;
 
@@ -165,33 +156,11 @@ public class NavigationEndpoint implements NavigationApi {
 			throw new BadRequestException("cannot open base location: " + e.getMessage());
 		}
 
-		// Create ResourceInContext from resource parameter and additional parameters
+		// async processing of
+		// 1. get collection.json, 2. lookup the resource's location, 3. get the resource, 4. transform it
 		Map<String, String> crContext = Map.of();
-		Uni<ResourceInContext> uniRic;
-		if (RESOURCE_IS_PATH) {
-			ResourceInContext ric = new ResourceInContext(crContext, resource.toString());
-			uniRic = Uni.createFrom().item(ric);
-		} else {
-			// get the resource location from the collection metadata
-			ResourceInContext collectionIc = new ResourceInContext(crContext, GRAPH);
-			uniRic = Uni.createFrom()
-					.item(collectionIc)
-					.plug((cic) -> {
-						return resourceProvider.asyncOpenStream(cic, request);
-					})
-					.plug((s) -> {
-						return collectionMetadataProc.getResourceLocation(
-								s, GRAPH, transformationConfig, crContext, thisIri.toString());
-					})
-					.onItem()
-					.transform((resourceLocation -> {
-						return new ResourceInContext(crContext, resourceLocation);
-					}));
-		}
-
-		return uniRic.plug((r) -> {
-					return resourceProvider.asyncOpenStream(r, request);
-				})
+		return collectionMetadataProc
+				.getResourceAsync(resourceProvider, transformationConfig, crContext, thisIri)
 				.plug((s) -> {
 					return transformation.transformAsync(
 							params, transformationConfig, resource.toString(), s, resourceProvider, request);

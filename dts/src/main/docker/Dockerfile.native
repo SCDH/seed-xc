@@ -16,6 +16,10 @@ COPY  --chown=1001:root dts/target/dependencies/ /work/resources/
 
 COPY --chown=1001:root dts/src/main/docker/entrypoint.sh /work/
 
+# copy resources from META-INF
+RUN mkdir -p /work/resources/seed-dts
+COPY --chown=1001:root --chmod=555 dts/src/main/resources/META-INF/resources/ /work/resources/seed-dts/
+
 USER 1001
 
 ENTRYPOINT ["./entrypoint.sh", "-Dquarkus.http.host=0.0.0.0"]

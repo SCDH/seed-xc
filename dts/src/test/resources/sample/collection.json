@@ -69,14 +69,7 @@
 	{
 	    "@id": "matt.xml",
 	    "@type": "Resource",
-	    "dtsVersion": "1.0rc1",
-	    "collection": "/collection?id=matt.xml{&nav}",
-	    "navigation": "/navigation?resource=matt.xml{&ref,start,end,tree}",
-	    "document": "/document?resource=matt.xml{&ref,start,end,tree,mediaType}",
-	    "title": "The Book of matt",
-	    "@type": "Resource",
-	    "totalParents": 1,
-	    "totalChildren": 0,
+	    "title": "The Book of Matthew",
 		"seed:location": "matt.xml"
 	},
 	{
@@ -89,7 +82,10 @@
 	    "title": "The Book of John",
 	    "totalParents": 1,
 	    "totalChildren": 0,
-		"seed:location": "john.xml"
+		"seed:location": {
+			"@type": "Path",
+			"path": "john.xml"
+		}
 	},
 	{
 	    "@id": "4ezr.xml",
@@ -155,10 +151,10 @@
 	}
     ],
     "@context": [
-	"https://scdh.github.io/dts-transformations/latest/xsl/context/modules/dct-nest.json",
-	"https://scdh.github.io/dts-transformations/latest/xsl/context/modules/1.0rc1.json",
+		"https://scdh.github.io/dts-transformations/latest/xsl/context/modules/dct-nest.json",
+		"https://scdh.github.io/dts-transformations/latest/xsl/context/modules/1.0rc1.json",
+		"https://raw.githubusercontent.com/SCDH/seed-xc/refs/heads/main/dts/src/main/resources/META-INF/resources/context/seed.json",
         {
-			"seed": "https://github.com/scdh/seed-xc/dts/semantics.ttl#",
 			"@base": null,
 	    	"extensions": "@nest"
 		}
