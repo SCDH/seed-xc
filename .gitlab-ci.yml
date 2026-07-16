@@ -1,5 +1,4 @@
 variables:
-  JAVA_DOCKER_IMAGE: "harbor.uni-muenster.de/proxy-docker/eclipse-temurin:21-alpine"
   MAVEN_OPTS: >-
     -Dhttps.protocols=TLSv1.2
     -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
@@ -26,12 +25,17 @@ cache:
 
 stages:
   - test
+  - build
   - push
 
+# default image: JDK25 with Mandrel Compiler for building native executables
+image:
+  name: quay.io/quarkus/ubi-quarkus-mandrel-builder-image:jdk-25
+  entrypoint:
+    - ""
 
 verify:
   stage: test
-  image: $JAVA_DOCKER_IMAGE
   script:
     - ./mvnw $MAVEN_CLI_OPTS -Pdownload-openapi generate-sources
     - ./mvnw $MAVEN_CLI_OPTS verify
@@ -39,17 +43,56 @@ verify:
 
 formatting:
   stage: test
-  image: $JAVA_DOCKER_IMAGE
   script:
     - ./mvnw $MAVEN_CLI_OPTS spotless:check
 
-push packages:
+push_packages:
   stage: push
-  image: $JAVA_DOCKER_IMAGE
+  rules:
+    - !reference [ .release_tag, rules ]
   script:
     - ./mvnw -Drevision=$CI_COMMIT_REF_NAME -Dchangelist="" $MAVEN_CLI_OPTS clean
     - ./mvnw -Drevision=$CI_COMMIT_REF_NAME -Dchangelist="" $MAVEN_CLI_OPTS -Pdownload-openapi generate-sources
-    - ./mvnw -Drevision=$CI_COMMIT_REF_NAME -Dchangelist="" $MAVEN_CLI_OPTS -s .gitlab/settings.xml deploy
+    - ./mvnw -Drevision=$CI_COMMIT_REF_NAME -Dchangelist="" $MAVEN_CLI_OPTS -Ddistribution.url=$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/maven -s .gitlab/settings.xml deploy
+
+build_native:
+  stage: build
   rules:
     - !reference [ .release_tag, rules ]
+  script:
+    - ./mvnw -Drevision=$CI_COMMIT_REF_NAME -Dchangelist="" $MAVEN_CLI_OPTS -Pdownload-openapi generate-sources
+    - ./mvnw -Drevision=$CI_COMMIT_REF_NAME -Dchangelist="" $MAVEN_CLI_OPTS -Ddts-native install
+  artifacts:
+    paths:
+      - dts/target/*-runner
+    expire_in: 1 days
 
+build-container-without-cache:
+  stage: push
+  needs:
+    - verify
+    - build_native
+  rules:
+    - !reference [ .release_tag, rules ]
+  image: quay.io/buildah/stable:v1
+  tags:
+    - privileged
+  before_script:
+    - buildah version
+    - export HOME=$CI_BUILD_DIR
+    - buildah login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    #- echo $HARBOR_PASSWORD | buildah login -u $HARBOR_USERNAME --password-stdin $HARBOR_URL
+  script:
+    ## make container using buildah script
+    - dts/buildah_native_micro.sh
+    - ctr=$(< buildah-container-id)
+    - echo "container ID $ctr"
+    ## make image from container and push to harbor registry
+    #- img=$(buildah commit $ctr $HARBOR_IMAGE_BUILD)
+    #- buildah push $img docker://$HARBOR_IMAGE_BUILD
+    # make from container and push to CI registry
+    - img=$(buildah commit $ctr $CI_IMAGE_BUILD )
+    - buildah push $img docker://$CI_IMAGE_BUILD
+  after_script:
+    - buildah logout $CI_REGISTRY
+    #- buildah logout $HARBOR_REGISTRY
