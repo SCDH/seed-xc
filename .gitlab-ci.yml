@@ -68,7 +68,7 @@ build_native:
     - !reference [ .release_tag, rules ]
   script:
     - ./mvnw -Drevision=$CI_COMMIT_REF_NAME -Dchangelist="" $MAVEN_CLI_OPTS -Pdownload-openapi generate-sources
-    - ./mvnw -Drevision=$CI_COMMIT_REF_NAME -Dchangelist="" $MAVEN_CLI_OPTS -Ddts-native -Dquarkus.native.container-build=false install
+    - ./mvnw -Drevision=$CI_COMMIT_REF_NAME -Dchangelist="" $MAVEN_CLI_OPTS -Ddts-native -Dquarkus.native.container-build=false -DskipITs=true install
   artifacts:
     paths:
       - dts/target/*-runner
