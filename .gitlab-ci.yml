@@ -66,12 +66,9 @@ build_native:
   stage: build
   rules:
     - !reference [ .release_tag, rules ]
-  tags:
-    - dind
-    - privileged
   script:
     - ./mvnw -Drevision=$CI_COMMIT_REF_NAME -Dchangelist="" $MAVEN_CLI_OPTS -Pdownload-openapi generate-sources
-    - ./mvnw -Drevision=$CI_COMMIT_REF_NAME -Dchangelist="" $MAVEN_CLI_OPTS -Ddts-native install
+    - ./mvnw -Drevision=$CI_COMMIT_REF_NAME -Dchangelist="" $MAVEN_CLI_OPTS -Ddts-native -Dquarkus.native.container-build=false install
   artifacts:
     paths:
       - dts/target/*-runner
