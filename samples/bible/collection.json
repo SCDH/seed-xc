@@ -21,20 +21,19 @@
 		    "@id": "matt.xml"
 		},
 		{
-		    "@id": "john.xml"
+		    "@id": "John"
 		},
 		{
-		    "@id": "agrapha"
+		    "@id": "Agrapha"
 		},
 		{
-		    "@id": "apocryphs"
+		    "@id": "Apocryphs"
 		}
 	    ]
 	},
 	{
-	    "@id": "apocryphs",
+	    "@id": "Apocryphs",
 	    "@type": "Collection",
-	    "dtsVersion": "1.0rc1",
 	    "title": "Collection of apocryphical Books",
 	    "dublinCore": {
 		"title": [
@@ -53,29 +52,34 @@
 	    },
 	    "member": [
 		{
-		    "@id": "4ezr.xml"
+		    "@id": "4Ezr"
 		},
 		{
-		    "@id": "agrapha"
+		    "@id": "Agrapha"
 		}
 	    ]
 	},
 	{
 	    "@id": "matt.xml",
 	    "@type": "Resource",
-	    "dtsVersion": "1.0rc1",
-	    "title": "The Book of matt",
-		"seed:location": "matt.xml"
+	    "title": "The Book of Matthew",
+		"seed:location": {
+			"@type": "Path",
+			"path": "matt.xml"
+		}
 	},
 	{
-	    "@id": "john.xml",
+	    "@id": "John",
 	    "@type": "Resource",
 	    "dtsVersion": "1.0rc1",
 	    "title": "The Book of John",
-		"seed:location": "john.xml"
+		"seed:location": {
+			"@type": "Path",
+			"path": "john.xml"
+		}
 	},
 	{
-	    "@id": "4ezr.xml",
+	    "@id": "4Ezr",
 	    "@type": "Resource",
 	    "dtsVersion": "1.0rc1",
 	    "title": "The 4th Book of Esra",
@@ -97,12 +101,14 @@
 		}
 	    },
 	    "download": "4ezr.xml",
-		"seed:location": "4ezr.xml"
+		"seed:location": {
+			"@type": "Path",
+			"path": "4ezr.xml"
+		}
 	},
 	{
-	    "@id": "agrapha",
+	    "@id": "Agrapha",
 	    "@type": "Collection",
-	    "dtsVersion": "1.0rc1",
 	    "title": "Collection of Agrapha",
 	    "dublinCore": {
 		"title": [
@@ -114,16 +120,18 @@
 	    },
 	    "member": [
 		{
-		    "@id": "agraphai.xml"
+		    "@id": "Agrapha1"
 		}
 	    ]
 	},
 	{
-	    "@id": "agraphai.xml",
+	    "@id": "Agrapha1",
 	    "@type": "Resource",
-	    "dtsVersion": "1.0rc1",
 	    "title": "Book of Non-Written Stuff I",
-		"seed:location": "agraphai.xml"
+		"seed:location": {
+			"@type": "Path",
+			"path": "agraphai.xml"
+		}
 	}
     ],
     "@context": [
