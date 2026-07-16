@@ -45,12 +45,6 @@ public class NavigationEndpoint implements NavigationApi {
 			defaultValue = "dts-transformations-xsl-navigation")
 	protected String TRANSFORMATION;
 
-	/**
-	 * Location of the collection metadata, same as for Collection endpoint.
-	 */
-	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.CollectionEndpoint.GRAPH", defaultValue = "collection.json")
-	protected String GRAPH;
-
 	@Inject
 	protected CollectionMetadataProcessor collectionMetadataProc;
 
@@ -165,16 +159,8 @@ public class NavigationEndpoint implements NavigationApi {
 		// async processing of
 		// 1. get collection.json, 2. lookup the resource's location, 3. get the resource, 4. transform it
 		Map<String, String> crContext = Map.of();
-		ResourceInContext collectionIc = new ResourceInContext(crContext, GRAPH);
-		return Uni.createFrom()
-				.item(collectionIc)
-				.plug((cic) -> {
-					return resourceProvider.asyncOpenStream(cic, request);
-				})
-				.plug((s) -> {
-					return collectionMetadataProc.getResource(
-							resourceProvider, s, GRAPH, transformationConfig, crContext, thisIri);
-				})
+		return collectionMetadataProc
+				.getResourceAsync(resourceProvider, transformationConfig, crContext, thisIri)
 				.plug((s) -> {
 					return transformation.transformAsync(
 							params, transformationConfig, resource.toString(), s, resourceProvider, request);

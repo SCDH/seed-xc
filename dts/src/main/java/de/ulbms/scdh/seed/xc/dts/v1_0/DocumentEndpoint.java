@@ -48,12 +48,6 @@ public class DocumentEndpoint implements DocumentApi {
 	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.DocumentEndpoint.SETS_SERIALIZER", defaultValue = "true")
 	protected boolean SETS_SERIALIZER;
 
-	/**
-	 * Location of the collection metadata, same as for Collection endpoint.
-	 */
-	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.CollectionEndpoint.GRAPH", defaultValue = "collection.json")
-	protected String GRAPH;
-
 	@Inject
 	CollectionMetadataProcessor collectionMetadataProc;
 
@@ -190,18 +184,10 @@ public class DocumentEndpoint implements DocumentApi {
 		// async processing of
 		// 1. get collection.json, 2. lookup the resource's location, 3. get the resource, 4. transform it
 		Map<String, String> crContext = Map.of();
-		ResourceInContext collectionIc = new ResourceInContext(crContext, GRAPH);
-		return Uni.createFrom()
-				.item(collectionIc)
-				.plug((cic) -> {
-					return resourceProvider.asyncOpenStream(cic, request);
-				})
-				.plug((s) -> {
-					return collectionMetadataProc.getResource(
-							resourceProvider, s, GRAPH, transformationConfig, crContext, thisIri);
-				})
+		return collectionMetadataProc
+				.getResourceAsync(resourceProvider, transformationConfig, crContext, thisIri)
 				.plug((s) -> finalTransformation.transformAsync(
 						// TODO: systemId from collectionMetadataProc
-						params, finalConfig, resource.toString(), s, resourceProvider, request));
+						params, finalConfig, thisIri.toString(), s, resourceProvider, request));
 	}
 }
