@@ -55,6 +55,9 @@ public class CollectionMetadataProcessor {
 	 */
 	public Uni<InputStream> getResourceAsync(
 			ResourceProvider resourceProvider, Config config, Map<String, String> context, URI resource) {
+		if (resource == null) {
+			return Uni.createFrom().failure(new NotFoundException());
+		}
 		return Uni.createFrom()
 				.item("empty")
 				.onItem()
