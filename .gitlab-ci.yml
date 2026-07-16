@@ -75,6 +75,8 @@ build_native:
     expire_in: 1 days
 
 build-container-without-cache:
+  variables:
+    GL_IMAGE: $CI_REGISTRY/$CI_PROJECT_NAMESPACE/distributed-text-services
   stage: push
   needs:
     - verify
@@ -97,9 +99,10 @@ build-container-without-cache:
     ## make image from container and push to harbor registry
     #- img=$(buildah commit $ctr $HARBOR_IMAGE_BUILD)
     #- buildah push $img docker://$HARBOR_IMAGE_BUILD
-    # make from container and push to CI registry
-    - img=$(buildah commit $ctr $CI_IMAGE_BUILD )
-    - buildah push $img docker://$CI_IMAGE_BUILD
+    # make from container and push to Gitlab CI registry
+    - img=$(buildah commit $ctr $GL_IMAGE)
+    - buildah push $img docker://$GL_IMAGE
+    - buildah push $img docker://$GL_IMAGE:$CI_COMMIT_REF_NAME
   after_script:
     - buildah logout $CI_REGISTRY
     #- buildah logout $HARBOR_REGISTRY
