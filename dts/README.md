@@ -42,9 +42,32 @@ with SEED DTS, not only TEI-XML.
 
 ### Docker
 
-TODO
+The official docker image is on [docker.io](https://hub.docker.com/r/scdh/distributed-test-services).
+
+```shell
+docker pull scdh/distributed-test-services
+```
+
+Start the service:
+
+```shell
+docker run -i --rm -p 8080:8080 scdh/distributed-test-services
+```
+
+This container image is highly optimized for deployment on cloud
+infrastructure, e.g. a kubernetes cluster. Its startup time is far
+under a second. With the [DTS
+Transformations](https://github.com/scdh/dts-transformations), which
+are configured per default, the startup time is in fact less than a
+tenth of a second.
+
+Read the [documentation](../doc/dts.md) on how to serve your own
+content.
 
 ### Dev Server
+
+Instead of using the official docker image, you can clone the project
+and start a development server.
 
 All commands must be run in the root directory of SEED XC, **not**
 from the `dts` subfolder.
@@ -131,6 +154,17 @@ transformations](../doc/dts.md#customizing-transformations).
 
 If you want to look, what's inside the container, do ` docker run -it
 scdh/dts-testing bash -c "ls -l /"`.
+
+A container image built this way differs from the official container
+image available on
+[docker.io](https://hub.docker.com/r/scdh/distributed-test-services):
+It's based on a minimal RedHat UBI image with
+[Dockerfile.native](src/main/docker/Dockerfile.native), so it has a
+package manager (microdnf). The official image is based on a micro
+image and does not have a package manager, in order to minimize its
+attack surface. This is much more complicated to build, in fact with
+[`buildah`](buildah_native_micro.sh) instead of `docker`, which is
+done on a Gitlab runner on Münster's IT infrastructure.
 
 ### Testing with cURL
 
