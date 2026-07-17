@@ -1,29 +1,8 @@
 # DTS
 
-## Data layout
+## Data Records
 
-### Collection Metadata
-
-The Service requires a file named `collection.json` at the base location of a project. It is called the **collection metadata file**. It holds collection metadata served by the collection endpoint.
-
-This file is very similar to the metadata returned by the collection endpoint. But all metadata is merged into a single JSON-LD file, members are not embedded but linked by ID.
-
-Examples are present in [`samples/bible/collection.json`](../samples/bible/collection.json) and––in an ever current state––in the [tests of the dts module](../dts/src/test/resources).
-
-For each resource (document), there must be a property (`seed:location`) that points to a file. The service uses this property to get the file location.
-
-The location is **independent** of the value of DTS' `{resource}` or `{id}` parameters. Providing the `seed:location` property for a resource is the key to this abstraction.
-
-IRIs of collections and resources in the collection metadata file can be relative or absolute. Use `"@base": null` in the `@context` to make them relative. See JSON-LD 1.1 specs, sec. [4.1.3](https://www.w3.org/TR/json-ld11/#base-iri):
-
-> Setting @base to null will prevent relative IRI references from being expanded to IRIs.
-
-The examples linked above use this standards-conformant feature.
-
-As a result, relative IRIs will be used by through `{resource}` and `{id}` in the URI templates. The relative IRIs will be resolved on the base of the request URL in LOD result bodies. This makes them IRIs which can be dereferenced. See [sections](#url-structure) below.
-
-Absolute IRIs in the collection metadata file are simply processed untouched.
-
+See [dts-records](dts-records)!
 
 ## URL structure
 
