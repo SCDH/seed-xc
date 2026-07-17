@@ -74,6 +74,7 @@ build_native:
   artifacts:
     paths:
       - dts/target/*-runner
+      - dts/target/dependencies
     expire_in: 1 days
 
 build-container-without-cache:
