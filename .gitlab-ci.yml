@@ -62,7 +62,7 @@ push_packages:
     - ./mvnw -Drevision=$CI_COMMIT_REF_NAME -Dchangelist="" $MAVEN_CLI_OPTS -Pdownload-openapi generate-sources
     - ./mvnw -Drevision=$CI_COMMIT_REF_NAME -Dchangelist="" $MAVEN_CLI_OPTS -Ddistribution.url=$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/maven -s .gitlab/settings.xml deploy
 
-build_native:
+dts-build-native:
   stage: build
   rules:
     - !reference [ .release_tag, rules ]
@@ -78,18 +78,18 @@ build_native:
     expire_in: 1 days
 
 build-container-without-cache:
-  variables:
-    GL_IMAGE: echo "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/distributed-text-services" | tr '[:upper:]' '[:lower:]'
   stage: push
   needs:
     - verify
-    - build_native
+    - dts-build-native
   rules:
     - !reference [ .release_tag, rules ]
   image: quay.io/buildah/stable:v1
   tags:
     - privileged
   before_script:
+    - export GL_IMAGE=$(echo "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME" | tr '[:upper:]' '[:lower:]')
+    - echo "$GL_IMAGE"
     - buildah version
     - export HOME=$CI_BUILD_DIR
     - buildah login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
@@ -104,8 +104,8 @@ build-container-without-cache:
     #- buildah push $img docker://$HARBOR_IMAGE_BUILD
     # make from container and push to Gitlab CI registry
     - img=$(buildah commit $ctr $GL_IMAGE)
-    - buildah push $img docker://$GL_IMAGE
-    - buildah push $img docker://$GL_IMAGE:$CI_COMMIT_REF_NAME
+    - buildah push $img docker://$GL_IMAGE:dts
+    - buildah push $img docker://$GL_IMAGE:dts-$CI_COMMIT_REF_NAME
   after_script:
     - buildah logout $CI_REGISTRY
     #- buildah logout $HARBOR_REGISTRY
