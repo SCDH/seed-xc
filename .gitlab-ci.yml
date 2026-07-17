@@ -78,7 +78,7 @@ build_native:
 
 build-container-without-cache:
   variables:
-    GL_IMAGE: $CI_REGISTRY/$CI_PROJECT_NAMESPACE/distributed-text-services
+    GL_IMAGE: echo "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/distributed-text-services" | tr '[:upper:]' '[:lower:]'
   stage: push
   needs:
     - verify
