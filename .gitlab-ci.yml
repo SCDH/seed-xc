@@ -113,4 +113,5 @@ build-container-without-cache:
     - buildah push $img docker://$DH_IMAGE:$CI_COMMIT_REF_NAME
   after_script:
     - buildah logout $CI_REGISTRY
+    - buildah logout docker.io
     #- buildah logout $HARBOR_REGISTRY
