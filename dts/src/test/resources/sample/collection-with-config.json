@@ -161,7 +161,7 @@
     ],
 	"configuration": {
 		"frames": {
-			"all": {
+			"collection": {
 				"location": "https://dtsapi.org/specifications/context/1.0rc1.json"
 			}
 		}

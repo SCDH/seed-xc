@@ -357,6 +357,8 @@ components:
         empty404:
           type: boolean
           description: return 404 status code on empty result set
+        context:
+          $ref: '#/components/schemas/context'
     runtimeParameters:
       description: How the transformation is to be called, with a set of global parameters and optionally the initial callable (template or function) and the parameters for it.
       type: object

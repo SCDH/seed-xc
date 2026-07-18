@@ -10,10 +10,7 @@ import de.ulbms.scdh.seed.xc.jena.ConfiguredJsonLdLoader;
 import de.ulbms.scdh.seed.xc.jena.ConfiguredJsonLdOptions;
 import de.ulbms.scdh.seed.xc.resources.filesystem.FileSystemResourceProvider;
 import io.smallrye.mutiny.Uni;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
@@ -115,6 +112,35 @@ public class CollectionConfigurationTest {
 		assertInstanceOf(RecordConfig.class, rc.get().get());
 		assertNotNull(rc.get().get().getFrames(), "frames present in " + COLLECTION);
 		assertInstanceOf(RecordFrames.class, rc.get().get().getFrames());
-		assertNotNull(rc.get().get().getFrames().getAll());
+		assertNotNull(rc.get().get().getFrames().getCollection());
+		assertNull(rc.get().get().getFrames().getAll());
+		assertNull(rc.get().get().getFrames().getNavigation());
+	}
+
+	@Test
+	public void testMergeForCollection() throws ExecutionException, InterruptedException {
+		Uni<Config> result = proc.merge(resourceProvider, input, COLLECTION.toString(), config, Map.of(), "collection");
+		AtomicReference<CompletableFuture<Config>> rc = new AtomicReference<>();
+		assertDoesNotThrow(() -> {
+			rc.set(result.subscribe().asCompletionStage());
+		});
+		assertInstanceOf(Config.class, rc.get().get());
+		assertNotSame(config, rc.get().get(), "must not overwrite the default configuration");
+		assertEquals(
+				"https://dtsapi.org/specifications/context/1.0rc1.json",
+				rc.get().get().getContext().getLocation().toString());
+		assertNull(rc.get().get().getContext().getDocument(), "there may not be a document context any more");
+	}
+
+	@Test
+	public void testMergeForNavigation() throws ExecutionException, InterruptedException {
+		Uni<Config> result = proc.merge(resourceProvider, input, COLLECTION.toString(), config, Map.of(), "navigation");
+		AtomicReference<CompletableFuture<Config>> rc = new AtomicReference<>();
+		assertDoesNotThrow(() -> {
+			rc.set(result.subscribe().asCompletionStage());
+		});
+		assertInstanceOf(Config.class, rc.get().get());
+		assertNotSame(config, rc.get().get(), "must not overwrite the default configuration");
+		assertNull(rc.get().get().getContext(), "there must still be the test's default context, which was null");
 	}
 }
