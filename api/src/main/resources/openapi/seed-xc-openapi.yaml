@@ -587,3 +587,31 @@ components:
       description: The error message.
       type: string
       format: binary
+    Record:
+      summary: asdf
+      type: object
+      properties:
+        configuration:
+          $ref: '#/components/schemas/RecordConfig'
+        "@graph":
+          type: object
+        "@context":
+          type: object
+    RecordConfig:
+      summary: DTS Configuration on a per-record basis
+      description: The configuration is contained in the 'configuration' container which allows to pass the config in the collection metadata file.
+      type: object
+      properties:
+        frames:
+          $ref: '#/components/schemas/RecordFrames'
+    RecordFrames:
+      summary: JSON-LD frames (and contexts) for the record
+      description: Allow to configure frame definitions for endpoints.
+      type: object
+      properties:
+        all:
+          $ref: '#/components/schemas/context'
+        collection:
+          $ref: '#/components/schemas/context'
+        navigation:
+          $ref: '#/components/schemas/context'
