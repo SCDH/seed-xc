@@ -118,8 +118,9 @@ public class CollectionConfigurationTest {
 	}
 
 	@Test
-	public void testMergeForCollection() throws ExecutionException, InterruptedException {
-		Uni<Config> result = proc.merge(resourceProvider, input, COLLECTION.toString(), config, Map.of(), "collection");
+	public void testMergeAsyncForCollection() throws ExecutionException, InterruptedException {
+		Uni<Config> result =
+				proc.mergeAsync(resourceProvider, input, COLLECTION.toString(), config, Map.of(), "collection");
 		AtomicReference<CompletableFuture<Config>> rc = new AtomicReference<>();
 		assertDoesNotThrow(() -> {
 			rc.set(result.subscribe().asCompletionStage());
@@ -133,8 +134,9 @@ public class CollectionConfigurationTest {
 	}
 
 	@Test
-	public void testMergeForNavigation() throws ExecutionException, InterruptedException {
-		Uni<Config> result = proc.merge(resourceProvider, input, COLLECTION.toString(), config, Map.of(), "navigation");
+	public void testMergeAsyncForNavigation() throws ExecutionException, InterruptedException {
+		Uni<Config> result =
+				proc.mergeAsync(resourceProvider, input, COLLECTION.toString(), config, Map.of(), "navigation");
 		AtomicReference<CompletableFuture<Config>> rc = new AtomicReference<>();
 		assertDoesNotThrow(() -> {
 			rc.set(result.subscribe().asCompletionStage());

@@ -8,8 +8,7 @@ import de.ulbms.scdh.seed.xc.api.*;
 import de.ulbms.scdh.seed.xc.api.Record;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.Dependent;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Map;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
@@ -70,7 +69,7 @@ public class CollectionConfiguration {
 	 * @param endpoint - the endpoint requesting the config
 	 * @return - a configuration with the per-record configuration merged
 	 */
-	public Uni<Config> merge(
+	public Uni<Config> mergeAsync(
 			ResourceProvider resourceProvider,
 			Uni<InputStream> input,
 			String systemId,
@@ -78,26 +77,40 @@ public class CollectionConfiguration {
 			Map<String, String> context,
 			String endpoint) {
 		return input.onItem().transform(inputStream -> {
-			LOG.info("getting record config from {}", systemId);
-			ObjectMapper om = new ObjectMapper(new JsonFactory());
 			try {
-				JsonParser parser = om.createParser(inputStream);
-				Record record = parser.readValueAs(Record.class);
+				byte[] in = inputStream.readAllBytes();
 				inputStream.close();
-				if (record == null || record.getConfiguration() == null) return defaultConfig;
-				Config config = clone(defaultConfig); // clone, in order to not overwrite the default config
-				// do the merge
-				mergeContext(record.getConfiguration(), config, endpoint);
-				return config;
+				return merge(in, defaultConfig, endpoint);
 			} catch (IOException e) {
-				LOG.info("failed to read record config from {}", e.getMessage());
 				try {
 					inputStream.close();
-				} catch (IOException ignored) {
+				} catch (IOException ignore) {
 				}
 				return defaultConfig;
 			}
 		});
+	}
+
+	/**
+	 * Merges the configuration from the input stream into the configuration passed in.
+	 * @param input - the input stream
+	 * @param defaultConfig - the configuration of the service instance
+	 * @param endpoint - the endpoint requesting the config
+	 * @return - a configuration with the per-record configuration merged
+	 */
+	public Config merge(byte[] input, final Config defaultConfig, String endpoint) {
+		ObjectMapper om = new ObjectMapper(new JsonFactory());
+		try (JsonParser parser = om.createParser(input)) {
+			Record record = parser.readValueAs(Record.class);
+			if (record == null || record.getConfiguration() == null) return defaultConfig;
+			Config config = clone(defaultConfig); // clone, do not overwrite the default config
+			// do the merge
+			mergeContext(record.getConfiguration(), config, endpoint);
+			return config;
+		} catch (IOException e) {
+			LOG.error("failed to read record config from {}", e.getMessage());
+			return defaultConfig;
+		}
 	}
 
 	/**
