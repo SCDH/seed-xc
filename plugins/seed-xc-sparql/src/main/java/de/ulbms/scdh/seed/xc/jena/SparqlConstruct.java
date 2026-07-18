@@ -211,6 +211,27 @@ public class SparqlConstruct implements Transformation {
 		});
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public byte[] transformRT(
+			RuntimeParameters parameters,
+			Config config,
+			String systemId,
+			InputStream source,
+			ResourceProvider resourceProvider,
+			HttpServerRequest request) {
+		try {
+			return transform(parameters, config, systemId, source, resourceProvider, request);
+		} catch (TransformationPreparationException | TransformationException e) {
+			if (e.getMessage().equals("404")) {
+				throw new NotFoundException("not found");
+			}
+			throw new InternalServerErrorException(e.getMessage());
+		}
+	}
+
 	@Override
 	public String getOutputMediaType() {
 		return transformationInfo.getMediaType();

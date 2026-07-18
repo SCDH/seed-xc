@@ -162,6 +162,27 @@ public abstract class TransformationBase implements Transformation {
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public byte[] transformRT(
+			RuntimeParameters parameters,
+			Config config,
+			String systemId,
+			InputStream source,
+			ResourceProvider resourceProvider,
+			HttpServerRequest request) {
+		try {
+			return transform(parameters, config, systemId, source, resourceProvider, request);
+		} catch (TransformationPreparationException e) {
+			throw new InternalServerErrorException(e.getMessage());
+		} catch (TransformationException e) {
+			throw new WebApplicationException(
+					transformationExceptionParser.message(e), transformationExceptionParser.parseCode(e));
+		}
+	}
+
+	/**
 	 * Returns an instance of the {@link XMLReader} SAX parser given
 	 * in the per-request {@link Config}. If no parser is requested,
 	 * Xerces {@link SAXParser} is returned. Parser features and

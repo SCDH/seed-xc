@@ -91,6 +91,18 @@ public interface Transformation {
 			HttpServerRequest request);
 
 	/**
+	 * Like {@link Transformation#transform(RuntimeParameters,Config,String,InputStream,ResourceProvider,HttpServerRequest)},
+	 * but throws only runtime exceptions.
+	 */
+	byte[] transformRT(
+			RuntimeParameters parameters,
+			Config config,
+			String systemId,
+			InputStream source,
+			ResourceProvider resourceProvider,
+			HttpServerRequest request);
+
+	/**
 	 * Returns the media type. This is used in the response header. So
 	 * it should be a real media type. It may return <code>null</code>
 	 * if no information is available. In this case the service will
