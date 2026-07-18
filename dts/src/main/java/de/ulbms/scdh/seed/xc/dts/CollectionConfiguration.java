@@ -30,18 +30,28 @@ public class CollectionConfiguration {
 	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.CollectionEndpoint.GRAPH", defaultValue = "collection.json")
 	protected String GRAPH;
 
+	/**
+	 * Reads the {@link RecordConfig} form the input stream and returns it.
+	 * @param resourceProvider - a resource provider
+	 * @param input - the input stream
+	 * @param systemId - the input streams URL
+	 * @param config - a configuration
+	 * @param context - a context map
+	 * @return - the record config
+	 */
 	public Uni<RecordConfig> getRecordConfig(
 			ResourceProvider resourceProvider,
-			Uni<InputStream> collectionMetadata,
+			Uni<InputStream> input,
 			String systemId,
 			Config config,
 			Map<String, String> context) {
-		return collectionMetadata.onItem().transform(inputStream -> {
+		return input.onItem().transform(inputStream -> {
 			LOG.info("getting record config from {}", systemId);
 			ObjectMapper om = new ObjectMapper(new JsonFactory());
 			try {
 				JsonParser parser = om.createParser(inputStream);
 				Record record = parser.readValueAs(Record.class);
+				inputStream.close();
 				if (record == null) return null;
 				return record.getConfiguration();
 			} catch (IOException e) {
