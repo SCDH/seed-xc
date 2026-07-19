@@ -142,7 +142,7 @@ public class CollectionConfigurationTest {
 		assertNotSame(config, rc.get().get(), "must not overwrite the default configuration");
 		assertNotNull(rc.get().get().getContext(), "has record-specific context");
 		assertEquals(
-				"https://dtsapi.org/specifications/context/1.0rc1.json",
+				"https://dtsapi.org/specifications/context/0.0rc0.json",
 				rc.get().get().getContext().getLocation().toString());
 		assertNull(rc.get().get().getContext().getDocument(), "it's a context link, not a document");
 	}
