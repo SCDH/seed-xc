@@ -7,12 +7,9 @@ import com.fasterxml.jackson.databind.util.TokenBuffer;
 import de.ulbms.scdh.seed.xc.api.*;
 import de.ulbms.scdh.seed.xc.api.Record;
 import io.smallrye.mutiny.Uni;
-import io.vertx.core.http.HttpServerRequest;
 import jakarta.enterprise.context.Dependent;
 import java.io.*;
 import java.util.Map;
-
-import jakarta.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,9 +28,6 @@ public class CollectionConfiguration {
 	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.CollectionEndpoint.GRAPH", defaultValue = "collection.json")
 	protected String GRAPH;
 
-	@Inject
-	HttpServerRequest request;
-
 	/**
 	 * Reads the {@link RecordConfig} form the input stream and returns it.
 	 * @param resourceProvider - a resource provider
@@ -50,7 +44,7 @@ public class CollectionConfiguration {
 			Config config,
 			Map<String, String> context) {
 		return input.onItem().transform(inputStream -> {
-			LOG.info("getting record config from {}", systemId);
+			LOG.debug("getting record config from {}", systemId);
 			ObjectMapper om = new ObjectMapper(new JsonFactory());
 			try {
 				JsonParser parser = om.createParser(inputStream);
@@ -59,7 +53,7 @@ public class CollectionConfiguration {
 				if (record == null) return null;
 				return record.getConfiguration();
 			} catch (IOException e) {
-				LOG.info("failed to read record config from {}", e.getMessage());
+				LOG.debug("failed to read record config from {}", e.getMessage());
 				return null;
 			}
 		});
@@ -105,14 +99,12 @@ public class CollectionConfiguration {
 	 * @return - a configuration with the per-record configuration merged
 	 */
 	public Config merge(byte[] input, final Config defaultConfig, String endpoint) {
-		String logReq = null;
-		if (request != null) logReq = request.absoluteURI();
 		ObjectMapper om = new ObjectMapper(new JsonFactory());
-		LOG.info("merging record config in request {}, {}", logReq, input.length);
+		LOG.debug("merging record config in request {}, {}", endpoint, input.length);
 		try (JsonParser parser = om.createParser(input)) {
 			Record record = parser.readValueAs(Record.class);
 			if (record == null || record.getConfiguration() == null) return defaultConfig;
-			LOG.info("using record config in request {}", logReq);
+			LOG.info("using record config for endpoint {}", endpoint); // stats
 			Config config = clone(defaultConfig); // clone, do not overwrite the default config
 			// do the merge
 			mergeContext(record.getConfiguration(), config, endpoint);

@@ -424,7 +424,8 @@ public class CollectionEndpointTest {
 			assertEquals(JsonValue.ValueType.OBJECT, body.getValueType());
 			JsonObject bodyObj = (JsonObject) body;
 			assertTrue(bodyObj.containsKey("@context"), "has @context");
-			assertEquals(JsonValue.ValueType.ARRAY, bodyObj.getValue("/@context").getValueType());
+			assertEquals(
+					JsonValue.ValueType.ARRAY, bodyObj.getValue("/@context").getValueType());
 			JsonArray context = bodyObj.getJsonArray("@context");
 			assertTrue(context.size() > 2, "at least 3 items in context array");
 			assertEquals(JsonValue.ValueType.OBJECT, context.get(2).getValueType());
@@ -433,7 +434,7 @@ public class CollectionEndpointTest {
 					.map(i -> (JsonObject) i)
 					.findFirst();
 			assertTrue(contextObj.isPresent());
-			//assertEquals("", contextObj.toString());
+			// assertEquals("", contextObj.toString());
 			assertTrue(contextObj.get().containsKey("Document"));
 		}
 	}
