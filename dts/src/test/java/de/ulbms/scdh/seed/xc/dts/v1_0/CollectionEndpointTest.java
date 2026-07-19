@@ -13,6 +13,7 @@ import java.io.StringReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Optional;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -406,6 +407,34 @@ public class CollectionEndpointTest {
 					bodyObj.getString("document")
 							.endsWith("/document/" + resource + URITemplateBuilder.THIS_DOCUMENT_TEMPLATE),
 					"document URI template");
+		}
+	}
+
+	// @TestHTTPEndpoint(CollectionEndpoint.class)
+	@TestHTTPResource("/file/other/collection/general")
+	URL urlConfiguredGeneral;
+
+	@Test
+	public void testConfiguredContext() throws IOException {
+		String resource = "other/collection/general";
+		try (InputStream in = urlConfiguredGeneral.openStream()) {
+			String result = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+			JsonReader reader = Json.createReader(new StringReader(result));
+			JsonStructure body = reader.read();
+			assertEquals(JsonValue.ValueType.OBJECT, body.getValueType());
+			JsonObject bodyObj = (JsonObject) body;
+			assertTrue(bodyObj.containsKey("@context"), "has @context");
+			assertEquals(JsonValue.ValueType.ARRAY, bodyObj.getValue("/@context").getValueType());
+			JsonArray context = bodyObj.getJsonArray("@context");
+			assertTrue(context.size() > 2, "at least 3 items in context array");
+			assertEquals(JsonValue.ValueType.OBJECT, context.get(2).getValueType());
+			Optional<JsonObject> contextObj = context.stream()
+					.filter(i -> i.getValueType().equals(JsonValue.ValueType.OBJECT))
+					.map(i -> (JsonObject) i)
+					.findFirst();
+			assertTrue(contextObj.isPresent());
+			//assertEquals("", contextObj.toString());
+			assertTrue(contextObj.get().containsKey("Document"));
 		}
 	}
 }

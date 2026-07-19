@@ -7,9 +7,12 @@ import com.fasterxml.jackson.databind.util.TokenBuffer;
 import de.ulbms.scdh.seed.xc.api.*;
 import de.ulbms.scdh.seed.xc.api.Record;
 import io.smallrye.mutiny.Uni;
+import io.vertx.core.http.HttpServerRequest;
 import jakarta.enterprise.context.Dependent;
 import java.io.*;
 import java.util.Map;
+
+import jakarta.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +30,9 @@ public class CollectionConfiguration {
 	 */
 	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.CollectionEndpoint.GRAPH", defaultValue = "collection.json")
 	protected String GRAPH;
+
+	@Inject
+	HttpServerRequest request;
 
 	/**
 	 * Reads the {@link RecordConfig} form the input stream and returns it.
@@ -99,16 +105,20 @@ public class CollectionConfiguration {
 	 * @return - a configuration with the per-record configuration merged
 	 */
 	public Config merge(byte[] input, final Config defaultConfig, String endpoint) {
+		String logReq = null;
+		if (request != null) logReq = request.absoluteURI();
 		ObjectMapper om = new ObjectMapper(new JsonFactory());
+		LOG.info("merging record config in request {}, {}", logReq, input.length);
 		try (JsonParser parser = om.createParser(input)) {
 			Record record = parser.readValueAs(Record.class);
 			if (record == null || record.getConfiguration() == null) return defaultConfig;
+			LOG.info("using record config in request {}", logReq);
 			Config config = clone(defaultConfig); // clone, do not overwrite the default config
 			// do the merge
 			mergeContext(record.getConfiguration(), config, endpoint);
 			return config;
 		} catch (IOException e) {
-			LOG.error("failed to read record config from {}", e.getMessage());
+			LOG.debug("no record config from {}", e.getMessage());
 			return defaultConfig;
 		}
 	}
