@@ -122,8 +122,8 @@ This file is similar to the collection endpoint's responses, but
 	....
     ],
     "@context": [ ⓫
-    "https://scdh.github.io/dts-transformations/latest/xsl/context/modules/dct-nest.json",
-    "https://scdh.github.io/dts-transformations/latest/xsl/context/modules/1.0rc1.json",
+    "https://scdh.github.io/dts-transformations/latest/context/modules/dct-nest.json",
+    "https://scdh.github.io/dts-transformations/latest/context/modules/1.0rc1.json",
     "https://raw.githubusercontent.com/SCDH/seed-xc/refs/heads/main/dts/src/main/resources/META-INF/resources/context/seed.json",
     {
         "@base": null, ⓬
@@ -167,23 +167,24 @@ as values of the `@id` properties of the response objects.
 
 So, the identifiers must be understood as URIs or
 [IRI](https://www.w3.org/TR/rdf11-concepts/#section-IRIs)s in the LOD
-graph, that your documents will referenced in via DTS.
+graph, that will referenced your documents in via DTS.
 
 ### Absolute IRIs
 
-Absolute IRIs make it as they are into the `{id}` or `{resource}` slot
-of the URI templates. The `@id` property will contain the request URI
-containing them.
+Absolute IRIs make it as they are into the `{id}` slot of the URI
+templates. The `@id` property will not contain the request URI.
 
 You can use the `"@base": "http://my.project.example.com/asdf/"`
 property in the `@context` to shorten them.
 
 ### Relative IRIs
 
-Relative IRIs also make it to the `{id}` or `{resource}` slot of the
-URI templates, and the `@id` property will contain the request URI
-containing them. That means, that the are made absolute by resolving
-them against the base URL of the DTS record.
+Relative IRIs are resolved on the current URL of the request! They
+also make it to the `{id}` or `{resource}` slot of the URI
+templates. The `@id` property will contain the parts of the request
+URL, because relative IRIs are resolved against it. That means, that
+the are made absolute by resolving them against the base URL of the
+DTS record.
 
 #### Example
 
@@ -203,8 +204,8 @@ BASE/FRONT/document/4Ezra
 
 Note: It was a clear decision to pass `{id}` or `{resource}` as path
 parameters in the URI templates and to use query parameters for the
-rest of the arguments. Reason: The rules of resolving relative IRIs
-strip the query part altogether.
+rest of the arguments. Reason: **The rules of resolving relative IRIs
+strip the query part altogether**.
 
 ### URL Encoding
 
@@ -286,8 +287,8 @@ and copy the definitions in there.
 {
 	"@graph": [ ... ],
 	"@context": [
-		"https://scdh.github.io/dts-transformations/latest/xsl/context/modules/dct-nest.json",
-		"https://scdh.github.io/dts-transformations/latest/xsl/context/modules/1.0rc1.json",
+		"https://scdh.github.io/dts-transformations/latest/context/modules/dct-nest.json",
+		"https://scdh.github.io/dts-transformations/latest/context/modules/1.0rc1.json",
 		"https://raw.githubusercontent.com/SCDH/seed-xc/refs/heads/main/dts/src/main/resources/META-INF/resources/context/seed.json", ❶
         {
 			"@base": null,
@@ -303,8 +304,8 @@ and copy the definitions in there.
 						"@omitDefault": true
 					},
 					"@context": [
-						"https://scdh.github.io/dts-transformations/latest/xsl/context/modules/dct-obj.json",
-						"https://scdh.github.io/dts-transformations/latest/xsl/context/modules/1.0rc1.json",
+						"https://scdh.github.io/dts-transformations/latest/context/modules/dct-obj.json",
+						"https://scdh.github.io/dts-transformations/latest/context/modules/1.0rc1.json",
 						{
 							"extensions": "@nest",
 							"Document": { "@id":  "dts:Document" }
