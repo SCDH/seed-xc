@@ -1,5 +1,7 @@
 package de.ulbms.scdh.seed.xc.dts;
 
+import static de.ulbms.scdh.seed.xc.api.utils.ParameterValueFactory.pvOf;
+
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,6 +29,12 @@ public class CollectionConfiguration {
 	 */
 	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.CollectionEndpoint.GRAPH", defaultValue = "collection.json")
 	protected String GRAPH;
+
+	@ConfigProperty(name = "dts-context-location-parameter", defaultValue = "context-url")
+	protected String contextLocationParameter;
+
+	@ConfigProperty(name = "dts-context-document-parameter", defaultValue = "context-document")
+	protected String contextDocumentParameter;
 
 	/**
 	 * Reads the {@link RecordConfig} form the input stream and returns it.
@@ -150,5 +158,28 @@ public class CollectionConfiguration {
 				config.setContext(frames.getAll());
 			}
 		}
+	}
+
+	/**
+	 * Make {@link RuntimeParameters} from the given {@link Config} and append them to the given runtime parameter
+	 * (that may ne resulting from request parameters). This is a way for passing per-record config properties to
+	 * transformations. It only works, if the according parameters are runtime paramter (as opposed to static
+	 * parameters). Parameters from the <code>params</code> woh't get overwritten.
+	 * @param params - the {@link RuntimeParameters} to append to
+	 * @param config - the per-record {@link Config}
+	 * @return - {@link RuntimeParameters} from <code>params</code> with parameters made from config properties appended
+	 */
+	public RuntimeParameters appendToParameters(RuntimeParameters params, Config config) {
+		if (config == null) return params;
+		if (config.getContext() != null && !params.getGlobalParameters().containsKey(contextLocationParameter)) {
+			Context context = config.getContext();
+			if (context.getLocation() != null) {
+				params.putGlobalParametersItem(contextLocationParameter, pvOf(context.getLocation()));
+			}
+			if (context.getDocument() != null && !params.getGlobalParameters().containsKey(contextDocumentParameter)) {
+				params.putGlobalParametersItem(contextDocumentParameter, pvOf(context.getDocument()));
+			}
+		}
+		return params;
 	}
 }
