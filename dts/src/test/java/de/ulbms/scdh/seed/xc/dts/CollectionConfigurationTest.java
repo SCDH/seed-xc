@@ -25,9 +25,8 @@ public class CollectionConfigurationTest {
 	private static final File COLLECTION_WITHOUT_CONFIG =
 			Paths.get("src", "test", "resources", "sample", "collection.json").toFile();
 
-	private static final File COLLECTION = Paths.get(
-					"src", "test", "resources", "sample", "collection-with-config.json")
-			.toFile();
+	private static final File COLLECTION =
+			Paths.get("src", "test", "resources", "other", "collection.json").toFile();
 
 	private static final Path PROJECT = Paths.get("src", "test", "resources", "sample");
 
@@ -114,7 +113,7 @@ public class CollectionConfigurationTest {
 		assertInstanceOf(RecordFrames.class, rc.get().get().getFrames());
 		assertNotNull(rc.get().get().getFrames().getCollection());
 		assertNull(rc.get().get().getFrames().getAll());
-		assertNull(rc.get().get().getFrames().getNavigation());
+		assertNotNull(rc.get().get().getFrames().getNavigation());
 	}
 
 	@Test
@@ -127,10 +126,8 @@ public class CollectionConfigurationTest {
 		});
 		assertInstanceOf(Config.class, rc.get().get());
 		assertNotSame(config, rc.get().get(), "must not overwrite the default configuration");
-		assertEquals(
-				"https://dtsapi.org/specifications/context/1.0rc1.json",
-				rc.get().get().getContext().getLocation().toString());
-		assertNull(rc.get().get().getContext().getDocument(), "there may not be a document context any more");
+		assertNull(rc.get().get().getContext().getLocation(), "it's a document not a link context");
+		assertNotNull(rc.get().get().getContext().getDocument(), "but a document context");
 	}
 
 	@Test
@@ -143,6 +140,10 @@ public class CollectionConfigurationTest {
 		});
 		assertInstanceOf(Config.class, rc.get().get());
 		assertNotSame(config, rc.get().get(), "must not overwrite the default configuration");
-		assertNull(rc.get().get().getContext(), "there must still be the test's default context, which was null");
+		assertNotNull(rc.get().get().getContext(), "has record-specific context");
+		assertEquals(
+				"https://dtsapi.org/specifications/context/1.0rc1.json",
+				rc.get().get().getContext().getLocation().toString());
+		assertNull(rc.get().get().getContext().getDocument(), "it's a context link, not a document");
 	}
 }
