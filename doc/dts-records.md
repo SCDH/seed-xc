@@ -122,8 +122,8 @@ This file is similar to the collection endpoint's responses, but
 	....
     ],
     "@context": [ ⓫
-    "https://scdh.github.io/dts-transformations/latest/xsl/context/modules/dct-nest.json",
-    "https://scdh.github.io/dts-transformations/latest/xsl/context/modules/1.0rc1.json",
+    "https://scdh.github.io/dts-transformations/latest/context/modules/dct-nest.json",
+    "https://scdh.github.io/dts-transformations/latest/context/modules/1.0rc1.json",
     "https://raw.githubusercontent.com/SCDH/seed-xc/refs/heads/main/dts/src/main/resources/META-INF/resources/context/seed.json",
     {
         "@base": null, ⓬
@@ -167,23 +167,24 @@ as values of the `@id` properties of the response objects.
 
 So, the identifiers must be understood as URIs or
 [IRI](https://www.w3.org/TR/rdf11-concepts/#section-IRIs)s in the LOD
-graph, that your documents will referenced in via DTS.
+graph, that will referenced your documents in via DTS.
 
 ### Absolute IRIs
 
-Absolute IRIs make it as they are into the `{id}` or `{resource}` slot
-of the URI templates. The `@id` property will contain the request URI
-containing them.
+Absolute IRIs make it as they are into the `{id}` slot of the URI
+templates. The `@id` property will not contain the request URI.
 
 You can use the `"@base": "http://my.project.example.com/asdf/"`
 property in the `@context` to shorten them.
 
 ### Relative IRIs
 
-Relative IRIs also make it to the `{id}` or `{resource}` slot of the
-URI templates, and the `@id` property will contain the request URI
-containing them. That means, that the are made absolute by resolving
-them against the base URL of the DTS record.
+Relative IRIs are resolved on the current URL of the request! They
+also make it to the `{id}` or `{resource}` slot of the URI
+templates. The `@id` property will contain the parts of the request
+URL, because relative IRIs are resolved against it. That means, that
+the are made absolute by resolving them against the base URL of the
+DTS record.
 
 #### Example
 
@@ -203,8 +204,8 @@ BASE/FRONT/document/4Ezra
 
 Note: It was a clear decision to pass `{id}` or `{resource}` as path
 parameters in the URI templates and to use query parameters for the
-rest of the arguments. Reason: The rules of resolving relative IRIs
-strip the query part altogether.
+rest of the arguments. Reason: **The rules of resolving relative IRIs
+strip the query part altogether**.
 
 ### URL Encoding
 
@@ -232,3 +233,130 @@ hesitate to file an issue report or start a discussion.
 
 Generally, I recommend to use relative IRIs in the `collection.json`
 metadata file and to avoid characters, that need URL encoding.
+
+
+## Metadata
+
+### Blank Node
+
+### Nesting
+
+### IRI
+
+```json
+{
+	"@id": "../../document/Ezr-la",
+	"title": "4 Book of Ezra. Latin",
+	...
+}
+```
+
+will expand to 
+
+```json
+{
+	"@id": "BASE/FRONT/document/Ezr-la",
+	"title": "4 Book of Ezra. Latin",
+	...
+}
+```
+
+so the metadata is stated to be about the document.
+
+## Configuration on a Per-Record Basis
+
+In addition to collection and resource metadata, the `collection.json`
+file can also contain configuration options, that adapt the
+transformations run on the DTS service.
+
+These options are contained in `/configuration` property.
+
+For the configuration to work, the LOD context definition has to
+include a binding for the `configuration` property. In the follow
+example, this is simply done by adding
+`https://raw.githubusercontent.com/SCDH/seed-xc/refs/heads/main/dts/src/main/resources/META-INF/resources/context/seed.json`
+❶ to the context array. If you want a monolithic context, have a look
+at
+[seed.json](../dts/main/resources/META-INF/resources/context/seed.json)
+and copy the definitions in there.
+
+
+#### Example
+
+```json
+{
+	"@graph": [ ... ],
+	"@context": [
+		"https://scdh.github.io/dts-transformations/latest/context/modules/dct-nest.json",
+		"https://scdh.github.io/dts-transformations/latest/context/modules/1.0rc1.json",
+		"https://raw.githubusercontent.com/SCDH/seed-xc/refs/heads/main/dts/src/main/resources/META-INF/resources/context/seed.json", ❶
+        {
+			"@base": null,
+	    	"extensions": "@nest"
+		}
+    ],
+	"configuration": { 
+		"frames": {
+			"collection": {
+				"document": { ❷
+					"member": {
+						"@embed": "@always",
+						"@omitDefault": true
+					},
+					"@context": [
+						"https://scdh.github.io/dts-transformations/latest/context/modules/dct-obj.json",
+						"https://scdh.github.io/dts-transformations/latest/context/modules/1.0rc1.json",
+						{
+							"extensions": "@nest",
+							"Document": { "@id":  "dts:Document" }
+						}
+					],
+					"dts:requested": {}
+				}
+			},
+			"navigation": { ❸
+				"location": "https://dtsapi.org/specifications/context/2.0.json"
+			}
+		}		
+	}
+```
+
+In this example, the record rewrites the JSON-LD context (frames) for
+the `collection` and for the `navigation` endpoints. The context for
+the `navigation` endpoint ❸ is set to a simple URL
+(`https://dtsapi.org/specifications/context/2.0.json`). This value is
+passed as a runtime parameter into the transformation and as a
+`Config` object (which is ignored by the XSLT plugin).
+
+For the collection endpoint ❷, the frame is set not to a URL by
+`location` but to a complex JSON object, contained under
+`document`. (`"member"` is part of the LSON-LD frame, and `@context`
+is the LOD context.) This information is, too, passed as runtime
+parameters and in a Config object. The SPARQL plugin uses the Config
+object and the actual SPARQL query drops the runtime parameters.
+
+See below for list of configuration options.
+
+### Runtime Parameters Supplied to Transformation Calls
+
+The following parameters are supplied to transformations on top of the
+parameters that result from request parameters.
+
+| Parameter          | Service | Endpoint   | JSON Path in `collection.json`                    | Type                 | Purpose                                                |
+|:-------------------|:--------|:-----------|:--------------------------------------------------|:---------------------|:-------------------------------------------------------|
+| `context-url`      | DTS     | collection | `/configuration/frames/(all|collection)/location` | string               | configure `@context` on a per-record basis             |
+| `context-document` | DTS     | collection | `/configuration/frames/(all|collection)/document` | stringified JSON doc | dito for complex contexts, read with `fn:parse-json()` |
+| `context-url`      | DTS     | navigation | `/configuration/frames/(all|navigation)/location` | string               | configure `@context` on a per-record basis             |
+| `context-document` | DTS     | navigation | `/configuration/frames/(all|navigation)/document` | stringified JSON doc | dito for complex contexts, read with `fn:parse-json()` |
+
+### Config properties Supplied to Transformation Calls
+
+See [Config](../api/src/main/resources/openapi/seed-xc-openapi.yaml#/schemas/config).
+
+| Config property           | Service | Endpoint   | JSON Path in `collection.json`                    | Type                 | Purpose                                    |
+|:--------------------------|:--------|:-----------|:--------------------------------------------------|:---------------------|:-------------------------------------------|
+| `config.context.location` | DTS     | collection | `/configuration/frames/(all|collection)/location` | string parsed as URI | configure frame on a per-record basis      |
+| `config.context.document` | DTS     | collection | `/configuration/frames/(all|collection)/document` | JsonLD Frame         | dito for complex frames                    |
+| `comfig.context.location` | DTS     | navigation | `/configuration/frames/(all|navigation)/location` | string parsed as URI | configure `@context` on a per-record basis |
+| `config.context.document` | DTS     | navigation | `/configuration/frames/(all|navigation)/document` | JsonLD Context       | dito for complex contexts                  |
+

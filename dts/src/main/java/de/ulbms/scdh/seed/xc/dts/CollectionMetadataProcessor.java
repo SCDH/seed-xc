@@ -88,7 +88,7 @@ public class CollectionMetadataProcessor {
 	 */
 	public Uni<InputStream> getResource(
 			ResourceProvider resourceProvider,
-			Uni<InputStream> collectionMetadata,
+			Uni<? extends InputStream> collectionMetadata,
 			String systemId,
 			Config config,
 			Map<String, String> context,

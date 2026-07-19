@@ -199,4 +199,20 @@ public class NavigationEndpointTest {
 						.endsWith("/document/john.xml" + URITemplateBuilder.THIS_DOCUMENT_TEMPLATE),
 				"document URI template");
 	}
+
+	@Test
+	public void testRecordConfig() {
+		Navigation body = given().when()
+				.get("/file/other/navigation/john.xml")
+				.then()
+				.statusCode(200)
+				.extract()
+				.body()
+				.as(Navigation.class);
+		// no members because tree not selected
+		assertNotNull(body.getAtContext());
+		assertEquals(
+				"https://dtsapi.org/specifications/context/0.0rc0.json",
+				body.getAtContext().toString());
+	}
 }

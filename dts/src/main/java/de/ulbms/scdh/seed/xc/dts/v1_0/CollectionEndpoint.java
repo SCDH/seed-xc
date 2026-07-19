@@ -4,15 +4,19 @@ import static de.ulbms.scdh.seed.xc.api.utils.ParameterValueFactory.pvOf;
 
 import de.ulbms.scdh.seed.xc.api.*;
 import de.ulbms.scdh.seed.xc.api.inject.TransformTimeProvider;
+import de.ulbms.scdh.seed.xc.dts.CollectionConfiguration;
 import de.ulbms.scdh.seed.xc.dts.endpoints.CollectionApi;
 import de.ulbms.scdh.seed.xc.transformations.TransformationMap;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.tuples.Tuple2;
 import io.vertx.core.http.HttpServerRequest;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -62,6 +66,9 @@ public class CollectionEndpoint implements CollectionApi {
 
 	@Inject
 	HttpServerRequest request;
+
+	@Inject
+	CollectionConfiguration collectionConfiguration;
 
 	/**
 	 * {@inheritDoc}
@@ -177,7 +184,23 @@ public class CollectionEndpoint implements CollectionApi {
 		Uni<ResourceInContext> uniRic = Uni.createFrom().item(ric);
 
 		return uniRic.plug((r) -> resourceProvider.asyncOpenStream(r, request))
-				.plug((s) -> transformation.transformAsync(
-						params, transformationsConfig, GRAPH, s, resourceProvider, request));
+				.onItem()
+				.transform(s -> {
+					try {
+						return s.readAllBytes();
+					} catch (IOException e) {
+						throw new InternalServerErrorException(e.getMessage());
+					}
+				})
+				.onItem()
+				.transform(bytes -> {
+					Config config = collectionConfiguration.merge(bytes, transformationsConfig, "collection");
+					return Tuple2.of(bytes, config);
+				})
+				.onItem()
+				.transform(t -> t.mapItem1(ByteArrayInputStream::new))
+				.onItem()
+				.transform((t) -> transformation.transformRT(
+						params, t.getItem2(), GRAPH, t.getItem1(), resourceProvider, request));
 	}
 }

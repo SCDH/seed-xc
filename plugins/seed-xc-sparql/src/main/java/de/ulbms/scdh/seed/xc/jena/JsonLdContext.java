@@ -48,6 +48,15 @@ public class JsonLdContext {
 	}
 
 	/**
+	 * Indicates, if the context provider can provide a JSON-LD document for the given context.
+	 * @param context - the {@link Context} configuration
+	 * @return whether a context can be provided
+	 */
+	public boolean providesContext(Context context) {
+		return context != null && (context.getLocation() != null || context.getDocument() != null);
+	}
+
+	/**
 	 * Returns the JSON-LD context as a {@link Document}. This method encapsulates
 	 * the preparation of the context including all options, e.g. setting a timeout
 	 * and caching.
@@ -55,7 +64,17 @@ public class JsonLdContext {
 	 * @throws TransformationPreparationException when preparation failed
 	 */
 	public Document getContext(TransformationInfo config) throws TransformationPreparationException {
-		Context context = config.getContext();
+		return getContext(config.getContext());
+	}
+
+	/**
+	 * Returns the JSON-LD context as a {@link Document}. This method encapsulates
+	 * the preparation of the context including all options, e.g. setting a timeout
+	 * and caching.
+	 * @return the context {@link Document}
+	 * @throws TransformationPreparationException when preparation failed
+	 */
+	public Document getContext(Context context) throws TransformationPreparationException {
 		if (context == null) {
 			return null;
 		}

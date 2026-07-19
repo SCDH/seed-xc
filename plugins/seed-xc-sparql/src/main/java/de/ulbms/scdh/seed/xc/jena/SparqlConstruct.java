@@ -158,7 +158,10 @@ public class SparqlConstruct implements Transformation {
 			// write result back to the wire
 			ByteArrayOutputStream output = new ByteArrayOutputStream();
 			RDFFormat format = serializer.getFormat(transformationInfo.getMediaType(), systemId, request);
-			if (!format.getLang().equals(Lang.JSONLD11) || !jsonLdContextFactory.providesContext(transformationInfo)) {
+			if (!format.getLang().equals(Lang.JSONLD11)
+					|| (!jsonLdContextFactory.providesContext(transformationInfo.getContext()))
+							&& (config == null || !jsonLdContextFactory.providesContext(config.getContext()))) {
+				// format differs from JSON-LD or frame is missing
 				RDFDataMgr.write(output, resultModel, format);
 			} else {
 				// use titanium for framing
@@ -166,7 +169,13 @@ public class SparqlConstruct implements Transformation {
 				DatasetGraph dsg = DatasetGraphFactory.create(resultModel.getGraph());
 				JsonArray ja = JenaToTitanium.convert(dsg, opts);
 				JsonDocument jdoc = JsonDocument.of(ja);
-				Document frameDoc = jsonLdContextFactory.getContext(transformationInfo);
+				Document frameDoc;
+				// per-record context overrides per-transformation context
+				if (config != null && config.getContext() != null) {
+					frameDoc = jsonLdContextFactory.getContext(config.getContext());
+				} else {
+					frameDoc = jsonLdContextFactory.getContext(transformationInfo.getContext());
+				}
 				JsonLdOptions options = new JsonLdOptions(jsonLdOptions);
 				// options.setBase(null);
 				options.setOmitGraph(true);
@@ -209,6 +218,27 @@ public class SparqlConstruct implements Transformation {
 				throw new InternalServerErrorException(e.getMessage());
 			}
 		});
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public byte[] transformRT(
+			RuntimeParameters parameters,
+			Config config,
+			String systemId,
+			InputStream source,
+			ResourceProvider resourceProvider,
+			HttpServerRequest request) {
+		try {
+			return transform(parameters, config, systemId, source, resourceProvider, request);
+		} catch (TransformationPreparationException | TransformationException e) {
+			if (e.getMessage().equals("404")) {
+				throw new NotFoundException("not found");
+			}
+			throw new InternalServerErrorException(e.getMessage());
+		}
 	}
 
 	@Override
