@@ -16,6 +16,7 @@ import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -186,15 +187,18 @@ public class CollectionEndpoint implements CollectionApi {
 				.onItem()
 				.transform(s -> {
 					try {
-						// better solution than this?
-						byte[] bytes = s.readAllBytes();
-						s.close();
-						Config config = collectionConfiguration.merge(bytes, transformationsConfig, "collection");
-						return Tuple2.of(new ByteArrayInputStream(bytes), config);
-					} catch (Exception e) {
-						throw new NotFoundException(e.getMessage());
+						return s.readAllBytes();
+					} catch (IOException e) {
+						throw new InternalServerErrorException(e.getMessage());
 					}
 				})
+				.onItem()
+				.transform(bytes -> {
+					Config config = collectionConfiguration.merge(bytes, transformationsConfig, "collection");
+					return Tuple2.of(bytes, config);
+				})
+				.onItem()
+				.transform(t -> t.mapItem1(ByteArrayInputStream::new))
 				.onItem()
 				.transform((t) -> transformation.transformRT(
 						params, t.getItem2(), GRAPH, t.getItem1(), resourceProvider, request));
