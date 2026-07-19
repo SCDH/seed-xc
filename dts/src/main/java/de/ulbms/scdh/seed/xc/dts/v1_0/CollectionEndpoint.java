@@ -15,14 +15,12 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
+import java.io.ByteArrayInputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.io.input.TeeInputStream;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -187,11 +185,15 @@ public class CollectionEndpoint implements CollectionApi {
 		return uniRic.plug((r) -> resourceProvider.asyncOpenStream(r, request))
 				.onItem()
 				.transform(s -> {
-					ByteArrayOutputStream branch = new ByteArrayOutputStream();
-					InputStream tee = new TeeInputStream(s, branch);
-					Config config =
-							collectionConfiguration.merge(branch.toByteArray(), transformationsConfig, "collection");
-					return Tuple2.of(tee, config);
+					try {
+						// better solution than this?
+						byte[] bytes = s.readAllBytes();
+						s.close();
+						Config config = collectionConfiguration.merge(bytes, transformationsConfig, "collection");
+						return Tuple2.of(new ByteArrayInputStream(bytes), config);
+					} catch (Exception e) {
+						throw new NotFoundException(e.getMessage());
+					}
 				})
 				.onItem()
 				.transform((t) -> transformation.transformRT(
