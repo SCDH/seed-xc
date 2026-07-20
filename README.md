@@ -2,6 +2,9 @@
 
 [![Tests](https://github.com/SCDH/seed-xc/actions/workflows/test.yaml/badge.svg)](https://github.com/SCDH/seed-xc/actions/workflows/test.yaml)
 [![Formatting](https://github.com/SCDH/seed-xc/actions/workflows/formatting.yaml/badge.svg)](https://github.com/SCDH/seed-xc/actions/workflows/formatting.yaml)
+[![docker.io](https://img.shields.io/docker/v/scdh/distributed-test-services?label=docker.io)](https://hub.docker.com/collaborations/chrlueck)
+[![pulls](https://img.shields.io/docker/pulls/scdh/distributed-test-services)](https://hub.docker.com/collaborations/chrlueck)
+
 
 This project provides RESTful micro services for XML processing and
 high-level components for building them. It is based on
