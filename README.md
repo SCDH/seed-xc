@@ -11,7 +11,7 @@ Java applications, and
 reactive programming API: Together they are the basis for [responsive,
 elastic and
 resilient](https://quarkus.io/guides/quarkus-reactive-architecture)
-services, that can serve thousands of request per second. 
+services, that can serve thousands of requests per second.
 
 **Services:**
 
@@ -32,12 +32,13 @@ services, that can serve thousands of request per second.
 - [SEED XC Transformation Map](transformations): compile
   transformations once ahead of time and make them available for
   processing subsequent transformation request instantly
-- [XSLT](plugins/saxon): a plugin to the SEED XC Transformation Map
-  that provides transformation by XSLT
-- [XQuery](plugins/saxon):
-  a plugin similar to the XSLT plugin, but for XQuery
-- SPARQL (planned): a plugin similar to XSLT, but for running a SPARQL
-  query against a serialized RDF graph
+- Transformations: Plugins for generating output representations from (file) input
+  - [XSLT](plugins/saxon): a plugin to the SEED XC Transformation Map
+	that provides transformation by XSLT
+  - [XQuery](plugins/saxon):
+	a plugin similar to the XSLT plugin, but for XQuery
+  - [SPARQL](plugins/seed-xc-sparql): a plugin similar to XSLT, but
+	for running a SPARQL query against a serialized RDF graph
 - ResourceProviders: Plugins for accessing resources (source
   documents) from different storage types
   - [local filesystem](plugins/resource-providers): activated per default in tests
@@ -57,7 +58,7 @@ from the alphabet D S E (the acronym for digital scholarly editions).
 ## Getting Started
 
 This projects provides container images on [docker
-hub]((https://hub.docker.com/r/scdh/) for each service, as soon as
+hub](https://hub.docker.com/r/scdh/) for each service, as soon as
 possible.
 
 **DTS**: See [`dts` directory](dts)
@@ -66,6 +67,7 @@ possible.
 
 **XSLT Compiler**: See [`compiler` directory](compiler)
 
+Don't forget to read the [docs](doc).
 
 You can also build dev services or deployments for a WAR
 container. Instructions are provided under the links above.
