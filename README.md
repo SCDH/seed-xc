@@ -1,17 +1,27 @@
-# SEED XC - XML Processing with Composable REST Services
+# SEED XC - Reactive Micro Services for XML and RDF Processing
 
 [![Tests](https://github.com/SCDH/seed-xc/actions/workflows/test.yaml/badge.svg)](https://github.com/SCDH/seed-xc/actions/workflows/test.yaml)
 [![Formatting](https://github.com/SCDH/seed-xc/actions/workflows/formatting.yaml/badge.svg)](https://github.com/SCDH/seed-xc/actions/workflows/formatting.yaml)
+[![docker.io](https://img.shields.io/docker/v/scdh/distributed-test-services?label=docker.io)](https://hub.docker.com/collaborations/chrlueck)
+[![pulls](https://img.shields.io/docker/pulls/scdh/distributed-test-services)](https://hub.docker.com/collaborations/chrlueck)
 
-This project provides micro services for XML processing and high-level
-components for building them.
+
+This project provides RESTful micro services for XML processing and
+high-level components for building them. It is based on
+[Quarkus](https://quarkus.io/about/), a stack for writing supersonic
+Java applications, and
+[Mutiny](https://smallrye.io/smallrye-mutiny/latest/), an event-driven
+reactive programming API: Together they are the basis for
+[non-blocking, responsive, elastic and
+resilient](https://quarkus.io/guides/quarkus-reactive-architecture)
+services, that can serve thousands of requests per second.
 
 **Services:**
 
-- [SEED XML Transformer](transformer): A RESTful webservice for
-  transforming XML (and even HTML tag soup) with XSLT, XQuery, etc.
 - [DTS](dts): A level 1 implementation of [Distributed Text
   Services](https://github.com/distributed-text-services/specifications)
+- [SEED XML Transformer](transformer): A RESTful webservice for
+  transforming XML (and even HTML tag soup) with XSLT, XQuery, etc.
 - [SEED XSLT Compiler](compiler): Compiles XSLT to
   [SEF](https://www.saxonica.com/saxonjs/documentation3/index.html)
   (needs a license for the Saxon entreprise edition)
@@ -25,12 +35,18 @@ components for building them.
 - [SEED XC Transformation Map](transformations): compile
   transformations once ahead of time and make them available for
   processing subsequent transformation request instantly
-- [XSLT](plugins/saxon): a plugin to the SEED XC Transformation Map
-  that provides transformation by XSLT
-- [XQuery](plugins/saxon):
-  a plugin similar to the XSLT plugin, but for XQuery
-- SPARQL (planned): a plugin similar to XSLT, but for running a SPARQL
-  query against a serialized RDF graph
+- Transformations: Plugins for the SEED XC Transformation Map
+  generating output representations from input streams
+  - [XSLT](plugins/saxon): XML Stylsheet Language Transformtions
+    driven by [Saxon HE](https://www.saxonica.com/)
+  - [XQuery](plugins/saxon): same as the XSLT plugin, but for the XMM
+    Query language
+  - [SPARQL](plugins/seed-xc-sparql): a [Apache
+    Jena](https://jena.apache.org/)-based plugin for running a SPARQL
+    query against a serialized RDF graph. For generating JSON-LD
+    output, it can run JSON-LD framing based on [Titanium JSON
+    LD](https://github.com/filip26/titanium-json-ld). So this plugin
+    is perfect for serving nice JSON APIs from RDF knowledge graphs.
 - ResourceProviders: Plugins for accessing resources (source
   documents) from different storage types
   - [local filesystem](plugins/resource-providers): activated per default in tests
@@ -49,40 +65,32 @@ from the alphabet D S E (the acronym for digital scholarly editions).
 
 ## Getting Started
 
-For DTS see [`dts` directory](dts)!
+This project provides container images on [docker
+hub](https://hub.docker.com/r/scdh/) for each service, as soon as
+possible.
 
-Build:
+**DTS**: See [`dts` directory](dts)
 
-Once after cloning and after each cleanup:
+**XML Transformer**: See [`transformer` directory](transformer)
 
-```shell
- ./mvnw -Pdownload-openapi generate-sources
-```
+**XSLT Compiler**: See [`compiler` directory](compiler)
 
-Then building all components:
+Don't forget to read the [docs](doc).
 
-```shell
-./mvnw package
-```
+For the container images, the services are compiled to a native Linux
+executable and are then for [security](doc/security.md) reasons build
+into a RedHat UBI micro image. Images are small, and have a fantastic
+startup time.
 
-To run one of the services in dev mode, use `-P` switch to select a
-service profile.
-
-XSLT Compiler:
-
-```shell
-./mvnw -Pcompiler quarkus:dev
-```
-
-XML Transformer:
-
-```shell
-./mvnw -Ptransformer quarkus:dev
-```
-
-Dev-Server will listen on http://localhost:8080
+You can also run dev services. Instructions are provided under the
+links above. But notice, that you cannot deploy a Quarkus application
+on Tomcat, TomEE, WildFly etc.
 
 
 ## Contributing
 
 See [contributing guide](contributing.md)!
+
+## License
+
+MIT

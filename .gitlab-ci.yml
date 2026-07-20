@@ -1,5 +1,4 @@
 variables:
-  JAVA_DOCKER_IMAGE: "harbor.uni-muenster.de/proxy-docker/eclipse-temurin:21-alpine"
   MAVEN_OPTS: >-
     -Dhttps.protocols=TLSv1.2
     -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
@@ -13,7 +12,9 @@ variables:
     --no-transfer-progress
     -DinstallAtEnd=true
     -DdeployAtEnd=true
-
+  #DOCKER_HOST: "tcp://docker:2375"
+  #DOCKER_TLS_CERTDIR: ""
+  #DOCKER_DRIVER: overlay2
 
 .release_tag: &release-tag
   rules:
@@ -24,14 +25,24 @@ cache:
   paths:
     - $CI_PROJECT_DIR/.m2/repository
 
+#services:
+#  - name: docker:dind
+#    alias: docker
+#    command: ["--tls=false"]
+
 stages:
   - test
+  - build
   - push
 
+# default image: JDK25 with Mandrel Compiler for building native executables
+image:
+  name: quay.io/quarkus/ubi-quarkus-mandrel-builder-image:jdk-25
+  entrypoint:
+    - ""
 
 verify:
   stage: test
-  image: $JAVA_DOCKER_IMAGE
   script:
     - ./mvnw $MAVEN_CLI_OPTS -Pdownload-openapi generate-sources
     - ./mvnw $MAVEN_CLI_OPTS verify
@@ -39,17 +50,68 @@ verify:
 
 formatting:
   stage: test
-  image: $JAVA_DOCKER_IMAGE
   script:
     - ./mvnw $MAVEN_CLI_OPTS spotless:check
 
-push packages:
+push_packages:
   stage: push
-  image: $JAVA_DOCKER_IMAGE
+  rules:
+    - !reference [ .release_tag, rules ]
   script:
     - ./mvnw -Drevision=$CI_COMMIT_REF_NAME -Dchangelist="" $MAVEN_CLI_OPTS clean
     - ./mvnw -Drevision=$CI_COMMIT_REF_NAME -Dchangelist="" $MAVEN_CLI_OPTS -Pdownload-openapi generate-sources
-    - ./mvnw -Drevision=$CI_COMMIT_REF_NAME -Dchangelist="" $MAVEN_CLI_OPTS -s .gitlab/settings.xml deploy
+    - ./mvnw -Drevision=$CI_COMMIT_REF_NAME -Dchangelist="" $MAVEN_CLI_OPTS -Ddistribution.url=$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/maven -s .gitlab/settings.xml deploy
+
+dts-build-native:
+  stage: build
   rules:
     - !reference [ .release_tag, rules ]
+  tags:
+    - ram:8gb
+  script:
+    - ./mvnw -Drevision=$CI_COMMIT_REF_NAME -Dchangelist="" $MAVEN_CLI_OPTS -Pdownload-openapi generate-sources
+    - ./mvnw -Drevision=$CI_COMMIT_REF_NAME -Dchangelist="" $MAVEN_CLI_OPTS -Ddts-native -Dquarkus.native.container-build=false -DskipITs=true install
+  artifacts:
+    paths:
+      - dts/target/*-runner
+      - dts/target/dependencies
+    expire_in: 1 days
 
+build-container-without-cache:
+  stage: push
+  needs:
+    - verify
+    - dts-build-native
+  rules:
+    - !reference [ .release_tag, rules ]
+  image: quay.io/buildah/stable:v1
+  tags:
+    - privileged
+  before_script:
+    - export GL_IMAGE=$(echo "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME" | tr '[:upper:]' '[:lower:]')
+    - echo "$GL_IMAGE"
+    - export DH_IMAGE=docker.io/scdh/distributed-test-services
+    - echo "$DH_IMAGE"
+    - buildah version
+    - export HOME=$CI_BUILD_DIR
+    - buildah login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - buildah login -u $DOCKERHUB_USER -p $DOCKERHUB_TOKEN docker.io
+    #- echo $HARBOR_PASSWORD | buildah login -u $HARBOR_USERNAME --password-stdin $HARBOR_URL
+  script:
+    ## make container using buildah script
+    - dts/buildah_native_micro.sh
+    - ctr=$(< buildah-container-id)
+    - echo "container ID $ctr"
+    ## make image from container and push to harbor registry
+    #- img=$(buildah commit $ctr $HARBOR_IMAGE_BUILD)
+    #- buildah push $img docker://$HARBOR_IMAGE_BUILD
+    # make from container and push to Gitlab CI registry
+    - img=$(buildah commit $ctr $GL_IMAGE)
+    - buildah push $img docker://$GL_IMAGE:dts
+    - buildah push $img docker://$GL_IMAGE:dts-$CI_COMMIT_REF_NAME
+    - buildah push $img docker://$DH_IMAGE
+    - buildah push $img docker://$DH_IMAGE:$CI_COMMIT_REF_NAME
+  after_script:
+    - buildah logout $CI_REGISTRY
+    - buildah logout docker.io
+    #- buildah logout $HARBOR_REGISTRY

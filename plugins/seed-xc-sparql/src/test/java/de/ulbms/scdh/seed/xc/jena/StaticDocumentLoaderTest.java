@@ -11,15 +11,16 @@ import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 public class StaticDocumentLoaderTest {
 
-	private static final File EMPTY_MAP =
-			Paths.get("src", "test", "resources", "context-map.json").toFile();
+	private static final List<File> EMPTY_MAP =
+			List.of(Paths.get("src", "test", "resources", "context-map.json").toFile());
 
-	private static final File GOOD_MAP =
-			Paths.get("src", "test", "resources", "context-map.json").toFile();
+	private static final List<File> GOOD_MAP =
+			List.of(Paths.get("src", "test", "resources", "context-map.json").toFile());
 
 	DocumentLoader loader;
 

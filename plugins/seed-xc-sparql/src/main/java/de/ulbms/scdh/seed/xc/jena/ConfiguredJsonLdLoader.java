@@ -7,6 +7,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import java.io.File;
 import java.time.Duration;
+import java.util.Arrays;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
@@ -24,6 +25,12 @@ public class ConfiguredJsonLdLoader {
 		httpLoader.fallbackContentType(MediaType.JSON);
 		httpLoader.timeout(Duration.ofMillis(readTimeout));
 
-		return new StaticDocumentLoader(new File(contextMap), httpLoader, true);
+		return new StaticDocumentLoader(
+				Arrays.stream(contextMap.split(","))
+						.map(String::trim)
+						.map(File::new)
+						.toList(),
+				httpLoader,
+				true);
 	}
 }

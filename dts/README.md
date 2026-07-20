@@ -8,9 +8,9 @@ rules.
 | endpoint   | implementation | URI template                                                          |
 |:-----------|:---------------|:----------------------------------------------------------------------|
 | entry      | ✅             | `BASE_URL/FRONT/entry`                                                |
-| collection | ✅             | `BASE_URL/FRONT/collection/{id}{?nav}`                                |
-| navigation | ✅             | `BASE_URL/FRONT/navigation/{resource}{?tree,ref,start,end,down}`      |
-| document   | ✅             | `BASE_URL/FRONT/navigation/{resource}{?tree,ref,start,end,mediaType}` |
+| collection | ✅             | `BASE_URL/FRONT/collection/{id}{?nav,page}`                           |
+| navigation | ✅             | `BASE_URL/FRONT/navigation/{resource}{?tree,ref,start,end,down,page}` |
+| document   | ✅             | `BASE_URL/FRONT/document/{resource}{?tree,ref,start,end,mediaType}`   |
 
 SEED DTS Server is designed for 1:n deployment, i.e., one service
 instance can serve a multitude of projects (entry points). A project
@@ -42,9 +42,32 @@ with SEED DTS, not only TEI-XML.
 
 ### Docker
 
-TODO
+The official docker image is on [docker.io](https://hub.docker.com/r/scdh/distributed-test-services).
+
+```shell
+docker pull scdh/distributed-test-services
+```
+
+Start the service:
+
+```shell
+docker run -i --rm -p 8080:8080 scdh/distributed-test-services
+```
+
+This container image is highly optimized for deployment on cloud
+infrastructure, e.g. a kubernetes cluster. Its startup time is far
+under a second. With the [DTS
+Transformations](https://github.com/scdh/dts-transformations), which
+are configured per default, the startup time is in fact less than a
+tenth of a second.
+
+Read the [documentation](../doc/dts.md) on how to serve your own
+content.
 
 ### Dev Server
+
+Instead of using the official docker image, you can clone the project
+and start a development server.
 
 All commands must be run in the root directory of SEED XC, **not**
 from the `dts` subfolder.
@@ -88,7 +111,7 @@ Have a look at
 [`src/main/resources/application.properties`](src/main/resources/application.properties)
 for more config options.
 
-### Native Executable
+### Native Executable and Docker Image
 
 A native executable is a build artifact, that can be run without a
 Java virtual machine. It is simply a linux executable, compiled from
@@ -107,22 +130,41 @@ and OpenJDK from a docker container:
 
 ```shell
 ./mvnw -Pdownload-openapi generate-sources
-./mvnw generate-sources package
 ./mvnw -Ddts-native install
 ```
 
-This produces `seed-dts-VERSION-runner` in `dts/target/`.
+This produces `seed-dts-VERSION-runner` in `dts/target/`. It has
+properties set for operating in a container image. So let's build it:
 
-Alternatively, you can download the native executable from the release
-assets.
+```shell
+docker build -f dts/src/main/docker/Dockerfile.native -t scdh/dts-testing .
+```
 
 The service starts up lightning fast. Just call the native executable:
 
 ```shell
-dts/target/seed-dts-0.0.1-SNAPSHOT-runner
+docker run -i --rm -p 8080:8080 scdh/dts-testing
 ```
 
 Swagger UI is available at http://localhost:8080/q/swagger-ui
+
+You can your own files into `/work/projects/`. Have a look at the docs
+for [customizing the
+transformations](../doc/dts.md#customizing-transformations).
+
+If you want to look, what's inside the container, do ` docker run -it
+scdh/dts-testing bash -c "ls -l /"`.
+
+A container image built this way differs from the official container
+image available on
+[docker.io](https://hub.docker.com/r/scdh/distributed-test-services):
+It's based on a minimal RedHat UBI image with
+[Dockerfile.native](src/main/docker/Dockerfile.native), so it has a
+package manager (microdnf). The official image is based on a micro
+image and does not have a package manager, in order to minimize its
+attack surface. This is much more complicated to build, in fact with
+[`buildah`](buildah_native_micro.sh) instead of `docker`, which is
+done on a Gitlab runner on Münster's IT infrastructure.
 
 ### Testing with cURL
 

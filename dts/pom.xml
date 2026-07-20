@@ -10,6 +10,7 @@
 
   <artifactId>seed-dts</artifactId>
   <name>SEED DTS</name>
+  <description>Distributed Text Services, level 1 conformance</description>
 
   <properties>
     <dts-openapi.version>0.5.0</dts-openapi.version>
@@ -19,6 +20,7 @@
     <seed-dts.config>${project.build.directory}/dependencies/dts-transformations.yaml</seed-dts.config>
     <seed-dts.saxon-config>${project.build.directory}/dependencies/dts-transformations/saxon.he.xml</seed-dts.saxon-config>
     <seed-dts.jsonld-context-map>${project.build.directory}/dependencies/dts-transformations/context-map.json</seed-dts.jsonld-context-map>
+    <seed-dts.seed-context-map>${project.basedir}/src/main/resources/META-INF/resources/context-map.json</seed-dts.seed-context-map>
     <seed-dts.accessible-path>${project.basedir}/../</seed-dts.accessible-path>
     <seed-dts.filesystem>${project.basedir}/../samples/</seed-dts.filesystem>
   </properties>
@@ -344,10 +346,13 @@
 
         <!-- service configuration -->
         <!-- these paths should match the setup in the container image -->
-        <native-workdir>/work/resources</native-workdir>
-        <seed-xml-transformer.config>${native-workdir}/seed-config.yaml</seed-xml-transformer.config>
-        <seed-xml-transformer.saxon-config>${native-workdir}/saxon-config.xml</seed-xml-transformer.saxon-config>
-        <seed-xml-transformer.accessible-path>${native-workdir}</seed-xml-transformer.accessible-path>
+        <native-resource-dir>/work/resources</native-resource-dir>
+        <seed-dts.config>${native-resource-dir}/dts-transformations-testing.yaml</seed-dts.config>
+        <seed-dts.saxon-config>${native-resource-dir}/dts-transformations/saxon.he.seed.xml</seed-dts.saxon-config>
+        <seed-dts.accessible-path>${native-resource-dir}/</seed-dts.accessible-path>
+        <seed-dts.jsonld-context-map>${native-resource-dir}/dts-transformations/context-map.json</seed-dts.jsonld-context-map>
+        <seed-dts.seed-context-map>${native-resource-dir}/seed-dts/context-map.json</seed-dts.seed-context-map>
+        <seed-dts.filesystem>/work/projects/</seed-dts.filesystem>
 
         <quarkus.package.type>native</quarkus.package.type>
         <!-- enable ConfigMaps as configuration source, see https://quarkus.io/guides/kubernetes-config -->

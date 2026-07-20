@@ -11,6 +11,7 @@ import de.ulbms.scdh.seed.xc.api.ResourceMapping;
 import java.io.File;
 import java.net.URI;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,41 +37,44 @@ public class StaticDocumentLoader implements DocumentLoader {
 
 	/**
 	 * Creates a new {@link StaticDocumentLoader} from a resource mapping given by {@link File}.
-	 * @param contextMap - the {@link File} path to the {@link ResourceMapping} JSON file
+	 * @param contextMaps - the {@link List<File>} paths to the {@link ResourceMapping} JSON file
 	 * @param fallbackLoader - a {@link DocumentLoader} used to handle request for non-mapped resources
 	 * @param delegateOnError - whether to delegate the request to the fallback, when loading of a local asset failed.
 	 */
-	public StaticDocumentLoader(final File contextMap, final DocumentLoader fallbackLoader, boolean delegateOnError) {
+	public StaticDocumentLoader(
+			final List<File> contextMaps, final DocumentLoader fallbackLoader, boolean delegateOnError) {
 		this.fallbackLoader = fallbackLoader;
 		this.delegateOnError = delegateOnError;
 		Map<URI, URI> assets = new HashMap<>();
 
-		URI contextMapUri = contextMap.toURI();
-		LOG.info("using context map {}", contextMapUri);
+		for (File contextMap : contextMaps) {
+			URI contextMapUri = contextMap.toURI();
+			LOG.info("using context map {}", contextMapUri);
 
-		ObjectMapper om = new ObjectMapper(new JsonFactory());
-		try {
-			ResourceMapping staticContexts = om.readValue(contextMap, ResourceMapping.class);
+			ObjectMapper om = new ObjectMapper(new JsonFactory());
+			try {
+				ResourceMapping staticContexts = om.readValue(contextMap, ResourceMapping.class);
 
-			for (String remote : staticContexts.keySet()) {
-				String local = staticContexts.get(remote).getPath();
-				try {
-					URI remoteUri = new URI(remote);
-					URI localUri = contextMapUri.resolve(local);
-					assets.put(remoteUri, localUri);
-					LOG.info("using static asset {} instead of remote {}", local, remote);
-				} catch (Exception e) {
-					LOG.error(
-							"failed to set up JSON-LD context asset for remote {} from {}: {}",
-							remote,
-							local,
-							e.getMessage());
+				for (String remote : staticContexts.keySet()) {
+					String local = staticContexts.get(remote).getPath();
+					try {
+						URI remoteUri = new URI(remote);
+						URI localUri = contextMapUri.resolve(local);
+						assets.put(remoteUri, localUri);
+						LOG.info("using static asset {} instead of remote {}", local, remote);
+					} catch (Exception e) {
+						LOG.error(
+								"failed to set up JSON-LD context asset for remote {} from {}: {}",
+								remote,
+								local,
+								e.getMessage());
+					}
 				}
+			} catch (Exception e) {
+				LOG.error("failed to set up static document loader from {}: {}", contextMap, e.getMessage());
 			}
-		} catch (Exception e) {
-			LOG.error("failed to set up static document loader from {}: {}", contextMap, e.getMessage());
+			LOG.info("set up static context loader with {} assets", assets.size());
 		}
-		LOG.info("set up static context loader with {} assets", assets.size());
 		contextMapping = Map.copyOf(assets); // makes contextMapping unmodifiable
 	}
 

@@ -4,18 +4,22 @@ import static de.ulbms.scdh.seed.xc.api.utils.ParameterValueFactory.pvOf;
 
 import de.ulbms.scdh.seed.xc.api.*;
 import de.ulbms.scdh.seed.xc.api.inject.TransformTimeProvider;
+import de.ulbms.scdh.seed.xc.dts.CollectionConfiguration;
 import de.ulbms.scdh.seed.xc.dts.CollectionMetadataProcessor;
 import de.ulbms.scdh.seed.xc.dts.URITemplateBuilder;
 import de.ulbms.scdh.seed.xc.dts.endpoints.NavigationApi;
 import de.ulbms.scdh.seed.xc.dts.model.Navigation;
 import de.ulbms.scdh.seed.xc.transformations.TransformationMap;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.tuples.Tuple2;
 import io.vertx.core.http.HttpServerRequest;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -51,11 +55,11 @@ public class NavigationEndpoint implements NavigationApi {
 	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.CollectionEndpoint.GRAPH", defaultValue = "collection.json")
 	protected String GRAPH;
 
-	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.NavigationEndpoint.RESOURCE_ID_PATH", defaultValue = "false")
-	protected boolean RESOURCE_IS_PATH;
-
 	@Inject
 	protected CollectionMetadataProcessor collectionMetadataProc;
+
+	@Inject
+	protected CollectionConfiguration collectionConfiguration;
 
 	@Inject
 	protected TransformationMap transformations;
@@ -165,36 +169,42 @@ public class NavigationEndpoint implements NavigationApi {
 			throw new BadRequestException("cannot open base location: " + e.getMessage());
 		}
 
-		// Create ResourceInContext from resource parameter and additional parameters
+		// async processing of
+		// 1. get collection.json, 2. lookup the resource's location, 3. get the resource, 4. transform it
 		Map<String, String> crContext = Map.of();
-		Uni<ResourceInContext> uniRic;
-		if (RESOURCE_IS_PATH) {
-			ResourceInContext ric = new ResourceInContext(crContext, resource.toString());
-			uniRic = Uni.createFrom().item(ric);
-		} else {
-			// get the resource location from the collection metadata
-			ResourceInContext collectionIc = new ResourceInContext(crContext, GRAPH);
-			uniRic = Uni.createFrom()
-					.item(collectionIc)
-					.plug((cic) -> {
-						return resourceProvider.asyncOpenStream(cic, request);
-					})
-					.plug((s) -> {
-						return collectionMetadataProc.getResourceLocation(
-								s, GRAPH, transformationConfig, crContext, thisIri.toString());
-					})
-					.onItem()
-					.transform((resourceLocation -> {
-						return new ResourceInContext(crContext, resourceLocation);
-					}));
-		}
+		ResourceInContext ric = new ResourceInContext(crContext, GRAPH);
+		Uni<ResourceInContext> uniRic = Uni.createFrom().item(ric);
 
-		return uniRic.plug((r) -> {
-					return resourceProvider.asyncOpenStream(r, request);
+		return uniRic.plug((r) -> resourceProvider.asyncOpenStream(r, request))
+				.onItem()
+				.transform(s -> {
+					try {
+						return s.readAllBytes();
+					} catch (IOException e) {
+						throw new InternalServerErrorException(e.getMessage());
+					}
 				})
-				.plug((s) -> {
-					return transformation.transformAsync(
-							params, transformationConfig, resource.toString(), s, resourceProvider, request);
-				});
+				.onItem()
+				.transform(bytes -> {
+					Config config = collectionConfiguration.merge(bytes, transformationConfig, "navigation");
+					return Tuple2.of(bytes, config);
+				})
+				.onItem()
+				.transform(t -> t.mapItem1(ByteArrayInputStream::new))
+				.onItem()
+				.transformToUni(t -> Uni.createFrom()
+						.item(t.getItem1())
+						.plug(s -> collectionMetadataProc.getResource(
+								resourceProvider, s, GRAPH, t.getItem2(), crContext, thisIri))
+						.onItem()
+						.transform(s -> Tuple2.of(s, t.getItem2())))
+				.onItem()
+				.transformToUni((t) -> transformation.transformAsync(
+						collectionConfiguration.appendToParameters(params, t.getItem2()),
+						t.getItem2(),
+						resource.toString(),
+						Uni.createFrom().item(t.getItem1()),
+						resourceProvider,
+						request));
 	}
 }
