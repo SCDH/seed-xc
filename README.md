@@ -4,14 +4,21 @@
 [![Formatting](https://github.com/SCDH/seed-xc/actions/workflows/formatting.yaml/badge.svg)](https://github.com/SCDH/seed-xc/actions/workflows/formatting.yaml)
 
 This project provides micro services for XML processing and high-level
-components for building them.
+components for building them. It is based on
+[Quarkus](https://quarkus.io/about/), a stack for writing supersonic
+Java applications, and
+[Mutiny](https://smallrye.io/smallrye-mutiny/latest/), an event-driven
+reactive programming API: Together they are the basis for [responsive,
+elastic and
+resilient](https://quarkus.io/guides/quarkus-reactive-architecture)
+services, that can serve thousands of request per second. 
 
 **Services:**
 
-- [SEED XML Transformer](transformer): A RESTful webservice for
-  transforming XML (and even HTML tag soup) with XSLT, XQuery, etc.
 - [DTS](dts): A level 1 implementation of [Distributed Text
   Services](https://github.com/distributed-text-services/specifications)
+- [SEED XML Transformer](transformer): A RESTful webservice for
+  transforming XML (and even HTML tag soup) with XSLT, XQuery, etc.
 - [SEED XSLT Compiler](compiler): Compiles XSLT to
   [SEF](https://www.saxonica.com/saxonjs/documentation3/index.html)
   (needs a license for the Saxon entreprise edition)
@@ -49,40 +56,25 @@ from the alphabet D S E (the acronym for digital scholarly editions).
 
 ## Getting Started
 
-For DTS see [`dts` directory](dts)!
+This projects provides container images on [docker
+hub]((https://hub.docker.com/r/scdh/) for each service, as soon as
+possible.
 
-Build:
+**DTS**: See [`dts` directory](dts)
 
-Once after cloning and after each cleanup:
+**XML Transformer**: See [`transformer` directory](transformer)
 
-```shell
- ./mvnw -Pdownload-openapi generate-sources
-```
+**XSLT Compiler**: See [`compiler` directory](compiler)
 
-Then building all components:
 
-```shell
-./mvnw package
-```
-
-To run one of the services in dev mode, use `-P` switch to select a
-service profile.
-
-XSLT Compiler:
-
-```shell
-./mvnw -Pcompiler quarkus:dev
-```
-
-XML Transformer:
-
-```shell
-./mvnw -Ptransformer quarkus:dev
-```
-
-Dev-Server will listen on http://localhost:8080
+You can also build dev services or deployments for a WAR
+container. Instructions are provided under the links above.
 
 
 ## Contributing
 
 See [contributing guide](contributing.md)!
+
+## License
+
+MIT

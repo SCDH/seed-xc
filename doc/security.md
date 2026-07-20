@@ -67,8 +67,10 @@ setting the Saxon configuration file.
 ### Compilation to Native Executable
 
 The Quarkus service is compiled to a native Linux executable with
-GraalVM. So, no Java Virtual Machine is required to run the
-service. This feature drastically reduces the attack vectors.
+[GraalVM](https://www.graalvm.org/)
+(resp. [Mandrel](https://github.com/graalvm/mandrel)). So, no Java
+Virtual Machine is required to run the service. This feature
+drastically reduces the attack vectors.
 
 ### Micro Images
 
