@@ -1,5 +1,11 @@
 # Changes
 
+## 0.0.12
+
+- bundled with DTS Transformations 0.6.0
+- JSON-LD contexts and frames configurable on a per-record basis (see issues #46)
+- fixes minor issues (#43, #45)
+
 ## 0.0.11
 
 - DTS 1.0 level 1 conformance
