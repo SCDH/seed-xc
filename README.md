@@ -1,4 +1,4 @@
-# SEED XC - Reactive Micro Services for XML Processing
+# SEED XC - Reactive Micro Services for XML and RDF Processing
 
 [![Tests](https://github.com/SCDH/seed-xc/actions/workflows/test.yaml/badge.svg)](https://github.com/SCDH/seed-xc/actions/workflows/test.yaml)
 [![Formatting](https://github.com/SCDH/seed-xc/actions/workflows/formatting.yaml/badge.svg)](https://github.com/SCDH/seed-xc/actions/workflows/formatting.yaml)
@@ -40,7 +40,10 @@ services, that can serve thousands of requests per second.
     Query language
   - [SPARQL](plugins/seed-xc-sparql): a [Apache
     Jena](https://jena.apache.org/)-based plugin for running a SPARQL
-    query against a serialized RDF graph
+    query against a serialized RDF graph. For generating JSON-LD
+    output, it can run JSON-LD framing based on [Titanium JSON
+    LD](https://github.com/filip26/titanium-json-ld). So this plugin
+    is perfect for serving nice JSON APIs from RDF knowledge graphs.
 - ResourceProviders: Plugins for accessing resources (source
   documents) from different storage types
   - [local filesystem](plugins/resource-providers): activated per default in tests
