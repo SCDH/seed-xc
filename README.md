@@ -59,7 +59,7 @@ from the alphabet D S E (the acronym for digital scholarly editions).
 
 ## Getting Started
 
-This projects provides container images on [docker
+This project provides container images on [docker
 hub](https://hub.docker.com/r/scdh/) for each service, as soon as
 possible.
 
@@ -71,8 +71,14 @@ possible.
 
 Don't forget to read the [docs](doc).
 
-You can also build dev services or deployments for a WAR
-container. Instructions are provided under the links above.
+For the container images, the services are compiled to a native Linux
+executable and are then for [security](doc/security.md) reasons build
+into a RedHat UBI micro image. Images are small, and have a fantastic
+startup time.
+
+You can also run dev services. Instructions are provided under the
+links above. But notice, that you cannot deploy a Quarkus application
+on Tomcat, TomEE, WildFly etc.
 
 
 ## Contributing
