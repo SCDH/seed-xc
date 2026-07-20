@@ -10,6 +10,7 @@
 
   <artifactId>seed-dts</artifactId>
   <name>SEED DTS</name>
+  <description>Distributed Text Services, level 1 conformance</description>
 
   <properties>
     <dts-openapi.version>0.5.0</dts-openapi.version>
