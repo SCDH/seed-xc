@@ -1,15 +1,15 @@
-# SEED XC - XML Processing with Composable REST Services
+# SEED XC - Reactive Micro Services for XML Processing
 
 [![Tests](https://github.com/SCDH/seed-xc/actions/workflows/test.yaml/badge.svg)](https://github.com/SCDH/seed-xc/actions/workflows/test.yaml)
 [![Formatting](https://github.com/SCDH/seed-xc/actions/workflows/formatting.yaml/badge.svg)](https://github.com/SCDH/seed-xc/actions/workflows/formatting.yaml)
 
-This project provides micro services for XML processing and high-level
-components for building them. It is based on
+This project provides RESTful micro services for XML processing and
+high-level components for building them. It is based on
 [Quarkus](https://quarkus.io/about/), a stack for writing supersonic
 Java applications, and
 [Mutiny](https://smallrye.io/smallrye-mutiny/latest/), an event-driven
-reactive programming API: Together they are the basis for [responsive,
-elastic and
+reactive programming API: Together they are the basis for
+[non-blocking, responsive, elastic and
 resilient](https://quarkus.io/guides/quarkus-reactive-architecture)
 services, that can serve thousands of requests per second.
 
@@ -32,13 +32,15 @@ services, that can serve thousands of requests per second.
 - [SEED XC Transformation Map](transformations): compile
   transformations once ahead of time and make them available for
   processing subsequent transformation request instantly
-- Transformations: Plugins for generating output representations from (file) input
-  - [XSLT](plugins/saxon): a plugin to the SEED XC Transformation Map
-	that provides transformation by XSLT
-  - [XQuery](plugins/saxon):
-	a plugin similar to the XSLT plugin, but for XQuery
-  - [SPARQL](plugins/seed-xc-sparql): a plugin similar to XSLT, but
-	for running a SPARQL query against a serialized RDF graph
+- Transformations: Plugins for the SEED XC Transformation Map
+  generating output representations from input streams
+  - [XSLT](plugins/saxon): XML Stylsheet Language Transformtions
+    driven by [Saxon HE](https://www.saxonica.com/)
+  - [XQuery](plugins/saxon): same as the XSLT plugin, but for the XMM
+    Query language
+  - [SPARQL](plugins/seed-xc-sparql): a [Apache
+    Jena](https://jena.apache.org/)-based plugin for running a SPARQL
+    query against a serialized RDF graph
 - ResourceProviders: Plugins for accessing resources (source
   documents) from different storage types
   - [local filesystem](plugins/resource-providers): activated per default in tests
