@@ -176,11 +176,11 @@
                 <typeMapping>file=byte[]</typeMapping>
                 <typeMapping>Collection=byte[]</typeMapping>
                 <typeMapping>Navigation=byte[]</typeMapping>
-                <typeMapping>Graph=EntityPart</typeMapping>
-                <typeMapping>Frame=EntityPart</typeMapping>
+                <typeMapping>Graph=InputStream</typeMapping>
+                <typeMapping>Frame=InputStream</typeMapping>
               </typeMappings>
               <importMappings>
-                <importMapping>EntityPart=jakarta.ws.rs.core.EntityPart</importMapping>
+                <importMapping>InputStream=java.io.InputStream</importMapping>
               </importMappings>
             </configuration>
           </execution>
