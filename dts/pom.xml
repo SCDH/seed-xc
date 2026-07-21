@@ -176,7 +176,12 @@
                 <typeMapping>file=byte[]</typeMapping>
                 <typeMapping>Collection=byte[]</typeMapping>
                 <typeMapping>Navigation=byte[]</typeMapping>
+                <typeMapping>Graph=EntityPart</typeMapping>
+                <typeMapping>Frame=EntityPart</typeMapping>
               </typeMappings>
+              <importMappings>
+                <importMapping>EntityPart=jakarta.ws.rs.core.EntityPart</importMapping>
+              </importMappings>
             </configuration>
           </execution>
         </executions>
@@ -270,7 +275,8 @@
                 <!-- this has to precede the OA generation which is in generate-sources -->
                 <phase>initialize</phase>
                 <configuration>
-                  <url>https://raw.githubusercontent.com/SCDH/dts-openapi/refs/tags/${dts-openapi.version}/standalone/facade-openapi.yaml</url>
+                  <!--url>https://raw.githubusercontent.com/SCDH/dts-openapi/refs/tags/${dts-openapi.version}/standalone/facade-openapi.yaml</url-->
+                  <url>https://raw.githubusercontent.com/SCDH/dts-openapi/refs/heads/standoff/standalone/facade-openapi.yaml</url>
                   <unpack>false</unpack>
                   <outputDirectory>${openapi-specs.dir}</outputDirectory>
                 </configuration>
