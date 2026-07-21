@@ -14,7 +14,7 @@ Java applications, and
 reactive programming API: Together they are the basis for
 [non-blocking, responsive, elastic and
 resilient](https://quarkus.io/guides/quarkus-reactive-architecture)
-services, that can serve thousands of requests per second.
+services.
 
 **Services:**
 
@@ -67,7 +67,10 @@ from the alphabet D S E (the acronym for digital scholarly editions).
 
 This project provides container images on [docker
 hub](https://hub.docker.com/r/scdh/) for each service, as soon as
-possible.
+possible. That does not imply, that they are production ready. Watch
+out for the [milestones](https://github.com/SCDH/seed-xc/milestones)
+in this regard. However, you can test and investigate them and even
+deploy them for prototypes.
 
 **DTS**: See [`dts` directory](dts)
 
