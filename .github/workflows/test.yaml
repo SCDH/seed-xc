@@ -19,15 +19,20 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Set up JDK 21
+      - name: Set up JDK and configure settings.xml for registries on https://maven.pkg.github.com/scdh/*
         uses: actions/setup-java@v5
         with:
           java-version: '21'
           distribution: 'temurin'
           cache: maven
+          server-id: scdh
 
       - name: get required resources
         run: ./mvnw --batch-mode --update-snapshots -Pdownload-openapi generate-sources
-          
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: run maven verify
         run: ./mvnw --batch-mode --update-snapshots verify
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

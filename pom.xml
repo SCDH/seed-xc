@@ -126,8 +126,12 @@
       <url>${distribution.url}</url>
     </repository>
     <repository>
-      <id>selene</id>
-      <url>https://maven.pkg.github.com/scdh/selene</url>
+      <!--
+        all SCDH's gh package registries, cf.
+        vdocs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry#installing-a-package
+      -->
+      <id>scdh</id>
+      <url>https://maven.pkg.github.com/scdh/*</url>
     </repository>
   </repositories>
 
