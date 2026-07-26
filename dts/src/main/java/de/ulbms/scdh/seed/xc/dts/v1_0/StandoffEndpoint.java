@@ -34,9 +34,6 @@ public class StandoffEndpoint implements StandoffApi {
 	public static final String MEDIATYPE_ANNOTATIONS =
 			"application/ld+json;text/turtle;application/rdf+xml;application/n-triples;text/trig;application/n-quads;application/trix+xml;application/rdf+thrift;application/rdf+protobuf";
 
-	@ConfigProperty(name = "dts-standoff-transformation-suffix", defaultValue = ".standoff")
-	protected String TRANSFORMATION_SUFFIX;
-
 	/**
 	 * The ID of the transformation using for transforming a resource.
 	 */
@@ -96,8 +93,19 @@ public class StandoffEndpoint implements StandoffApi {
 			String tree,
 			String mediaType,
 			InputStream frame) {
-		setIRI();
+		setIRI(resource);
 		setResourceProvider(provider, location);
+		final Config config = getConfig();
+		final RuntimeParameters parameters = mkParameters(resource, ref, start, end, tree, mediaType);
+		final MappingTransformation transformation = getTransformation(mediaType, config);
+
+		collectionMetadataProc
+				.getResourceAsync(resourceProvider, config, Map.of(), thisIri)
+				.plug(s -> transformation.mapResourceAsync(
+						// TODO: systemId from collectionMetadataProc
+						parameters, config, thisIri.toString(), s, resourceProvider, request));
+		// TODO
+
 		return null;
 	}
 
@@ -116,8 +124,20 @@ public class StandoffEndpoint implements StandoffApi {
 			String tree,
 			String mediaType,
 			InputStream frame) {
-		setIRI();
+
+		setIRI(resource);
 		setResourceProvider(provider, location);
+		final Config config = getConfig();
+		final RuntimeParameters parameters = mkParameters(resource, ref, start, end, tree, mediaType);
+		final MappingTransformation transformation = getTransformation(mediaType, config);
+
+		collectionMetadataProc
+				.getResourceAsync(resourceProvider, config, Map.of(), thisIri)
+				.plug(s -> transformation.mapResourceAsync(
+						// TODO: systemId from collectionMetadataProc
+						parameters, config, thisIri.toString(), s, resourceProvider, request));
+		// TODO
+
 		return null;
 	}
 
@@ -141,7 +161,9 @@ public class StandoffEndpoint implements StandoffApi {
 	 * Set the IRI of the resource. According to the URI templates,
 	 * this is essentially the request URL, but query and fragment parts dropped.
 	 */
-	private void setIRI() {
+	private void setIRI(URI resource) {
+		if (resource == null || resource.toString().isEmpty())
+			throw new BadRequestException("resource parameter is required");
 		try {
 			URI rqUrl = new URI(request.absoluteURI());
 			// the IRI of the resource is the current request, but query part and fragment cut off
@@ -158,24 +180,14 @@ public class StandoffEndpoint implements StandoffApi {
 		}
 	}
 
-	/**
-	 * Similar to Document endpoint: This first gets the resource using the resource provider and then
-	 * transforms it. But a Resource mapping is set.
-	 */
-	private Uni<Void> setMapping(
-			URI resource,
-			String ref,
-			String start,
-			String end,
-			String tree,
-			String mediaType) {
-
-		if (resource == null || resource.toString().isEmpty())
-			throw new BadRequestException("resource parameter is required");
-
+	private Config getConfig() {
 		Config transformationConfig = new Config();
 		transformationConfig.base(request.absoluteURI());
+		return transformationConfig;
+	}
 
+	private RuntimeParameters mkParameters(
+			URI resource, String ref, String start, String end, String tree, String mediaType) {
 		// make RuntimeParameter object from parameters
 		RuntimeParameters params = new RuntimeParameters();
 		Map<String, ParameterValue> map = new HashMap<>();
@@ -186,29 +198,28 @@ public class StandoffEndpoint implements StandoffApi {
 		if (end != null) map.put("end", pvOf(end));
 		if (tree != null) map.put("tree", pvOf(tree));
 		params.globalParameters(map);
-		LOG.info("parameters: {}", map);
+		LOG.debug("parameters: {}", map);
+		return params;
+	}
 
-		LOG.debug("getting metadata for {}", thisIri);
-
+	private MappingTransformation getTransformation(String mediaType, Config config) {
 		Transformation transformation = null;
 		if (mediaType == null) {
 			// get the default transformation or return failure
-			transformation = transformations.get(TRANSFORMATION + TRANSFORMATION_SUFFIX);
+			transformation = transformations.get(TRANSFORMATION);
 			if (transformation == null) {
-				LOG.error("mapper transformation not available: {}", TRANSFORMATION + TRANSFORMATION_SUFFIX);
-				return Uni.createFrom()
-						.failure(new jakarta.ws.rs.BadRequestException(
-								"mapper transformation not available: " + TRANSFORMATION + TRANSFORMATION_SUFFIX));
+				LOG.error("mapper transformation not available: {}", TRANSFORMATION);
+				throw new jakarta.ws.rs.BadRequestException("mapper transformation not available: " + TRANSFORMATION);
 			}
 		} else {
 			// try to get a transformation for the requested media type
 			LOG.info("searching for mapper transformation to media type {}", mediaType);
 			boolean found = false;
 			for (String transformationId : transformations.keySet()) {
-				transformation = transformations.get(transformationId + TRANSFORMATION_SUFFIX);
+				transformation = transformations.get(transformationId);
 				LOG.info(
 						"testing mapper transformation {}, with type {}: {}",
-						transformationId + TRANSFORMATION_SUFFIX,
+						transformationId,
 						transformation.getType(),
 						transformation.getOutputMediaType());
 				if (transformation.getOutputMediaType() != null
@@ -221,33 +232,26 @@ public class StandoffEndpoint implements StandoffApi {
 						// output method XML.
 						Serializer serializer = new Serializer();
 						serializer.setMethod(mediaType);
-						transformationConfig.setSerializer(serializer);
+						config.setSerializer(serializer);
 					}
 					break;
 				}
 			}
 			if (!found) {
 				LOG.error("DTS mapper transformation to media type not available: {}", mediaType);
-				return Uni.createFrom()
-						.failure(new jakarta.ws.rs.BadRequestException(
-								"DTS mapper transformation to requested media type not available: " + mediaType));
+				throw new jakarta.ws.rs.BadRequestException(
+						"DTS mapper transformation to requested media type not available: " + mediaType);
 			}
 		}
-		if (!MapperTransformation.isAssignableBy(transformation)) {
-			throw InternalServerErrorException("transformation is not a DOM mapper");
+		// assert that the transformation is a Mapping Transformation
+		if (!MappingTransformation.class.isAssignableFrom(transformation.getClass())) {
+			throw new InternalServerErrorException("transformation is not a DOM mapper");
 		}
-		final MapperTransformation finalTransformation =
-				transformation; // final required for the lambda expression below
-		final Config finalConfig = transformationConfig;
-
-
-		// async processing of
-		// 1. get collection.json, 2. lookup the resource's location, 3. get the resource, 4. transform it
-		Map<String, String> crContext = Map.of();
-		return collectionMetadataProc
-				.getResourceAsync(resourceProvider, transformationConfig, crContext, thisIri)
-				.plug((s) -> finalTransformation.transformAsync(
-						// TODO: systemId from collectionMetadataProc
-						params, finalConfig, thisIri.toString(), s, resourceProvider, request));
+		MappingTransformation finalTransformation = (MappingTransformation) transformation;
+		if (finalTransformation.canMapResource()) {
+			return finalTransformation;
+		} else {
+			throw new BadRequestException("transformation is cannot be used to map a DOM: " + transformation);
+		}
 	}
 }
