@@ -89,7 +89,7 @@
     <titanium.version>1.7.0</titanium.version>
     <openapitools.version>7.19.0</openapitools.version>
     <dts-transformations.version>0.6.0</dts-transformations.version>
-    <selene.version>0.1.0-SNAPSHOT</selene.version>
+    <selene.version>0.1.1</selene.version>
 
     <quarkus.native.native-image-xmx>8192m</quarkus.native.native-image-xmx>
     <!-- enable docker layers with additional dependencies,
