@@ -125,6 +125,10 @@
       <id>seed-xc-maven</id>
       <url>${distribution.url}</url>
     </repository>
+    <repository>
+      <id>selene</id>
+      <url>https://maven.pkg.github.com/scdh/selene</url>
+    </repository>
   </repositories>
 
   <build>
