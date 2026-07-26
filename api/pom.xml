@@ -17,6 +17,12 @@
   </properties>
 
   <dependencies>
+    <!-- for Selene integration -->
+    <dependency>
+      <groupId>de.wwu.scdh.annotations.selections</groupId>
+      <artifactId>selection-engine-core</artifactId>
+      <version>${selene.version}</version>
+    </dependency>
     <!-- for the annotations in the model and in the api -->
     <dependency>
       <groupId>io.quarkus</groupId>
