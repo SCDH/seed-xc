@@ -88,8 +88,8 @@ public class UrlResourceProvider extends UrlValidator implements ResourceProvide
 		try {
 			URL resolvedUrl = resolved.toURL();
 			URLConnection conn = resolvedUrl.openConnection();
-			conn.setConnectTimeout(config.connectTimeout);
-			conn.setReadTimeout(config.readTimeout);
+			conn.setConnectTimeout(config.getConnectTimeout());
+			conn.setReadTimeout(config.getReadTimeout());
 			conn.connect();
 			return conn.getInputStream();
 		} catch (MalformedURLException e) {

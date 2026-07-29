@@ -26,11 +26,7 @@ public class UrlResourceProviderTest {
 	@BeforeEach
 	public void createProvider()
 			throws ResourceException, ResourceProviderConfigurationException, ResourceNotFoundException {
-		config = new UrlConfig();
-		config.allowedProtocols = "file";
-		config.domainWhiteList = ".*";
-		config.domainBlackList = "asdf";
-		config.allowedFilePath = RESOURCES.getSchemeSpecificPart();
+		config = new UrlConfig("file", ".*", "asdf", RESOURCES.getSchemeSpecificPart(), 0, 0, 1000000);
 		builder = new UrlResourceProviderBuilder();
 		builder.config = config;
 		provider = builder.withBase(RESOURCES);
@@ -51,7 +47,7 @@ public class UrlResourceProviderTest {
 
 	@Test
 	public void testBadScheme() throws ResourceProviderConfigurationException {
-		config.allowedProtocols = "https";
+		config = new UrlConfig("https", ".*", "asdf", RESOURCES.getSchemeSpecificPart(), 0, 0, 1000000);
 		UrlResourceProvider provider2 = new UrlResourceProvider(RESOURCES, config);
 		assertThrows(ResourceException.class, () -> {
 			provider2.openStream(new URI("samples/hello.xml"));
@@ -86,7 +82,7 @@ public class UrlResourceProviderTest {
 	@Disabled
 	@Test
 	public void testConnectionTimeout() throws ResourceProviderConfigurationException {
-		config.connectTimeout = 0;
+		config = new UrlConfig("file", ".*", "asdf", RESOURCES.getSchemeSpecificPart(), 0, 0, 1000000);
 		UrlResourceProvider provider2 = new UrlResourceProvider(RESOURCES, config);
 		assertThrows(ResourceNotFoundException.class, () -> {
 			InputStream input = provider2.openStream(new URI("samples/hello.xml"));

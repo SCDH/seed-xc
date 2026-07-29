@@ -32,11 +32,7 @@ public class UrlResourceProviderBuilderTest {
 
 	@BeforeEach
 	public void createBuilder() {
-		config = new UrlConfig();
-		config.allowedProtocols = "file";
-		config.domainWhiteList = ".*";
-		config.domainBlackList = "asdf";
-		config.allowedFilePath = RESOURCES.getSchemeSpecificPart();
+		config = new UrlConfig("file", ".*", "asdf", RESOURCES.getSchemeSpecificPart(), 0, 0, 1000000);
 		builder = new UrlResourceProviderBuilder();
 		builder.config = config;
 	}
@@ -63,9 +59,8 @@ public class UrlResourceProviderBuilderTest {
 
 	@Test
 	public void testWhiteMS() throws URISyntaxException {
-		config.allowedProtocols = "https";
-		config.domainWhiteList = DOMAINS_WHITE_MS;
-		config.domainBlackList = "";
+		config = new UrlConfig("https", DOMAINS_WHITE_MS, "", RESOURCES.getSchemeSpecificPart(), 0, 0, 1000000);
+		builder.config = config;
 		assertDoesNotThrow(
 				() -> {
 					provider = builder.withBase(new URI("https://zivgitlab.uni-muenster.de"));
@@ -87,9 +82,15 @@ public class UrlResourceProviderBuilderTest {
 
 	@Test
 	public void testWhiteMSRUB() throws URISyntaxException {
-		config.allowedProtocols = "https";
-		config.domainWhiteList = DOMAINS_WHITE_MS + "," + DOMAINS_WHITE_RUB;
-		config.domainBlackList = "";
+		config = new UrlConfig(
+				"https",
+				DOMAINS_WHITE_MS + "," + DOMAINS_WHITE_RUB,
+				"",
+				RESOURCES.getSchemeSpecificPart(),
+				0,
+				0,
+				1000000);
+		builder.config = config;
 		assertDoesNotThrow(
 				() -> {
 					provider = builder.withBase(new URI("https://zivgitlab.uni-muenster.de"));
@@ -110,9 +111,7 @@ public class UrlResourceProviderBuilderTest {
 
 	@Test
 	public void testBlackComOnly() throws URISyntaxException {
-		config.allowedProtocols = "https";
-		config.domainWhiteList = "";
-		config.domainBlackList = DOMAINS_BLACK_COM;
+		config = new UrlConfig("https", "", DOMAINS_BLACK_COM, RESOURCES.getSchemeSpecificPart(), 0, 0, 1000000);
 		builder.config = config;
 		assertDoesNotThrow(
 				() -> {
