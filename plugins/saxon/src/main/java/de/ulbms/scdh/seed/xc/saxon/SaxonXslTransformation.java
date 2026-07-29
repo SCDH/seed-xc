@@ -5,6 +5,9 @@ import de.ulbms.scdh.seed.xc.saxon.harden.ChainingResourceResolver;
 import de.ulbms.scdh.seed.xc.saxon.harden.ChainingUnparsedTextURIResolver;
 import de.ulbms.scdh.seed.xc.saxon.harden.ServiceConfiguration;
 import de.ulbms.scdh.seed.xc.saxon.harden.ZipFileURIResolver;
+import de.wwu.scdh.annotation.selection.resource.MappedDOMResource;
+import io.smallrye.mutiny.Uni;
+import io.vertx.core.http.HttpServerRequest;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import java.io.ByteArrayOutputStream;
@@ -15,6 +18,8 @@ import java.util.Map;
 import java.util.zip.ZipFile;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
+
+import jakarta.ws.rs.BadRequestException;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.s9api.ItemType;
@@ -24,6 +29,7 @@ import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,11 +40,15 @@ import org.slf4j.LoggerFactory;
  * class must be application scoped.
  */
 @Dependent
-public class SaxonXslTransformation extends TransformationBase implements Transformation, ExportingCompiler {
+public class SaxonXslTransformation extends TransformationBase
+		implements Transformation, MappingTransformation, ExportingCompiler {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SaxonXslTransformation.class);
 
 	public static final String TRANSFORMATION_TYPE = "xslt";
+
+	@ConfigProperty(name = "selene-xslt-tracing-library", defaultValue = "libtrace.xsl")
+	protected String seleneTracingLibrary;
 
 	/**
 	 * {@inheritDoc}
@@ -54,7 +64,7 @@ public class SaxonXslTransformation extends TransformationBase implements Transf
 	@Inject
 	protected ZipFileURIResolver zipResourceResolver;
 
-	private XsltExecutable executable;
+	private XsltExecutable executable, mappingExecutable = null;
 
 	/**
 	 * Make a {@link ResourceRequest} from a URI given as string.
@@ -115,6 +125,13 @@ public class SaxonXslTransformation extends TransformationBase implements Transf
 			XsltCompiler compiler = processor.newXsltCompiler();
 			compiler.setJustInTimeCompilation(false);
 			compiler.setResourceResolver(compileTimeResourceResolver);
+			// set up the mapping compiler
+			XsltCompiler mappingCompiler = processor.newXsltCompiler();
+			mappingCompiler.setJustInTimeCompilation(false);
+			mappingCompiler.setResourceResolver(compileTimeResourceResolver);
+			boolean isMappingTransformation = false;
+			// compile tracing library with appropriate parameters
+			// TODO
 			// set compile time parameters
 			if (transformationInfo.getCompileTimeParameters() != null) {
 				ConversionRules conversionRules =
@@ -128,11 +145,13 @@ public class SaxonXslTransformation extends TransformationBase implements Transf
 					if (compileTimeParam.getType() == null) {
 						// assume xs:string type
 						this.setAtomicParameter(compiler, compileTimeParam, stringToStringConverter);
+						this.setAtomicParameter(mappingCompiler, compileTimeParam, stringToStringConverter);
 					} else {
 						SchemaType schemaType = BuiltInType.getSchemaTypeByLocalName(compileTimeParam.getType());
 						if (schemaType == null) {
 							// try xs:string type
 							this.setAtomicParameter(compiler, compileTimeParam, stringToStringConverter);
+							this.setAtomicParameter(mappingCompiler, compileTimeParam, stringToStringConverter);
 						} else if (schemaType.isAtomicType()) {
 							BuiltInAtomicType atomicType = (BuiltInAtomicType) schemaType;
 							StringConverter converter = atomicType.getStringConverter(conversionRules);
@@ -143,6 +162,7 @@ public class SaxonXslTransformation extends TransformationBase implements Transf
 										compileTimeParam.getType());
 							} else {
 								this.setAtomicParameter(compiler, compileTimeParam, converter);
+								this.setAtomicParameter(mappingCompiler, compileTimeParam, converter);
 							}
 						} else {
 							LOG.error(
@@ -167,6 +187,16 @@ public class SaxonXslTransformation extends TransformationBase implements Transf
 						} else {
 							compiler.importPackage(pkg);
 						}
+						if (library.getLocation().endsWith(seleneTracingLibrary)) {
+							isMappingTransformation = true;
+						} else {
+							XsltPackage mpkg = mappingCompiler.compilePackage(packageSource);
+							if (library.getAsName() != null && library.getAsVersion() != null) {
+								mappingCompiler.importPackage(mpkg, library.getAsName(), library.getAsVersion());
+							} else {
+								mappingCompiler.importPackage(mpkg);
+							}
+						}
 					} catch (SaxonApiException e) {
 						LOG.error("Failed to compile package from '{}': {}", library.getLocation(), e.getMessage());
 						throw new ConfigurationException(
@@ -176,6 +206,9 @@ public class SaxonXslTransformation extends TransformationBase implements Transf
 			}
 			// then compile the stylesheet
 			executable = compiler.compile(stylesheet);
+			if (isMappingTransformation) {
+				mappingExecutable = mappingCompiler.compile(stylesheet);
+			}
 		} catch (SaxonApiException e) {
 			LOG.error("Failed to setup transformation '{}':\n{}", transformationInfo.getIdent(), e.getMessage());
 			throw new ConfigurationException(
@@ -398,5 +431,32 @@ public class SaxonXslTransformation extends TransformationBase implements Transf
 		}
 		LOG.debug("made stylesheet parameters '{}'", stylesheetParameters);
 		return stylesheetParameters;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean canMapResource() {
+		return mappingExecutable != null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Uni<MappedDOMResource> mapResourceAsync(
+			RuntimeParameters parameters,
+			Config config,
+			String systemId,
+			Uni<? extends InputStream> source,
+			ResourceProvider resourceProvider,
+			HttpServerRequest request) {
+		if (mappingExecutable == null) {
+			throw new BadRequestException("pointer transformation not available" + transformationInfo.getIdent());
+		}
+
+		// TODO
+		return null;
 	}
 }
