@@ -122,8 +122,8 @@ This file is similar to the collection endpoint's responses, but
 	....
     ],
     "@context": [ ⓫
-    "https://scdh.github.io/dts-transformations/latest/context/modules/dct-nest.json",
     "https://scdh.github.io/dts-transformations/latest/context/modules/1.0rc1.json",
+    "https://scdh.github.io/dts-transformations/latest/context/modules/dct-obj.json",
     "https://raw.githubusercontent.com/SCDH/seed-xc/refs/heads/main/dts/src/main/resources/META-INF/resources/context/seed.json",
     {
         "@base": null, ⓬
@@ -287,8 +287,8 @@ and copy the definitions in there.
 {
 	"@graph": [ ... ],
 	"@context": [
-		"https://scdh.github.io/dts-transformations/latest/context/modules/dct-nest.json",
 		"https://scdh.github.io/dts-transformations/latest/context/modules/1.0rc1.json",
+		"https://scdh.github.io/dts-transformations/latest/context/modules/dct-obj.json",
 		"https://raw.githubusercontent.com/SCDH/seed-xc/refs/heads/main/dts/src/main/resources/META-INF/resources/context/seed.json", ❶
         {
 			"@base": null,
