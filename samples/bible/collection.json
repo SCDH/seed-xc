@@ -3,7 +3,6 @@
     {
       "@id": "general",
       "@type": "Collection",
-      "dtsVersion": "1.0rc1",
       "title": "Sample Collection of DTS Transformations",
       "dublinCore": {
         "title": [
@@ -70,7 +69,6 @@
     {
       "@id": "John",
       "@type": "Resource",
-      "dtsVersion": "1.0rc1",
       "title": "The Book of John",
       "seed:location": {
         "@type": "Path",
@@ -80,7 +78,6 @@
     {
       "@id": "4Ezr",
       "@type": "Resource",
-      "dtsVersion": "1.0rc1",
       "title": "The 4th Book of Esra",
       "dublinCore": {
         "title": [
