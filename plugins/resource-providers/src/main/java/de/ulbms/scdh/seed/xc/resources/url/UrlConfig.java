@@ -1,5 +1,9 @@
 package de.ulbms.scdh.seed.xc.resources.url;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+
+@ApplicationScoped
 public class UrlConfig {
 
 	private final String allowedProtocols;
@@ -17,13 +21,18 @@ public class UrlConfig {
 	private final long resourceMaxSize;
 
 	public UrlConfig(
-			String allowedProtocols,
-			String domainWhiteList,
-			String domainBlackList,
-			String allowedFilePath,
-			int connectTimeout,
-			int readTimeout,
-			long resourceMaxSize) {
+			@ConfigProperty(name = "resources-url-allowed-protocols", defaultValue = "file,http,https")
+					String allowedProtocols,
+			@ConfigProperty(name = "resources-url-domain-whitelist", defaultValue = ".*") String domainWhiteList,
+			@ConfigProperty(name = "resources-url-domain-whitelist", defaultValue = "drive-by-download")
+					String domainBlackList,
+			@ConfigProperty(
+							name = "de.ulbms.scdh.seed.xc.resources.filesystem.FileSystemResourceProvider.path",
+							defaultValue = "/")
+					String allowedFilePath,
+			@ConfigProperty(name = "url-connect-timeout", defaultValue = "10000") int connectTimeout,
+			@ConfigProperty(name = "url-read-timeout", defaultValue = "10000") int readTimeout,
+			@ConfigProperty(name = "resouce-max-size", defaultValue = "1048576") long resourceMaxSize) {
 		this.allowedProtocols = allowedProtocols;
 		this.domainWhiteList = domainWhiteList;
 		this.domainBlackList = domainBlackList;
