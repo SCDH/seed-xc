@@ -15,3 +15,6 @@ buildah-container-id
 # local maven repo in CI/CD
 # must be ignored for formatting test
 /.m2
+
+# sample data
+/samples/4esra
