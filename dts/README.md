@@ -78,8 +78,16 @@ URL-encoded** (which is done by Swagger UI behind the scenes based on
 the datatype declared for `location`):
 
 ```shell
-curl -X 'GET' 'http://localhost:8080/url/https%3A%2F%2Fscdh.zivgitlabpages.uni-muenster.de%2Fdoering-4esra%2Fedition-4esra%2F/collection'
+curl -X 'GET' 'http://localhost:8080/url/https%3A%2F%2Fscdh.zivgitlabpages.uni-muenster.de%2Fdoering-4esra%2Fedition-4esra%2F/entry'
 ```
+
+If you want to inspect indented JSON output, pipe it through `yq` like so:
+
+```shell
+curl -X 'GET'   'http://localhost:8080/url/https%3A%2F%2Fscdh.zivgitlabpages.uni-muenster.de%2Fdoering-4esra%2Fedition-4esra%2F/collection' | yq
+```
+
+
 
 ### Parts of the URL
 
