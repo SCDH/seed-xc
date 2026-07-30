@@ -54,12 +54,26 @@ Start the service:
 docker run -i --rm -p 8080:8080 scdh/distributed-test-services
 ```
 
+The instance comes with Swagger UI under
+http://localhost:8080/q/swagger-ui .
+
 This container image is highly optimized for deployment on cloud
 infrastructure, e.g. a kubernetes cluster. Its startup time is far
 under a second. With the [DTS
 Transformations](https://github.com/scdh/dts-transformations), which
 are configured per default, the startup time is in fact less than a
 tenth of a second.
+
+There's a sample project out
+[there](https://scdh.zivgitlabpages.uni-muenster.de/doering-4esra/edition-4esra/collection.json). For
+serving it through your local instance, use the following parameters
+on the endpoints of the DTS instance: `provider` = `url`; `location`
+=
+`https://scdh.zivgitlabpages.uni-muenster.de/doering-4esra/edition-4esra/`. Note,
+that the trailing slash on the URL is important (right now). For curl,
+the URL must be url-encoded; use the instance's Swagger UI for getting
+an example.
+
 
 Read the [documentation](../doc/dts.md) on how to serve your own
 content.
