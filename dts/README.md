@@ -67,12 +67,18 @@ tenth of a second.
 There's a sample project out
 [there](https://scdh.zivgitlabpages.uni-muenster.de/doering-4esra/edition-4esra/collection.json). For
 serving it through your local instance, use the following parameters
-on the endpoints of the DTS instance: `provider` = `url`; `location`
-=
-`https://scdh.zivgitlabpages.uni-muenster.de/doering-4esra/edition-4esra/`. Note,
-that the trailing slash on the URL is important (right now). For curl,
-the URL must be url-encoded; use the instance's Swagger UI for getting
-an example.
+on the endpoints of the DTS instance: `provider` must be `url`;
+`location` must be
+`https://scdh.zivgitlabpages.uni-muenster.de/doering-4esra/edition-4esra/`.
+
+Note, that the **trailing slash on the URL** is important (right
+now). Also note, that for curl and any other client, the URL must be
+url-encode (which is done by Swagger UI behind the scenes based on the
+datatype declared for `location`):
+
+```shell
+curl -X 'GET' 'http://localhost:8080/url/https%3A%2F%2Fscdh.zivgitlabpages.uni-muenster.de%2Fdoering-4esra%2Fedition-4esra%2F/collection'
+```
 
 Read the [documentation](../doc/dts.md) on how to serve your own
 content and on how to mount it into the instance for testing.
