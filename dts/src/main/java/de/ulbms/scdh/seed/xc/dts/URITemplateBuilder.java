@@ -80,20 +80,21 @@ public class URITemplateBuilder {
 		}
 		String origPath = request.getRawPath();
 		LOG.info("original path: {}", origPath);
-		origPath = origPath.replace("%25", "%"); // escaped by new URI(...)
 		// the /endpint/ path is the but-last part
 		int endpointEndingSlash = origPath.lastIndexOf('/');
 		int endpointStartingSlash = origPath.lastIndexOf('/', endpointEndingSlash - 1);
 		String path = origPath.substring(0, endpointStartingSlash + 1) + endpoint;
 		try {
-			URI template = new URI(
+			URI base = new URI(
 					request.getScheme(),
 					request.getRawUserInfo(),
 					request.getHost(),
 					request.getPort(),
-					path,
+					null,
 					null,
 					null);
+			// use single-argument constructor to prevent path to be escaped!
+			URI template = new URI(base.toString() + path);
 			return template + origPath.substring(endpointEndingSlash) + RESOURCE_TEMPLATE.get(endpoint);
 		} catch (URISyntaxException e) {
 			throw new InternalServerErrorException("failed to make template from " + request);
