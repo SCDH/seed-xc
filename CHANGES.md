@@ -1,5 +1,9 @@
 # Changes
 
+## 0.0.15
+
+- makes entry endpoint work by fixing #63
+
 ## 0.0.14
 
 - fixes bugs #60 ... #62
