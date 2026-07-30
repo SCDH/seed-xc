@@ -107,8 +107,8 @@ content and on how to mount it into the instance for testing.
 
 ## Development
 
-To build the service and get into development, have a look at
-[dev.md](dev.md).
+To build the service and get into the details of the implementation or
+the container image, start with reading [dev.md](dev.md)!
 
 ## FAQ
 
