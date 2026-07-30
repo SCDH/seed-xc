@@ -71,10 +71,11 @@ on the endpoints of the DTS instance: `provider` must be `url`;
 `location` must be
 `https://scdh.zivgitlabpages.uni-muenster.de/doering-4esra/edition-4esra/`.
 
-Note, that the **trailing slash on the URL** is important (right
-now). Also note, that for curl and any other client, the URL must be
-url-encode (which is done by Swagger UI behind the scenes based on the
-datatype declared for `location`):
+Note, that the **trailing slash on the location URL** is important
+([right now](https://github.com/SCDH/seed-xc/issues/59)). Also note,
+that for curl and any other client, the value of **`location` must be
+URL-encoded** (which is done by Swagger UI behind the scenes based on
+the datatype declared for `location`):
 
 ```shell
 curl -X 'GET' 'http://localhost:8080/url/https%3A%2F%2Fscdh.zivgitlabpages.uni-muenster.de%2Fdoering-4esra%2Fedition-4esra%2F/collection'
