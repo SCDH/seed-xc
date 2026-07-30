@@ -1,5 +1,9 @@
 # Changes
 
+## 0.0.14
+
+- fixes bugs #60 ... #62
+
 ## 0.0.13
 
 - fixes issue issue with URL resource provider (see issue #57)
