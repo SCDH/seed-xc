@@ -41,7 +41,7 @@ with SEED DTS, not only TEI-XML.
 The official docker image is on [docker.io](https://hub.docker.com/r/scdh/distributed-test-services).
 
 ```shell
-docker pull scdh/distributed-test-services
+docker pull scdh/distributed-test-services:latest
 ```
 
 Start the service:
