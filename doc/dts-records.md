@@ -52,6 +52,8 @@ curl -X 'GET' \
 
 ## Requirements
 
+Here's what's required for serving your Edition through SEED DTS:
+
 1. Your TEI-XML documents
 1. a `collection.json` metadata file listing your documents as DTS
    resources and describing the collection structure they appear in.
@@ -75,6 +77,7 @@ Ezra, an apocrypha by the prophet Ezra. And there's `collection.json`.
 └── collection.json
 ```
 
+This example is similar to the [sample project](../dts#sample-dataset).
 
 ### TEI-XML documents
 
