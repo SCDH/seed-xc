@@ -74,9 +74,8 @@ that the trailing slash on the URL is important (right now). For curl,
 the URL must be url-encoded; use the instance's Swagger UI for getting
 an example.
 
-
 Read the [documentation](../doc/dts.md) on how to serve your own
-content.
+content and on how to mount it into the instance for testing.
 
 ### Dev Server
 
