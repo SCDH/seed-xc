@@ -19,6 +19,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,18 +77,15 @@ public class CollectionEndpoint implements CollectionApi {
 	 */
 	@Override
 	public Uni<byte[]> collectionDefault(URI provider, URI location) {
+		String front = "/" + provider.toString() + "/" + URLEncoder.encode(location.toString(), StandardCharsets.UTF_8);
 		URI thisIri;
 		try {
 			URI rqUrl = new URI(request.absoluteURI());
 			// the IRI of the collection/resource is the current request, but query part and fragment cut off
-			thisIri = new URI(
-					rqUrl.getScheme(),
-					rqUrl.getRawUserInfo(),
-					rqUrl.getHost(),
-					rqUrl.getPort(),
-					rqUrl.getPath() + "/" + defaultCollection,
-					null,
-					null);
+			URI base = new URI(
+					rqUrl.getScheme(), rqUrl.getRawUserInfo(), rqUrl.getHost(), rqUrl.getPort(), null, null, null);
+			// use single-argument constructor to avoid extra escaping, see #60
+			thisIri = new URI(base.toString() + front + "/collection/" + defaultCollection);
 		} catch (URISyntaxException e) {
 			throw new InternalServerErrorException("failed to make Base URI");
 		}
@@ -99,19 +98,16 @@ public class CollectionEndpoint implements CollectionApi {
 	 */
 	@Override
 	public Uni<byte[]> collection(URI id, URI provider, URI location, String nav, Integer page) {
-
+		String front = "/" + provider.toString() + "/" + URLEncoder.encode(location.toString(), StandardCharsets.UTF_8);
+		String idEncoded = URLEncoder.encode(id.toString(), StandardCharsets.UTF_8);
 		URI thisIri;
 		try {
 			URI rqUrl = new URI(request.absoluteURI());
 			// the IRI of the collection/resource is the current request, but query part and fragment cut off
-			thisIri = new URI(
-					rqUrl.getScheme(),
-					rqUrl.getRawUserInfo(),
-					rqUrl.getHost(),
-					rqUrl.getPort(),
-					rqUrl.getPath(),
-					null,
-					null);
+			URI base = new URI(
+					rqUrl.getScheme(), rqUrl.getRawUserInfo(), rqUrl.getHost(), rqUrl.getPort(), null, null, null);
+			// use single-argument constructor to avoid extra escaping, see #60
+			thisIri = new URI(base.toString() + front + "/collection/" + idEncoded);
 		} catch (URISyntaxException e) {
 			throw new InternalServerErrorException("failed to make Base URI");
 		}

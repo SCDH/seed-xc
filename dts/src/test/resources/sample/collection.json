@@ -4,7 +4,6 @@
 	    "@id": "general",
 	    "@type": "Collection",
 	    "collection": "/collection{?id,page,nav}",
-	    "dtsVersion": "1.0rc1",
 	    "totalParents": 0,
 	    "totalChildren": 2,
 	    "title": "Sample Collection of DTS Transformations",

@@ -4,8 +4,6 @@ import de.ulbms.scdh.seed.xc.api.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.net.URI;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * A {@link UrlResourceProviderBuilder} is a {@link ResourceProviderBuilder} that produces {@link UrlResourceProvider}
@@ -14,10 +12,8 @@ import org.slf4j.LoggerFactory;
 @ApplicationScoped
 public class UrlResourceProviderBuilder extends UrlValidator implements ResourceProviderBuilder {
 
-	private static final Logger LOG = LoggerFactory.getLogger(UrlResourceProviderBuilder.class);
-
 	@Inject
-	UrlConfig config;
+	protected UrlConfig config;
 
 	/**
 	 * {@inheritDoc}

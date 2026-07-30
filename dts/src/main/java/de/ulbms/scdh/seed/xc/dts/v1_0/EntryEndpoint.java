@@ -27,11 +27,11 @@ public class EntryEndpoint implements EntryApi {
 	URITemplateBuilder templateBuilder;
 
 	@Override
-	public Uni<Entry> entry(URI location, URI provider) {
+	public Uni<Entry> entry(URI provider, URI location) {
 
 		ResourceProvider resourceProvider;
 		try {
-			ResourceProviderBuilder resourceProviderBuilder = resourceProviderManager.get(location.toString());
+			ResourceProviderBuilder resourceProviderBuilder = resourceProviderManager.get(provider.toString());
 			resourceProvider = resourceProviderBuilder.withBase(location);
 		} catch (ResourceProviderConfigurationException e) {
 			throw new BadRequestException("no resource provider type " + provider);

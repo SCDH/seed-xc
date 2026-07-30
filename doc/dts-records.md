@@ -2,7 +2,57 @@
 
 This chapter described how to create a record for publication through DTS.
 
+## Testing
+
+Once you have prepared your dataset like described below, you can use
+the production version of the SEED DTS container image for testing as
+if your dataset was online on the production service.
+
+For testing a local dataset, [bind
+mount](https://docs.docker.com/engine/storage/bind-mounts/) the
+dataset's base directory below the containers `/work/projects/`
+directory.
+
+```shell
+docker pull scdh/distributed-test-services
+```
+
+Start the service:
+
+```shell
+docker run --mount type=bind,src=<HOST_PATH>,dst=/work/projects/<NAME> -i --rm -p 8080:8080 scdh/distributed-test-services
+```
+
+Note, that `<HOST_PATH>` must be an absolute path on your system. On
+Linux, you can use `realpath` for turning a relative into an absolute
+path.
+
+Example: For bind mounting local `samples/bible` and make it
+accessible under `agrapha` run:
+
+```shell
+docker run --mount type=bind,src=$(realpath samples/bible),dst=/work/projects/agrapha -i --rm -p 8080:8080 scdh/distributed-test-services
+```
+
+The instance comes with Swagger UI under
+http://localhost:8080/q/swagger-ui .
+
+For serving the dataset, use the following parameters on the endpoints
+of the DTS instance: `provider` = `file` for using the file resource
+provider; `location` = `<NAME>` for accessing your project.
+
+Using curl:
+
+```shell
+curl -X 'GET' \
+  'http://localhost:8080/file/NAME/collection' \
+  -H 'accept: application/ld+json'
+```
+
+
 ## Requirements
+
+Here's what's required for serving your Edition through SEED DTS:
 
 1. Your TEI-XML documents
 1. a `collection.json` metadata file listing your documents as DTS
@@ -27,6 +77,8 @@ Ezra, an apocrypha by the prophet Ezra. And there's `collection.json`.
 └── collection.json
 ```
 
+This example is similar to the [sample
+dataset](../dts/README.md#sample-dataset).
 
 ### TEI-XML documents
 
@@ -43,7 +95,7 @@ This file is similar to the collection endpoint's responses, but
 2. many properties are calculated by the service and can be dropped
 3. must contain a `seed:location` property for each DTS Resource,
    which points to a location, where the service find it.
-   
+
 
 #### Example
 
@@ -94,7 +146,7 @@ This file is similar to the collection endpoint's responses, but
             "value": "4Ezr-la"
             }
         ]
-        }   
+        }
     },
     {
         "@id": "4Ezr-la-de",
@@ -117,13 +169,13 @@ This file is similar to the collection endpoint's responses, but
 					"value": "4Ezr-la-de"
 				}
 			]
-        }   
+        }
     },
 	....
     ],
     "@context": [ ⓫
-    "https://scdh.github.io/dts-transformations/latest/context/modules/dct-nest.json",
     "https://scdh.github.io/dts-transformations/latest/context/modules/1.0rc1.json",
+    "https://scdh.github.io/dts-transformations/latest/context/modules/dct-obj.json",
     "https://raw.githubusercontent.com/SCDH/seed-xc/refs/heads/main/dts/src/main/resources/META-INF/resources/context/seed.json",
     {
         "@base": null, ⓬
@@ -157,7 +209,7 @@ This file is similar to the collection endpoint's responses, but
 11. The JSON-LD context makes this a representation of an RDF
     graph. The `collection.json` will be parsed as a RDF graph on the
     server and processed with RDF tools like SPARQL.
-	
+
 ## `@id`
 
 The identifiers in `collection.json` determine the IRIs of the linked
@@ -251,7 +303,7 @@ metadata file and to avoid characters, that need URL encoding.
 }
 ```
 
-will expand to 
+will expand to
 
 ```json
 {
@@ -287,15 +339,15 @@ and copy the definitions in there.
 {
 	"@graph": [ ... ],
 	"@context": [
-		"https://scdh.github.io/dts-transformations/latest/context/modules/dct-nest.json",
 		"https://scdh.github.io/dts-transformations/latest/context/modules/1.0rc1.json",
+		"https://scdh.github.io/dts-transformations/latest/context/modules/dct-obj.json",
 		"https://raw.githubusercontent.com/SCDH/seed-xc/refs/heads/main/dts/src/main/resources/META-INF/resources/context/seed.json", ❶
         {
 			"@base": null,
 	    	"extensions": "@nest"
 		}
     ],
-	"configuration": { 
+	"configuration": {
 		"frames": {
 			"collection": {
 				"document": { ❷
@@ -317,7 +369,7 @@ and copy the definitions in there.
 			"navigation": { ❸
 				"location": "https://dtsapi.org/specifications/context/2.0.json"
 			}
-		}		
+		}
 	}
 ```
 
@@ -359,4 +411,3 @@ See [Config](../api/src/main/resources/openapi/seed-xc-openapi.yaml#/schemas/con
 | `config.context.document` | DTS     | collection | `/configuration/frames/(all|collection)/document` | JsonLD Frame         | dito for complex frames                    |
 | `comfig.context.location` | DTS     | navigation | `/configuration/frames/(all|navigation)/location` | string parsed as URI | configure `@context` on a per-record basis |
 | `config.context.document` | DTS     | navigation | `/configuration/frames/(all|navigation)/document` | JsonLD Context       | dito for complex contexts                  |
-

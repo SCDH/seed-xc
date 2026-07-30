@@ -29,23 +29,24 @@ abstract class UrlValidator {
 
 	protected void configure(UrlConfig config) throws ResourceProviderConfigurationException {
 		if (!isConfigured) {
-			allowedProtocolSet = new HashSet<>(Arrays.asList(config.allowedProtocols.split(",")));
+			allowedProtocolSet =
+					new HashSet<>(Arrays.asList(config.getAllowedProtocols().split(",")));
 
-			domainWhiteList = config.domainWhiteList;
+			domainWhiteList = config.getDomainWhiteList();
 			List<Pattern> patterns = new ArrayList<>();
-			for (String domain : config.domainWhiteList.split(",")) {
+			for (String domain : config.getDomainWhiteList().split(",")) {
 				patterns.add(Pattern.compile(domain));
 			}
 			domainWhiteListPatterns = List.copyOf(patterns); // unmodifiable
 
 			patterns = new ArrayList<>();
-			for (String domain : config.domainBlackList.split(",")) {
+			for (String domain : config.getDomainBlackList().split(",")) {
 				patterns.add(Pattern.compile(domain));
 			}
 			domainBlackListPatterns = List.copyOf(patterns); // unmodifiable
 
 			try {
-				allowedFileUri = new URI(config.allowedFilePath);
+				allowedFileUri = new URI(config.getAllowedFilePath());
 			} catch (URISyntaxException e) {
 				LOG.error("configuration error for allowed file path: {}", e.getMessage());
 				throw new ResourceProviderConfigurationException(e);

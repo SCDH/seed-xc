@@ -22,6 +22,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -109,16 +111,15 @@ public class NavigationEndpoint implements NavigationApi {
 
 		URI thisIri;
 		try {
+			String front =
+					"/" + provider.toString() + "/" + URLEncoder.encode(location.toString(), StandardCharsets.UTF_8);
+			String resourceEncoded = URLEncoder.encode(resource.toString(), StandardCharsets.UTF_8);
 			URI rqUrl = new URI(request.absoluteURI());
 			// the IRI of the resource is the current request, but query part and fragment cut off
-			thisIri = new URI(
-					rqUrl.getScheme(),
-					rqUrl.getRawUserInfo(),
-					rqUrl.getHost(),
-					rqUrl.getPort(),
-					rqUrl.getPath(),
-					null,
-					null);
+			URI base = new URI(
+					rqUrl.getScheme(), rqUrl.getRawUserInfo(), rqUrl.getHost(), rqUrl.getPort(), null, null, null);
+			// use single-argument constructor to avoid extra escaping! see #61
+			thisIri = new URI(base.toString() + front + "/navigation/" + resourceEncoded);
 		} catch (URISyntaxException e) {
 			throw new InternalServerErrorException("failed to make Base URI");
 		}

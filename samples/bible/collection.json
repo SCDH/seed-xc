@@ -3,7 +3,6 @@
     {
       "@id": "general",
       "@type": "Collection",
-      "dtsVersion": "1.0rc1",
       "title": "Sample Collection of DTS Transformations",
       "dublinCore": {
         "title": [
@@ -70,7 +69,6 @@
     {
       "@id": "John",
       "@type": "Resource",
-      "dtsVersion": "1.0rc1",
       "title": "The Book of John",
       "seed:location": {
         "@type": "Path",
@@ -80,7 +78,6 @@
     {
       "@id": "4Ezr",
       "@type": "Resource",
-      "dtsVersion": "1.0rc1",
       "title": "The 4th Book of Esra",
       "dublinCore": {
         "title": [
@@ -134,8 +131,8 @@
     }
   ],
   "@context": [
-    "https://scdh.github.io/dts-transformations/latest/context/modules/dct-nest.json",
     "https://scdh.github.io/dts-transformations/latest/context/modules/1.0rc1.json",
+    "https://scdh.github.io/dts-transformations/latest/context/modules/dct-obj.json",
     "https://raw.githubusercontent.com/SCDH/seed-xc/refs/heads/main/dts/src/main/resources/META-INF/resources/context/seed.json",
     {
       "@base": null,
