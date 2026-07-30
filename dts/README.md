@@ -102,13 +102,13 @@ For more details see [docs](../doc/dts.md#front).
 
 ### Preparing your own Edition
 
-Read the [documentation](../doc/dts.md) on how to serve your own
+Read the [documentation](../doc/dts-records.md) on how to serve your own
 content and on how to mount it into the instance for testing.
 
 ## Development
 
 To build the service and get into development, have a look at
-[dev.md](dev).
+[dev.md](dev.md).
 
 ## FAQ
 
