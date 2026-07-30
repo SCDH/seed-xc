@@ -77,7 +77,8 @@ Ezra, an apocrypha by the prophet Ezra. And there's `collection.json`.
 └── collection.json
 ```
 
-This example is similar to the [sample project](../dts#sample-dataset).
+This example is similar to the [sample
+dataset](../dts/README.md#sample-dataset).
 
 ### TEI-XML documents
 
