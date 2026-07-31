@@ -491,8 +491,28 @@ public class SaxonXslTransformation extends TransformationBase
 		if (mappingExecutable == null) {
 			throw new BadRequestException("pointer transformation not available" + transformationInfo.getIdent());
 		}
-
-		// TODO
-		return null;
+		// TODO: improve use of systemId, preimageIri, and imageIri
+		return source.onItem()
+				.transform(inputStream -> {
+					ResourceBuilder resourceBuilder = new ResourceBuilder(processor);
+					DOMResource resource;
+					try {
+						de.wwu.scdh.annotation.selection.Resource<?> parsed =
+								resourceBuilder.parseResource(preimageIri, inputStream, ResourceBuilder.Parser.XML);
+						return (DOMResource) parsed;
+					} catch (de.wwu.scdh.annotation.selection.ResourceException e) {
+						throw new InternalServerErrorException("failed to parse resource " + systemId);
+					}
+				})
+				.onItem()
+				.transform(resource -> {
+					try {
+						Xslt30Transformer transformer = mappingExecutable.load30();
+						Class<? extends Point> pointerClass = ResourceBuilder.pointerClassFromOutputMethod(transformer);
+						return ResourceBuilder.mapWithXsltTracePackage(resource, transformer, pointerClass);
+					} catch (de.wwu.scdh.annotation.selection.ResourceException e) {
+						throw new InternalServerErrorException("failed to map resource " + systemId);
+					}
+				});
 	}
 }
