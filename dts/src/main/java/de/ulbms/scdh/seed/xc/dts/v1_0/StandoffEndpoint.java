@@ -17,6 +17,8 @@ import jakarta.ws.rs.NotFoundException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -61,7 +63,7 @@ public class StandoffEndpoint implements StandoffApi {
 	@Inject
 	HttpServerRequest request;
 
-	private URI thisIri;
+	private URI preimageIri, imageIri;
 
 	private ResourceProvider resourceProvider;
 
@@ -93,17 +95,24 @@ public class StandoffEndpoint implements StandoffApi {
 			String tree,
 			String mediaType,
 			InputStream frame) {
-		setIRI(resource);
+		setIRI(provider, location, resource, "backward");
 		setResourceProvider(provider, location);
 		final Config config = getConfig();
 		final RuntimeParameters parameters = mkParameters(resource, ref, start, end, tree, mediaType);
 		final MappingTransformation transformation = getTransformation(mediaType, config);
 
 		collectionMetadataProc
-				.getResourceAsync(resourceProvider, config, Map.of(), thisIri)
+				.getResourceAsync(resourceProvider, config, Map.of(), preimageIri)
 				.plug(s -> transformation.mapResourceAsync(
 						// TODO: systemId from collectionMetadataProc
-						parameters, config, thisIri.toString(), s, resourceProvider, request));
+						parameters,
+						config,
+						preimageIri.toString(),
+						preimageIri,
+						imageIri,
+						s,
+						resourceProvider,
+						request));
 		// TODO
 
 		return null;
@@ -125,17 +134,24 @@ public class StandoffEndpoint implements StandoffApi {
 			String mediaType,
 			InputStream frame) {
 
-		setIRI(resource);
+		setIRI(provider, location, resource, "forward");
 		setResourceProvider(provider, location);
 		final Config config = getConfig();
 		final RuntimeParameters parameters = mkParameters(resource, ref, start, end, tree, mediaType);
 		final MappingTransformation transformation = getTransformation(mediaType, config);
 
 		collectionMetadataProc
-				.getResourceAsync(resourceProvider, config, Map.of(), thisIri)
+				.getResourceAsync(resourceProvider, config, Map.of(), preimageIri)
 				.plug(s -> transformation.mapResourceAsync(
 						// TODO: systemId from collectionMetadataProc
-						parameters, config, thisIri.toString(), s, resourceProvider, request));
+						parameters,
+						config,
+						preimageIri.toString(),
+						preimageIri,
+						imageIri,
+						s,
+						resourceProvider,
+						request));
 		// TODO
 
 		return null;
@@ -161,20 +177,20 @@ public class StandoffEndpoint implements StandoffApi {
 	 * Set the IRI of the resource. According to the URI templates,
 	 * this is essentially the request URL, but query and fragment parts dropped.
 	 */
-	private void setIRI(URI resource) {
+	private void setIRI(URI provider, URI location, URI resource, String direction) {
 		if (resource == null || resource.toString().isEmpty())
 			throw new BadRequestException("resource parameter is required");
 		try {
+			String front =
+					"/" + provider.toString() + "/" + URLEncoder.encode(location.toString(), StandardCharsets.UTF_8);
+			String resourceEncoded = URLEncoder.encode(resource.toString(), StandardCharsets.UTF_8);
 			URI rqUrl = new URI(request.absoluteURI());
 			// the IRI of the resource is the current request, but query part and fragment cut off
-			thisIri = new URI(
-					rqUrl.getScheme(),
-					rqUrl.getRawUserInfo(),
-					rqUrl.getHost(),
-					rqUrl.getPort(),
-					rqUrl.getPath(),
-					null,
-					null);
+			URI base = new URI(
+					rqUrl.getScheme(), rqUrl.getRawUserInfo(), rqUrl.getHost(), rqUrl.getPort(), null, null, null);
+			// use single-argument constructor to avoid extra escaping! see #61
+			preimageIri = new URI(base.toString() + front + "/oa/" + direction + "/" + resourceEncoded);
+			imageIri = new URI(base.toString() + front + "/oa/" + direction + "/" + resourceEncoded + rqUrl.getQuery());
 		} catch (URISyntaxException e) {
 			throw new InternalServerErrorException("failed to make Base URI");
 		}

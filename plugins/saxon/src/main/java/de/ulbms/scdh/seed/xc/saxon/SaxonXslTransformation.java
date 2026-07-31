@@ -5,6 +5,8 @@ import de.ulbms.scdh.seed.xc.saxon.harden.ChainingResourceResolver;
 import de.ulbms.scdh.seed.xc.saxon.harden.ChainingUnparsedTextURIResolver;
 import de.ulbms.scdh.seed.xc.saxon.harden.ServiceConfiguration;
 import de.ulbms.scdh.seed.xc.saxon.harden.ZipFileURIResolver;
+import de.wwu.scdh.annotation.selection.Point;
+import de.wwu.scdh.annotation.selection.resource.DOMResource;
 import de.wwu.scdh.annotation.selection.resource.MappedDOMResource;
 import de.wwu.scdh.annotation.selection.resource.ResourceBuilder;
 import io.smallrye.mutiny.Uni;
@@ -12,9 +14,11 @@ import io.vertx.core.http.HttpServerRequest;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.InternalServerErrorException;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipFile;
@@ -479,6 +483,8 @@ public class SaxonXslTransformation extends TransformationBase
 			RuntimeParameters parameters,
 			Config config,
 			String systemId,
+			URI preimageIri,
+			URI imageIri,
 			Uni<? extends InputStream> source,
 			ResourceProvider resourceProvider,
 			HttpServerRequest request) {
