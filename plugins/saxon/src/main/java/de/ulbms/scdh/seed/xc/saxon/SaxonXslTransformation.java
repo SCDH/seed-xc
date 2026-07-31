@@ -6,10 +6,12 @@ import de.ulbms.scdh.seed.xc.saxon.harden.ChainingUnparsedTextURIResolver;
 import de.ulbms.scdh.seed.xc.saxon.harden.ServiceConfiguration;
 import de.ulbms.scdh.seed.xc.saxon.harden.ZipFileURIResolver;
 import de.wwu.scdh.annotation.selection.resource.MappedDOMResource;
+import de.wwu.scdh.annotation.selection.resource.ResourceBuilder;
 import io.smallrye.mutiny.Uni;
 import io.vertx.core.http.HttpServerRequest;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
@@ -18,8 +20,6 @@ import java.util.Map;
 import java.util.zip.ZipFile;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
-
-import jakarta.ws.rs.BadRequestException;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.s9api.ItemType;
@@ -129,9 +129,20 @@ public class SaxonXslTransformation extends TransformationBase
 			XsltCompiler mappingCompiler = processor.newXsltCompiler();
 			mappingCompiler.setJustInTimeCompilation(false);
 			mappingCompiler.setResourceResolver(compileTimeResourceResolver);
-			boolean isMappingTransformation = false;
+			boolean isMappingTransformation = false; // state: set true, when transformation depends on libtrace.xsl
+			boolean mappingCompiled =
+					true; // state: set false when a compilation step of the mapping transformation failed
 			// compile tracing library with appropriate parameters
-			// TODO
+			try {
+				XsltPackage tracePkg = ResourceBuilder.compileTracingPackage(mappingCompiler, getSeleneOutputMethod());
+				mappingCompiler.importPackage(tracePkg);
+			} catch (de.wwu.scdh.annotation.selection.ResourceException | SaxonApiException e) {
+				mappingCompiled = false;
+				LOG.warn(
+						"failed to compile the Selene tracing library. No mapping will be available for {}: {}",
+						transformationInfo.getIdent(),
+						e.getMessage());
+			}
 			// set compile time parameters
 			if (transformationInfo.getCompileTimeParameters() != null) {
 				ConversionRules conversionRules =
@@ -187,14 +198,25 @@ public class SaxonXslTransformation extends TransformationBase
 						} else {
 							compiler.importPackage(pkg);
 						}
-						if (library.getLocation().endsWith(seleneTracingLibrary)) {
-							isMappingTransformation = true;
-						} else {
-							XsltPackage mpkg = mappingCompiler.compilePackage(packageSource);
-							if (library.getAsName() != null && library.getAsVersion() != null) {
-								mappingCompiler.importPackage(mpkg, library.getAsName(), library.getAsVersion());
+						if (mappingCompiled) {
+							if (library.getLocation().endsWith(seleneTracingLibrary)) {
+								isMappingTransformation = true;
 							} else {
-								mappingCompiler.importPackage(mpkg);
+								try {
+									XsltPackage mPkg = mappingCompiler.compilePackage(packageSource);
+									if (library.getAsName() != null && library.getAsVersion() != null) {
+										mappingCompiler.importPackage(
+												mPkg, library.getAsName(), library.getAsVersion());
+									} else {
+										mappingCompiler.importPackage(mPkg);
+									}
+								} catch (SaxonApiException e) {
+									LOG.warn(
+											"failed to compile mapping transformation {}: {}",
+											transformationInfo.getIdent(),
+											e.getMessage());
+									mappingCompiled = false;
+								}
 							}
 						}
 					} catch (SaxonApiException e) {
@@ -206,8 +228,16 @@ public class SaxonXslTransformation extends TransformationBase
 			}
 			// then compile the stylesheet
 			executable = compiler.compile(stylesheet);
-			if (isMappingTransformation) {
-				mappingExecutable = mappingCompiler.compile(stylesheet);
+			if (mappingCompiled && isMappingTransformation) {
+				try {
+					mappingExecutable = mappingCompiler.compile(stylesheet);
+					LOG.info("successfully compiled mapping transformation {}", transformationInfo.getIdent());
+				} catch (SaxonApiException e) {
+					LOG.error(
+							"failed to compile mapping transformation {}: {}",
+							transformationInfo.getIdent(),
+							e.getMessage());
+				}
 			}
 		} catch (SaxonApiException e) {
 			LOG.error("Failed to setup transformation '{}':\n{}", transformationInfo.getIdent(), e.getMessage());
