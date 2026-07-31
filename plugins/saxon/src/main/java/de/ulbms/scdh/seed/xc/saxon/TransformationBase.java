@@ -2,6 +2,7 @@ package de.ulbms.scdh.seed.xc.saxon;
 
 import de.ulbms.scdh.seed.xc.api.*;
 import de.ulbms.scdh.seed.xc.api.inject.CompileTime;
+import de.wwu.scdh.annotation.selection.resource.ResourceBuilder;
 import io.smallrye.mutiny.Uni;
 import io.vertx.core.http.HttpServerRequest;
 import jakarta.inject.Inject;
@@ -33,6 +34,10 @@ public abstract class TransformationBase implements Transformation {
 	Logger LOG = LoggerFactory.getLogger(TransformationBase.class);
 
 	public static final String FEATURE_XINCLUDE = "http://apache.org/xml/features/xinclude";
+
+	public static final Pattern MEDIA_TYPE_PATTERN_XML = Pattern.compile("\\(application\\|text\\)/(.*\\+)xml");
+	public static final Pattern MEDIA_TYPE_PATTERN_JSON = Pattern.compile("application/(.*\\+)json");
+	public static final Pattern MEDIA_TYPE_PATTERN_TXT = Pattern.compile("text/plain");
 
 	protected TransformationInfo transformationInfo;
 
@@ -121,18 +126,35 @@ public abstract class TransformationBase implements Transformation {
 				&& config.getSerializer() != null
 				&& config.getSerializer().getMethod() != null) {
 			String method = config.getSerializer().getMethod();
-			if (Pattern.compile("\\(application\\|text\\)/(.*\\+)xml")
-					.matcher(method)
-					.find()) {
+			if (MEDIA_TYPE_PATTERN_XML.matcher(method).find()) {
 				serializer.setOutputProperty(Serializer.Property.METHOD, "xml");
-			} else if (Pattern.compile("application/(.*\\+)json")
-					.matcher(method)
-					.find()) {
+			} else if (MEDIA_TYPE_PATTERN_JSON.matcher(method).find()) {
 				serializer.setOutputProperty(Serializer.Property.METHOD, "json");
-			} else if (Pattern.compile("text/plain").matcher(method).find()) {
+			} else if (MEDIA_TYPE_PATTERN_TXT.matcher(method).find()) {
 				serializer.setOutputProperty(Serializer.Property.METHOD, "text");
 			}
 			// default?
+		}
+	}
+
+	/**
+	 * Returns the type Selene output method for a given media type information in the {@link TransformationInfo}.
+	 * @return a value from {@link de.wwu.scdh.annotation.selection.resource.ResourceBuilder.OutputMethod}
+	 */
+	protected ResourceBuilder.OutputMethod getSeleneOutputMethod() {
+		String method = transformationInfo.getMediaType();
+		if (method == null) {
+			LOG.warn("No output method information in transformation info. Assuming XML");
+			return ResourceBuilder.OutputMethod.XML;
+		} else if (MEDIA_TYPE_PATTERN_XML.matcher(method).find()) {
+			return ResourceBuilder.OutputMethod.XML;
+		} else if (MEDIA_TYPE_PATTERN_JSON.matcher(method).find()) {
+			return ResourceBuilder.OutputMethod.JSON;
+		} else if (MEDIA_TYPE_PATTERN_TXT.matcher(method).find()) {
+			return ResourceBuilder.OutputMethod.TEXT;
+		} else {
+			// default?
+			return ResourceBuilder.OutputMethod.XML;
 		}
 	}
 
