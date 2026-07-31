@@ -2,26 +2,48 @@ package de.ulbms.scdh.seed.xc.dts.v1_0;
 
 import static de.ulbms.scdh.seed.xc.api.utils.ParameterValueFactory.pvOf;
 
+import com.apicatalog.jsonld.JsonLd;
+import com.apicatalog.jsonld.JsonLdError;
+import com.apicatalog.jsonld.JsonLdOptions;
+import com.apicatalog.jsonld.api.FramingApi;
+import com.apicatalog.jsonld.document.Document;
+import com.apicatalog.jsonld.document.JsonDocument;
 import de.ulbms.scdh.seed.xc.api.*;
 import de.ulbms.scdh.seed.xc.api.inject.TransformTimeProvider;
 import de.ulbms.scdh.seed.xc.dts.CollectionMetadataProcessor;
 import de.ulbms.scdh.seed.xc.dts.endpoints.StandoffApi;
 import de.ulbms.scdh.seed.xc.transformations.TransformationMap;
+import de.wwu.scdh.annotation.selection.Mode;
+import de.wwu.scdh.annotation.selection.RewriterConfig;
+import de.wwu.scdh.annotation.selection.RewriterFactory;
+import de.wwu.scdh.annotation.selection.wadm.NormalizeAnnotation;
 import io.smallrye.mutiny.Uni;
 import io.vertx.core.http.HttpServerRequest;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
+import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonWriter;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.riot.*;
+import org.apache.jena.riot.system.jsonld.JenaToTitanium;
+import org.apache.jena.riot.system.jsonld.TitaniumJsonLdOptions;
+import org.apache.jena.sparql.core.DatasetGraph;
+import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.resteasy.reactive.PartType;
 import org.jboss.resteasy.reactive.RestForm;
@@ -63,6 +85,12 @@ public class StandoffEndpoint implements StandoffApi {
 	@Inject
 	HttpServerRequest request;
 
+	@Inject
+	JsonLdOptions jsonLdOptions;
+
+	@Inject
+	de.ulbms.scdh.seed.xc.jena.Serializer serializer;
+
 	private URI preimageIri, imageIri;
 
 	private ResourceProvider resourceProvider;
@@ -101,7 +129,7 @@ public class StandoffEndpoint implements StandoffApi {
 		final RuntimeParameters parameters = mkParameters(resource, ref, start, end, tree, mediaType);
 		final MappingTransformation transformation = getTransformation(mediaType, config);
 
-		collectionMetadataProc
+		return collectionMetadataProc
 				.getResourceAsync(resourceProvider, config, Map.of(), preimageIri)
 				.plug(s -> transformation.mapResourceAsync(
 						// TODO: systemId from collectionMetadataProc
@@ -112,10 +140,22 @@ public class StandoffEndpoint implements StandoffApi {
 						imageIri,
 						s,
 						resourceProvider,
-						request));
-		// TODO
-
-		return null;
+						request))
+				.onItem()
+				.transform(mappedResource -> {
+					return NormalizeAnnotation.normalize(
+							mappedResource,
+							preimageIri,
+							getRewriterFactory(),
+							getRewriterConfig(),
+							getAnnotationsGraph(annotations));
+				})
+				.onItem()
+				.transform(model -> serialize(model, frame))
+				.onItem()
+				.transform(bytes -> {
+					return new String(bytes, Charset.defaultCharset());
+				});
 	}
 
 	/**
@@ -140,7 +180,7 @@ public class StandoffEndpoint implements StandoffApi {
 		final RuntimeParameters parameters = mkParameters(resource, ref, start, end, tree, mediaType);
 		final MappingTransformation transformation = getTransformation(mediaType, config);
 
-		collectionMetadataProc
+		return collectionMetadataProc
 				.getResourceAsync(resourceProvider, config, Map.of(), preimageIri)
 				.plug(s -> transformation.mapResourceAsync(
 						// TODO: systemId from collectionMetadataProc
@@ -151,10 +191,22 @@ public class StandoffEndpoint implements StandoffApi {
 						imageIri,
 						s,
 						resourceProvider,
-						request));
-		// TODO
-
-		return null;
+						request))
+				.onItem()
+				.transform(mappedResource -> {
+					return NormalizeAnnotation.normalize(
+							mappedResource,
+							preimageIri,
+							getRewriterFactory(),
+							getRewriterConfig(),
+							getAnnotationsGraph(annotations));
+				})
+				.onItem()
+				.transform(model -> serialize(model, frame))
+				.onItem()
+				.transform(bytes -> {
+					return new String(bytes, Charset.defaultCharset());
+				});
 	}
 
 	private void setResourceProvider(URI provider, URI location) {
@@ -267,7 +319,62 @@ public class StandoffEndpoint implements StandoffApi {
 		if (finalTransformation.canMapResource()) {
 			return finalTransformation;
 		} else {
-			throw new BadRequestException("transformation is cannot be used to map a DOM: " + transformation);
+			throw new BadRequestException("transformation cannot be used to map a DOM resource: " + transformation);
 		}
+	}
+
+	private byte[] serialize(Model model, InputStream frame) {
+		ByteArrayOutputStream output = new ByteArrayOutputStream();
+		RDFFormat format;
+		try {
+			format = serializer.getFormat(null, "", request);
+		} catch (TransformationPreparationException e) {
+			format = RDFFormat.JSONLD11;
+		}
+		if (!format.getLang().equals(Lang.JSONLD11) || frame == null) {
+			// format differs from JSON-LD or frame is missing
+			RDFDataMgr.write(output, model, format);
+		} else {
+			try {
+				// use titanium for framing
+				JsonLdOptions opts = new JsonLdOptions();
+				DatasetGraph dsg = DatasetGraphFactory.create(model.getGraph());
+				JsonArray ja = JenaToTitanium.convert(dsg, opts);
+				JsonDocument jDoc = JsonDocument.of(ja);
+				Document frameDoc = JsonDocument.of(frame);
+				JsonLdOptions options = new JsonLdOptions(jsonLdOptions);
+				// options.setBase(null);
+				options.setOmitGraph(true);
+				// add more options here!
+				FramingApi framingApi = JsonLd.frame(jDoc, frameDoc);
+				framingApi.loader(options.getDocumentLoader()); // important to set loader!
+				framingApi.base("");
+				JsonObject framed = framingApi.get();
+				JsonWriter writer = Json.createWriter(output);
+				writer.writeObject(framed);
+			} catch (JsonLdError e) {
+				throw new BadRequestException("failed JSON-LD framing of result graph");
+			}
+		}
+		return output.toByteArray();
+	}
+
+	private RewriterConfig getRewriterConfig() {
+		return new RewriterConfig(Mode.DEEP_NODE_STEP_OVER_END, true, "path(.)"); // TODO
+	}
+
+	private RewriterFactory getRewriterFactory() {
+		return null; // TODO
+	}
+
+	private Model getAnnotationsGraph(InputStream inputStream) {
+		RDFParserBuilder parserBuilder = RDFParser.source(inputStream);
+		// TODO: content negotiation: get lang from the request
+		Lang lang = Lang.JSONLD11;
+		LOG.debug("trying to parse RDF data as {}", lang);
+		if (lang.equals(Lang.JSONLD11)) {
+			parserBuilder.set(TitaniumJsonLdOptions.JSONLD_OPTIONS, jsonLdOptions);
+		}
+		return parserBuilder.lang(lang).toModel();
 	}
 }

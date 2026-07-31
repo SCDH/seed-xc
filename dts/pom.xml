@@ -56,7 +56,6 @@
       <groupId>${project.groupId}</groupId>
       <artifactId>seed-xc-sparql</artifactId>
       <version>${revision}${changelist}</version>
-      <scope>${plugins.scope}</scope>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
