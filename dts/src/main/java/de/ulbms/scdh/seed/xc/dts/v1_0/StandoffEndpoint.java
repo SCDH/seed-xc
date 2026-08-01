@@ -72,6 +72,9 @@ public class StandoffEndpoint implements StandoffApi {
 	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.DocumentEndpoint.SETS_SERIALIZER", defaultValue = "true")
 	protected boolean SETS_SERIALIZER;
 
+	@ConfigProperty(name = "service-base-url")
+	protected String serviceBaseUrl;
+
 	@Inject
 	CollectionMetadataProcessor collectionMetadataProc;
 
@@ -239,9 +242,13 @@ public class StandoffEndpoint implements StandoffApi {
 					"/" + provider.toString() + "/" + URLEncoder.encode(location.toString(), StandardCharsets.UTF_8);
 			String resourceEncoded = URLEncoder.encode(resource.toString(), StandardCharsets.UTF_8);
 			URI rqUrl = new URI(request.absoluteURI());
-			// the IRI of the resource is the current request, but query part and fragment cut off
-			URI base = new URI(
-					rqUrl.getScheme(), rqUrl.getRawUserInfo(), rqUrl.getHost(), rqUrl.getPort(), null, null, null);
+			URI base;
+			if (serviceBaseUrl != null && !serviceBaseUrl.isEmpty()) {
+				base = new URI(serviceBaseUrl);
+			} else {
+				base = new URI(
+						rqUrl.getScheme(), rqUrl.getRawUserInfo(), rqUrl.getHost(), rqUrl.getPort(), null, null, null);
+			}
 			// use single-argument constructor to avoid extra escaping! see #61
 			preimageIri = new URI(base.toString() + front + "/oa/" + direction + "/" + resourceEncoded);
 			imageIri = new URI(base.toString() + front + "/oa/" + direction + "/" + resourceEncoded + rqUrl.getQuery());
