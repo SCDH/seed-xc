@@ -25,9 +25,7 @@ import jakarta.json.Json;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonWriter;
-import jakarta.ws.rs.BadRequestException;
-import jakarta.ws.rs.InternalServerErrorException;
-import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.*;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.URI;
@@ -283,7 +281,7 @@ public class StandoffEndpoint implements StandoffApi {
 			transformation = transformations.get(TRANSFORMATION);
 			if (transformation == null) {
 				LOG.error("mapper transformation not available: {}", TRANSFORMATION);
-				throw new jakarta.ws.rs.BadRequestException("mapper transformation not available: " + TRANSFORMATION);
+				throw new InternalServerErrorException("default transformation not available: " + TRANSFORMATION);
 			}
 		} else {
 			// try to get a transformation for the requested media type
@@ -319,13 +317,29 @@ public class StandoffEndpoint implements StandoffApi {
 		}
 		// assert that the transformation is a Mapping Transformation
 		if (!MappingTransformation.class.isAssignableFrom(transformation.getClass())) {
-			throw new InternalServerErrorException("transformation is not a DOM mapper");
+			LOG.info(
+					"transformation {} is not a DOM mapper due to its type class {}",
+					transformation.getTransformationInfo().getIdent(),
+					transformation.getClazz());
+			// Because the server does recognize the method
+			// 405 is the right thing here, with empty Allow header
+			throw new NotAllowedException(
+					"transformation is not a DOM mapper: "
+							+ transformation.getTransformationInfo().getIdent(),
+					new Exception());
 		}
 		MappingTransformation finalTransformation = (MappingTransformation) transformation;
 		if (finalTransformation.canMapResource()) {
 			return finalTransformation;
 		} else {
-			throw new BadRequestException("transformation cannot be used to map a DOM resource: " + transformation);
+			LOG.info(
+					"transformation does not support DOM mapping: {}",
+					transformation.getTransformationInfo().getIdent());
+			// 405 is the right thing here, with empty Allow header
+			throw new NotAllowedException(
+					"transformation does not support DOM mapping: "
+							+ transformation.getTransformationInfo().getIdent(),
+					new Exception());
 		}
 	}
 
