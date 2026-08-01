@@ -97,8 +97,10 @@ public class StandoffEndpoint implements StandoffApi {
 	private ResourceProvider resourceProvider;
 
 	/**
-	 *
-	 *
+	 * Transform Open Annotations pointing into the image back into annotations pointing into the preimage.
+	 * The preimage is the default representation of the resource document, the image is determined by the DTS
+	 * parameters that are similar to the document endpoint and chase a part and a media type (and profile).
+	 * I.e., the image is derived from the preimage by transformation.
 	 *
 	 * @param resource - Resource identifier. Passed as runtime parameter to the transformation and also to the resource provider.
 	 * @param provider - the type of resource provider
@@ -156,7 +158,22 @@ public class StandoffEndpoint implements StandoffApi {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Transform Open Annotations pointing into the preimage forward into annotations pointing into the image.
+	 * The preimage is the default representation of the resource document, the image is determined by the DTS
+	 * parameters that are similar to the document endpoint and chase a part and a media type (and profile).
+	 * I.e., the image is derived from the preimage by transformation.
+	 *
+	 * @param resource - Resource identifier. Passed as runtime parameter to the transformation and also to the resource provider.
+	 * @param provider - the type of resource provider
+	 * @param location - the base location accessed by the resource provider
+	 * @param annotations - an RDF graph with annotations.
+	 * @param ref - See DTS specs. Passed as runtime parameter to the transformation.
+	 * @param start - See DTS specs. Passed as runtime parameter to the transformation.
+	 * @param end - See DTS specs. Passed as runtime parameter to the transformation.
+	 * @param tree - See DTS specs. Passed as runtime parameter to the transformation.
+	 * @param mediaType - See DTS specs. Passed as runtime parameter to the transformation.
+	 * @param frame - A JSON-LD frame for framing the output.
+	 * @return The document or parts of it in the requested media type.
 	 */
 	@Override
 	public Uni<String> standoffForward(
