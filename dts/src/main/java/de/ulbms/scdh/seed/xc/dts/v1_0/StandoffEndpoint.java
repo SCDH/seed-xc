@@ -148,7 +148,7 @@ public class StandoffEndpoint implements StandoffApi {
 				.transform(mappedResource -> {
 					return NormalizeAnnotation.normalize(
 							mappedResource,
-							preimageIri,
+							imageIri, // backward!
 							getRewriterFactory(),
 							getRewriterConfig(),
 							getAnnotationsGraph(annotations));
@@ -199,7 +199,7 @@ public class StandoffEndpoint implements StandoffApi {
 				.transform(mappedResource -> {
 					return NormalizeAnnotation.normalize(
 							mappedResource,
-							preimageIri,
+							preimageIri, // forward!
 							getRewriterFactory(),
 							getRewriterConfig(),
 							getAnnotationsGraph(annotations));
