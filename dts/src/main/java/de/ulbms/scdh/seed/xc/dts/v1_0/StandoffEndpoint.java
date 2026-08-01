@@ -60,7 +60,7 @@ public class StandoffEndpoint implements StandoffApi {
 	 * The ID of the transformation using for transforming a resource.
 	 */
 	@ConfigProperty(
-			name = "de.ulbms.scdh.seed.xc.dts.DocumentEndpoint.TRANSFORMATION",
+			name = "document-endpoint-transformation",
 			defaultValue = "dts-transformations-xsl-document")
 	protected String TRANSFORMATION;
 
