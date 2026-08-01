@@ -16,6 +16,8 @@ import de.ulbms.scdh.seed.xc.transformations.TransformationMap;
 import de.wwu.scdh.annotation.selection.Mode;
 import de.wwu.scdh.annotation.selection.RewriterConfig;
 import de.wwu.scdh.annotation.selection.RewriterFactory;
+import de.wwu.scdh.annotation.selection.rewriter.BackwardMappingFactory;
+import de.wwu.scdh.annotation.selection.rewriter.ForwardMappingFactory;
 import de.wwu.scdh.annotation.selection.wadm.NormalizeAnnotation;
 import io.smallrye.mutiny.Uni;
 import io.vertx.core.http.HttpServerRequest;
@@ -148,7 +150,7 @@ public class StandoffEndpoint implements StandoffApi {
 				.transform(mappedResource -> NormalizeAnnotation.normalize(
 						mappedResource,
 						imageIri, // backward!
-						getRewriterFactory(),
+						getRewriterFactory("backward"),
 						getRewriterConfig(),
 						getAnnotationsGraph(annotations)))
 				.onItem()
@@ -211,7 +213,7 @@ public class StandoffEndpoint implements StandoffApi {
 				.transform(mappedResource -> NormalizeAnnotation.normalize(
 						mappedResource,
 						preimageIri, // forward!
-						getRewriterFactory(),
+						getRewriterFactory("forward"),
 						getRewriterConfig(),
 						getAnnotationsGraph(annotations)))
 				.onItem()
@@ -401,8 +403,13 @@ public class StandoffEndpoint implements StandoffApi {
 		return new RewriterConfig(Mode.DEEP_NODE_STEP_OVER_END, true, "path(.)"); // TODO
 	}
 
-	private RewriterFactory getRewriterFactory() {
-		return null; // TODO
+	private RewriterFactory getRewriterFactory(String direction) {
+		if (direction.equals("forward")) {
+			return new ForwardMappingFactory();
+		}
+		else {
+			return new BackwardMappingFactory();
+		}
 	}
 
 	private Model getAnnotationsGraph(InputStream inputStream) {
