@@ -249,9 +249,10 @@ public class StandoffEndpoint implements StandoffApi {
 				base = new URI(
 						rqUrl.getScheme(), rqUrl.getRawUserInfo(), rqUrl.getHost(), rqUrl.getPort(), null, null, null);
 			}
+			// The preimage and image come out of the document endpoint!
 			// use single-argument constructor to avoid extra escaping! see #61
-			preimageIri = new URI(base.toString() + front + "/oa/" + direction + "/" + resourceEncoded);
-			imageIri = new URI(base.toString() + front + "/oa/" + direction + "/" + resourceEncoded + rqUrl.getQuery());
+			preimageIri = new URI(base.toString() + front + "/document/" + resourceEncoded);
+			imageIri = new URI(base.toString() + front + "/document/" + resourceEncoded + rqUrl.getQuery());
 		} catch (URISyntaxException e) {
 			throw new InternalServerErrorException("failed to make Base URI");
 		}
