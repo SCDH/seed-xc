@@ -226,8 +226,10 @@ public class StandoffEndpoint implements StandoffApi {
 	}
 
 	/**
-	 * Set the IRI of the resource. According to the URI templates,
-	 * this is essentially the request URL, but query and fragment parts dropped.
+	 * Set the IRI of the resource.</P>
+	 *
+	 * The IRI of the resource (preimage) is the current request, but query part and fragment cut off. The IRI of the
+	 * image has the query part.
 	 */
 	private void setIRI(URI provider, URI location, URI resource, String direction) {
 		if (resource == null || resource.toString().isEmpty())
