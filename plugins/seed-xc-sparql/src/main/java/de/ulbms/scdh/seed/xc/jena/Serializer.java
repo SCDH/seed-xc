@@ -52,7 +52,7 @@ public class Serializer {
 	 * @param charset - the charset requested
 	 * @return - the fully specified format for which a formatter exists
 	 */
-	protected static RDFFormat getFormatVariant(Lang lang, String charset) {
+	public static RDFFormat getFormatVariant(Lang lang, String charset) {
 		if (lang.equals(Lang.NTRIPLES)) {
 			return new RDFFormat(lang, RDFFormat.UTF8);
 		} else if (lang.equals(Lang.TTL)) {
