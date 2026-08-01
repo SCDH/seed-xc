@@ -20,6 +20,7 @@ import de.wwu.scdh.annotation.selection.rewriter.BackwardMappingFactory;
 import de.wwu.scdh.annotation.selection.rewriter.ForwardMappingFactory;
 import de.wwu.scdh.annotation.selection.wadm.NormalizeAnnotation;
 import io.smallrye.mutiny.Uni;
+import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpServerRequest;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
@@ -74,6 +75,9 @@ public class StandoffEndpoint implements StandoffApi {
 
 	@ConfigProperty(name = "service-base-url", defaultValue = ".")
 	protected String serviceBaseUrl;
+
+	@ConfigProperty(name = "annotations-default-frame", defaultValue = "http://www.w3.org/ns/anno.jsonld")
+	protected String defaultFrame;
 
 	@Inject
 	CollectionMetadataProcessor collectionMetadataProc;
@@ -365,28 +369,29 @@ public class StandoffEndpoint implements StandoffApi {
 
 	private byte[] serialize(Model model, InputStream frame) {
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
-		RDFFormat format;
-		try {
-			format = serializer.getFormat(null, "", request);
-		} catch (TransformationPreparationException e) {
-			format = RDFFormat.JSONLD11;
-		}
-		if (!format.getLang().equals(Lang.JSONLD11) || frame == null) {
+		org.apache.jena.riot.Lang lang = RDFLanguages.contentTypeToLang(request.getHeader(HttpHeaders.ACCEPT));
+		RDFFormat format = de.ulbms.scdh.seed.xc.jena.Serializer.getFormatVariant(lang, request.getHeader(HttpHeaders.ACCEPT_CHARSET));
+		if (!format.getLang().equals(Lang.JSONLD11)) {
 			// format differs from JSON-LD or frame is missing
 			RDFDataMgr.write(output, model, format);
 		} else {
 			try {
 				// use titanium for framing
-				JsonLdOptions opts = new JsonLdOptions();
-				DatasetGraph dsg = DatasetGraphFactory.create(model.getGraph());
-				JsonArray ja = JenaToTitanium.convert(dsg, opts);
-				JsonDocument jDoc = JsonDocument.of(ja);
-				Document frameDoc = JsonDocument.of(frame);
-				JsonLdOptions options = new JsonLdOptions(jsonLdOptions);
+				JsonLdOptions options = new JsonLdOptions(jsonLdOptions); // clone
 				// options.setBase(null);
 				options.setOmitGraph(true);
 				// add more options here!
-				FramingApi framingApi = JsonLd.frame(jDoc, frameDoc);
+				DatasetGraph dsg = DatasetGraphFactory.create(model.getGraph());
+				JsonArray ja = JenaToTitanium.convert(dsg, options);
+				JsonDocument jDoc = JsonDocument.of(ja);
+				// make the frame or use annot.json context as default
+				FramingApi framingApi;
+				if (frame != null) {
+					Document frameDoc = JsonDocument.of(frame);
+					framingApi = JsonLd.frame(jDoc, frameDoc);
+				} else {
+					framingApi = JsonLd.frame(jDoc, defaultFrame);
+				}
 				framingApi.loader(options.getDocumentLoader()); // important to set loader!
 				framingApi.base("");
 				JsonObject framed = framingApi.get();
