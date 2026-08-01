@@ -143,14 +143,12 @@ public class StandoffEndpoint implements StandoffApi {
 						resourceProvider,
 						request))
 				.onItem()
-				.transform(mappedResource -> {
-					return NormalizeAnnotation.normalize(
-							mappedResource,
-							imageIri, // backward!
-							getRewriterFactory(),
-							getRewriterConfig(),
-							getAnnotationsGraph(annotations));
-				})
+				.transform(mappedResource -> NormalizeAnnotation.normalize(
+						mappedResource,
+						imageIri, // backward!
+						getRewriterFactory(),
+						getRewriterConfig(),
+						getAnnotationsGraph(annotations)))
 				.onItem()
 				.transform(model -> serialize(model, frame))
 				.onItem()
@@ -178,6 +176,7 @@ public class StandoffEndpoint implements StandoffApi {
 		final Config config = getConfig();
 		final RuntimeParameters parameters = mkParameters(resource, ref, start, end, tree, mediaType);
 		final MappingTransformation transformation = getTransformation(mediaType, config);
+		LOG.debug("prepared to forward oa annotations from {} to {}", preimageIri, imageIri);
 
 		return collectionMetadataProc
 				.getResourceAsync(resourceProvider, config, Map.of(), preimageIri)
@@ -192,14 +191,12 @@ public class StandoffEndpoint implements StandoffApi {
 						resourceProvider,
 						request))
 				.onItem()
-				.transform(mappedResource -> {
-					return NormalizeAnnotation.normalize(
-							mappedResource,
-							preimageIri, // forward!
-							getRewriterFactory(),
-							getRewriterConfig(),
-							getAnnotationsGraph(annotations));
-				})
+				.transform(mappedResource -> NormalizeAnnotation.normalize(
+						mappedResource,
+						preimageIri, // forward!
+						getRewriterFactory(),
+						getRewriterConfig(),
+						getAnnotationsGraph(annotations)))
 				.onItem()
 				.transform(model -> serialize(model, frame))
 				.onItem()
