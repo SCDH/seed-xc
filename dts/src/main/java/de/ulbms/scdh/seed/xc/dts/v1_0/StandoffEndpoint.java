@@ -156,9 +156,7 @@ public class StandoffEndpoint implements StandoffApi {
 				.onItem()
 				.transform(model -> serialize(model, frame))
 				.onItem()
-				.transform(bytes -> {
-					return new String(bytes, Charset.defaultCharset());
-				});
+				.transform(bytes -> new String(bytes, Charset.defaultCharset()));
 	}
 
 	/**
@@ -207,9 +205,7 @@ public class StandoffEndpoint implements StandoffApi {
 				.onItem()
 				.transform(model -> serialize(model, frame))
 				.onItem()
-				.transform(bytes -> {
-					return new String(bytes, Charset.defaultCharset());
-				});
+				.transform(bytes -> new String(bytes, Charset.defaultCharset()));
 	}
 
 	private void setResourceProvider(URI provider, URI location) {
