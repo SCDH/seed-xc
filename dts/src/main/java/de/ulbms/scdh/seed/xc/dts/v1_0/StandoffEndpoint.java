@@ -70,7 +70,7 @@ public class StandoffEndpoint implements StandoffApi {
 	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.DocumentEndpoint.SETS_SERIALIZER", defaultValue = "true")
 	protected boolean SETS_SERIALIZER;
 
-	@ConfigProperty(name = "service-base-url")
+	@ConfigProperty(name = "service-base-url", defaultValue = ".")
 	protected String serviceBaseUrl;
 
 	@Inject
@@ -251,7 +251,7 @@ public class StandoffEndpoint implements StandoffApi {
 			String resourceEncoded = URLEncoder.encode(resource.toString(), StandardCharsets.UTF_8);
 			URI rqUrl = new URI(request.absoluteURI());
 			URI base;
-			if (serviceBaseUrl != null && !serviceBaseUrl.isEmpty()) {
+			if (serviceBaseUrl != null && !serviceBaseUrl.isBlank() && !serviceBaseUrl.equals(".")) {
 				base = new URI(serviceBaseUrl);
 			} else {
 				base = new URI(
