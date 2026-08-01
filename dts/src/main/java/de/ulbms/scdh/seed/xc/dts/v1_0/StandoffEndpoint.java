@@ -268,7 +268,7 @@ public class StandoffEndpoint implements StandoffApi {
 
 	private Config getConfig() {
 		Config transformationConfig = new Config();
-		transformationConfig.base(request.absoluteURI());
+		transformationConfig.base(preimageIri.toString());
 		return transformationConfig;
 	}
 
