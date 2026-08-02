@@ -511,7 +511,7 @@ public class SaxonXslTransformation extends TransformationBase
 						// setting the global context item is required for global variables
 						transformer.setGlobalContextItem(resource.getContents(), false);
 						Class<? extends Point> pointerClass = ResourceBuilder.pointerClassFromOutputMethod(transformer);
-						return ResourceBuilder.mapWithXsltTracePackage(imageIri, resource, transformer, pointerClass);
+						return ResourceBuilder.mapWithXslTransformation(imageIri, resource, transformer, pointerClass);
 					} catch (de.wwu.scdh.annotation.selection.ResourceException e) {
 						throw new InternalServerErrorException("failed to map resource " + systemId);
 					} catch (SaxonApiException | TransformationPreparationException | TransformationException e) {
