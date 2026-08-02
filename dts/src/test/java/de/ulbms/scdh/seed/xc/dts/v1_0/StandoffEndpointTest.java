@@ -126,8 +126,7 @@ public class StandoffEndpointTest {
 				getXPathComponent(getStartSelector(body))
 						.startsWith(
 								"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}l[3]/"));
-		assertTrue(getXPathComponent(getStartSelector(body))
-				.endsWith("Q{http://wwu.de/scdh/selection-engine/node-tracing}text[1]"));
+		assertTrue(getXPathComponent(getStartSelector(body)).endsWith("text()[1]"));
 		assertEquals("char=2", getRFC5147Component(getStartSelector(body)));
 		// rewritten end selector was rebased
 		assertEquals("XPathSelector", getType(getEndSelector(body)));
@@ -135,10 +134,7 @@ public class StandoffEndpointTest {
 				getXPathComponent(getEndSelector(body))
 						.startsWith(
 								"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}l[4]/"));
-		assertTrue(
-				getXPathComponent(getEndSelector(body))
-						.endsWith("Q{http://wwu.de/scdh/selection-engine/node-tracing}text[2]"),
-				"second text node!");
+		assertTrue(getXPathComponent(getEndSelector(body)).endsWith("text()[2]"), "second text node!");
 		assertEquals("char=4", getRFC5147Component(getEndSelector(body)), "re-calculated!");
 	}
 
@@ -171,8 +167,7 @@ public class StandoffEndpointTest {
 						.startsWith(
 								"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{https://w3id.org/api/dts#}wrapper[1]/Q{http://www.tei-c.org/ns/1.0}l[1]/"),
 				"in dts:wrapper and rewritten from [3] to [1]!");
-		assertTrue(getXPathComponent(getStartSelector(body))
-				.endsWith("Q{http://wwu.de/scdh/selection-engine/node-tracing}text[1]"));
+		assertTrue(getXPathComponent(getStartSelector(body)).endsWith("text()[1]"));
 		assertEquals("char=2", getRFC5147Component(getStartSelector(body)));
 		// rewritten end selector was rebased
 		assertEquals("XPathSelector", getType(getEndSelector(body)));
@@ -181,10 +176,7 @@ public class StandoffEndpointTest {
 						.startsWith(
 								"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{https://w3id.org/api/dts#}wrapper[1]/Q{http://www.tei-c.org/ns/1.0}l[2]/"),
 				"in dts:wrapper and rewritten from [5] to [2]");
-		assertTrue(
-				getXPathComponent(getEndSelector(body))
-						.endsWith("Q{http://wwu.de/scdh/selection-engine/node-tracing}text[2]"),
-				"second text node!");
+		assertTrue(getXPathComponent(getEndSelector(body)).endsWith("text()[2]"), "second text node!");
 		assertEquals("char=4", getRFC5147Component(getEndSelector(body)), "re-calculated!");
 	}
 

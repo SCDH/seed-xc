@@ -409,7 +409,7 @@ public class StandoffEndpoint implements StandoffApi {
 	}
 
 	private RewriterConfig getRewriterConfig() {
-		return new RewriterConfig(Mode.DEEP_NODE_STEP_OVER_END, true, "path(.)"); // TODO
+		return new RewriterConfig(null, false, "path(.)", true); // TODO
 	}
 
 	private RewriterFactory getRewriterFactory(String direction) {

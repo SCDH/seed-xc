@@ -9,7 +9,7 @@
       "type": "RangeSelector",
       "endSelector": {
         "type": "XPathSelector",
-        "value": "/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{https://w3id.org/api/dts#}wrapper[1]/Q{http://www.tei-c.org/ns/1.0}l[2]/Q{http://wwu.de/scdh/selection-engine/node-tracing}text[2]",
+        "value": "/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{https://w3id.org/api/dts#}wrapper[1]/Q{http://www.tei-c.org/ns/1.0}l[2]/text()[2]",
         "refinedBy": {
           "type": "FragmentSelector",
           "conformsTo": "http://tools.ietf.org/rfc/rfc5147",
@@ -18,7 +18,7 @@
       },
       "startSelector": {
         "type": "XPathSelector",
-        "value": "/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{https://w3id.org/api/dts#}wrapper[1]/Q{http://www.tei-c.org/ns/1.0}l[1]/Q{http://wwu.de/scdh/selection-engine/node-tracing}text[1]",
+        "value": "/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{https://w3id.org/api/dts#}wrapper[1]/Q{http://www.tei-c.org/ns/1.0}l[1]/text()[1]",
         "refinedBy": {
           "type": "FragmentSelector",
           "conformsTo": "http://tools.ietf.org/rfc/rfc5147",
