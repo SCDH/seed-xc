@@ -507,10 +507,17 @@ public class SaxonXslTransformation extends TransformationBase
 				.transform(resource -> {
 					try {
 						Xslt30Transformer transformer = mappingExecutable.load30();
+						transformer.setStylesheetParameters(makeStylesheetParameters(parameters));
+						// setting the global context item is required for global variables
+						transformer.setGlobalContextItem(resource.getContents(), false);
 						Class<? extends Point> pointerClass = ResourceBuilder.pointerClassFromOutputMethod(transformer);
 						return ResourceBuilder.mapWithXsltTracePackage(imageIri, resource, transformer, pointerClass);
 					} catch (de.wwu.scdh.annotation.selection.ResourceException e) {
 						throw new InternalServerErrorException("failed to map resource " + systemId);
+					} catch (SaxonApiException | TransformationPreparationException | TransformationException e) {
+						LOG.error("failed to set stylesheet parameters to mapping transformation: {}", e.getMessage());
+						throw new BadRequestException(
+								"failed to set up transformation parameters: " + e.getMessage(), e);
 					}
 				});
 	}
