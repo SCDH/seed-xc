@@ -370,7 +370,8 @@ public class StandoffEndpoint implements StandoffApi {
 	private byte[] serialize(Model model, InputStream frame) {
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		org.apache.jena.riot.Lang lang = RDFLanguages.contentTypeToLang(request.getHeader(HttpHeaders.ACCEPT));
-		RDFFormat format = de.ulbms.scdh.seed.xc.jena.Serializer.getFormatVariant(lang, request.getHeader(HttpHeaders.ACCEPT_CHARSET));
+		RDFFormat format = de.ulbms.scdh.seed.xc.jena.Serializer.getFormatVariant(
+				lang, request.getHeader(HttpHeaders.ACCEPT_CHARSET));
 		if (!format.getLang().equals(Lang.JSONLD11)) {
 			// format differs from JSON-LD or frame is missing
 			RDFDataMgr.write(output, model, format);
@@ -415,8 +416,7 @@ public class StandoffEndpoint implements StandoffApi {
 	private RewriterFactory getRewriterFactory(String direction) {
 		if (direction.equals("forward")) {
 			return new ForwardMappingFactory();
-		}
-		else {
+		} else {
 			return new BackwardMappingFactory();
 		}
 	}
