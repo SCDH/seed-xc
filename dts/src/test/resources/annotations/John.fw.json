@@ -11,7 +11,7 @@
       "type": "RangeSelector",
       "startSelector": {
         "type": "XPathSelector",
-        "value": "/*:TEI[1]/*:text[1]/*:body[1]/*:lg[1]/*:lg[1]/*:l[1]/text()[1]",
+        "value": "/*:TEI[1]/*:text[1]/*:body[1]/*:lg[1]/*:lg[1]/*:l[3]/text()[1]",
         "refinedBy": {
           "type": "FragmentSelector",
           "conformsTo": "http://tools.ietf.org/rfc/rfc5147",
