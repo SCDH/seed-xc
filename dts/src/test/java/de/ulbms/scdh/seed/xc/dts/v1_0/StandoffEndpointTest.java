@@ -19,7 +19,8 @@ public class StandoffEndpointTest {
 	private static final File ANNOT_DIR =
 			Paths.get("src", "test", "resources", "annotations").toFile();
 
-	private static final File ANNOT_JOHN = new File(ANNOT_DIR, "John.fw.json");
+	private static final File ANNOT_JOHN_FW = new File(ANNOT_DIR, "John.fw.json");
+	private static final File ANNOT_JOHN_BW = new File(ANNOT_DIR, "John.bw.json");
 	private static final File ANNOT_P11 = new File(ANNOT_DIR, "p1.1.json");
 
 	@Test
@@ -29,7 +30,7 @@ public class StandoffEndpointTest {
 
 	@Test
 	public void testForwardNotAllowedWithTransformation() {
-		given().multiPart("annotations", ANNOT_JOHN, "application/ld+json")
+		given().multiPart("annotations", ANNOT_JOHN_FW, "application/ld+json")
 				.when()
 				.post("/file/sample/oa/forward/john.xml?mediaType=text/plain")
 				.then()
@@ -39,7 +40,7 @@ public class StandoffEndpointTest {
 
 	@Test
 	public void testConNegJsonLD() {
-		byte[] graph = given().multiPart("annotations", ANNOT_JOHN, "application/ld+json")
+		byte[] graph = given().multiPart("annotations", ANNOT_JOHN_FW, "application/ld+json")
 				.accept("application/ld+json")
 				.when()
 				.post("/file/sample/oa/forward/john.xml")
@@ -55,7 +56,7 @@ public class StandoffEndpointTest {
 
 	@Test
 	public void testConNegTurtle() {
-		byte[] graph = given().multiPart("annotations", ANNOT_JOHN, "application/ld+json")
+		byte[] graph = given().multiPart("annotations", ANNOT_JOHN_FW, "application/ld+json")
 				.accept("text/turtle")
 				.when()
 				.post("/file/sample/oa/forward/john.xml")
@@ -109,7 +110,7 @@ public class StandoffEndpointTest {
 
 	@Test
 	public void testForwardToBaseRepresentationWithJohnWhole() {
-		JsonObject body = given().multiPart("annotations", ANNOT_JOHN, "application/ld+json")
+		JsonObject body = given().multiPart("annotations", ANNOT_JOHN_FW, "application/ld+json")
 				.accept("application/ld+json")
 				.when()
 				.post("/file/sample/oa/forward/john.xml")
@@ -152,7 +153,7 @@ public class StandoffEndpointTest {
 
 	@Test
 	public void testForwardToBaseRepresentationWithJohn13to15() {
-		JsonObject body = given().multiPart("annotations", ANNOT_JOHN, "application/ld+json")
+		JsonObject body = given().multiPart("annotations", ANNOT_JOHN_FW, "application/ld+json")
 				.accept("application/ld+json")
 				.when()
 				.post("/file/sample/oa/forward/john.xml?start=John:1:3&end=John:1:5")
@@ -187,6 +188,38 @@ public class StandoffEndpointTest {
 		assertEquals("char=4", getRFC5147Component(getEndSelector(body)), "re-calculated!");
 	}
 
+	@Test
+	public void testBackwardToBaseRepresentationWithJohn13to15() {
+		JsonObject body = given().multiPart("annotations", ANNOT_JOHN_BW, "application/ld+json")
+				.accept("application/ld+json")
+				.when()
+				.post("/file/sample/oa/backward/john.xml?start=John:1:3&end=John:1:5")
+				.then()
+				.statusCode(200)
+				.extract()
+				.body()
+				.as(JsonObject.class);
+		assertEquals("RangeSelector", getType(getSelector(body)));
+		// rewritten start selector has namespaces
+		assertEquals("XPathSelector", getType(getStartSelector(body)));
+		assertTrue(
+				getXPathComponent(getStartSelector(body))
+						.startsWith(
+								"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}l[3]/"));
+		assertTrue(getXPathComponent(getStartSelector(body)).endsWith("text()[1]"));
+		assertEquals("char=2", getRFC5147Component(getStartSelector(body)));
+		// rewritten end selector was rebased
+		assertEquals("XPathSelector", getType(getEndSelector(body)));
+		assertTrue(
+				getXPathComponent(getEndSelector(body))
+						.startsWith(
+								"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}l[4]/"));
+		assertTrue(getXPathComponent(getEndSelector(body)).endsWith("text()[2]"), "second text node!");
+		assertEquals("char=4", getRFC5147Component(getEndSelector(body)), "re-calculated!");
+	}
+
+	// just for failing!
+	@Disabled
 	@Test
 	public void testDocumentJohnXmlStatus201() {
 		given().when().get("/file/sample/document/john.xml").then().statusCode(201);
