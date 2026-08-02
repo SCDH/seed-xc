@@ -3,6 +3,7 @@ package de.ulbms.scdh.seed.xc.dts.v1_0;
 import static de.ulbms.scdh.seed.xc.api.utils.ParameterValueFactory.pvOf;
 
 import com.apicatalog.jsonld.JsonLd;
+import com.apicatalog.jsonld.JsonLdEmbed;
 import com.apicatalog.jsonld.JsonLdError;
 import com.apicatalog.jsonld.JsonLdOptions;
 import com.apicatalog.jsonld.api.FramingApi;
@@ -13,7 +14,6 @@ import de.ulbms.scdh.seed.xc.api.inject.TransformTimeProvider;
 import de.ulbms.scdh.seed.xc.dts.CollectionMetadataProcessor;
 import de.ulbms.scdh.seed.xc.dts.endpoints.StandoffApi;
 import de.ulbms.scdh.seed.xc.transformations.TransformationMap;
-import de.wwu.scdh.annotation.selection.Mode;
 import de.wwu.scdh.annotation.selection.RewriterConfig;
 import de.wwu.scdh.annotation.selection.RewriterFactory;
 import de.wwu.scdh.annotation.selection.rewriter.BackwardMappingFactory;
@@ -76,7 +76,7 @@ public class StandoffEndpoint implements StandoffApi {
 	@ConfigProperty(name = "service-base-url", defaultValue = ".")
 	protected String serviceBaseUrl;
 
-	@ConfigProperty(name = "annotations-default-frame", defaultValue = "http://www.w3.org/ns/anno.jsonld")
+	@ConfigProperty(name = "annotations-default-frame", defaultValue = "https://www.w3.org/ns/anno-frame.json")
 	protected String defaultFrame;
 
 	@Inject
@@ -380,6 +380,7 @@ public class StandoffEndpoint implements StandoffApi {
 				JsonLdOptions options = new JsonLdOptions(jsonLdOptions); // clone
 				// options.setBase(null);
 				options.setOmitGraph(true);
+				options.setEmbed(JsonLdEmbed.ALWAYS);
 				// add more options here!
 				DatasetGraph dsg = DatasetGraphFactory.create(model.getGraph());
 				JsonArray ja = JenaToTitanium.convert(dsg, options);
@@ -393,12 +394,15 @@ public class StandoffEndpoint implements StandoffApi {
 					framingApi = JsonLd.frame(jDoc, defaultFrame);
 				}
 				framingApi.loader(options.getDocumentLoader()); // important to set loader!
-				framingApi.base("");
 				JsonObject framed = framingApi.get();
 				JsonWriter writer = Json.createWriter(output);
 				writer.writeObject(framed);
 			} catch (JsonLdError e) {
-				throw new BadRequestException("failed JSON-LD framing of result graph");
+				if (frame != null) {
+					throw new BadRequestException("failed JSON-LD framing of result graph");
+				} else {
+					throw new InternalServerErrorException("failed JSON-LD framing with the default frame");
+				}
 			}
 		}
 		return output.toByteArray();
