@@ -267,7 +267,7 @@ public class StandoffEndpoint implements StandoffApi {
 			// use single-argument constructor to avoid extra escaping! see #61
 			preimageIri = new URI(base.toString() + front + "/document/" + resourceEncoded);
 			if (rqUrl.getQuery() != null) {
-				imageIri = new URI(base.toString() + front + "/document/" + resourceEncoded + rqUrl.getQuery());
+				imageIri = new URI(base.toString() + front + "/document/" + resourceEncoded + "?" + rqUrl.getQuery());
 			} else {
 				imageIri = new URI(base.toString() + front + "/document/" + resourceEncoded);
 			}
