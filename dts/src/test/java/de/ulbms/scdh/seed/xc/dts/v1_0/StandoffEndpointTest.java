@@ -1,15 +1,14 @@
 package de.ulbms.scdh.seed.xc.dts.v1_0;
 
 import static io.restassured.RestAssured.given;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import io.quarkus.test.junit.QuarkusTest;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.file.Paths;
 
-import org.junit.jupiter.api.Disabled;
+import jakarta.json.JsonObject;
 import org.junit.jupiter.api.Test;
 
 @QuarkusTest
@@ -29,7 +28,7 @@ public class StandoffEndpointTest {
 	}
 
 	@Test
-	public void testJohnForwardTxtRepresentation() {
+	public void testForwardNotAllowedWithTransformation() {
 		given().multiPart("annotations", ANNOT_JOHN, "application/ld+json")
 				.when()
 				.post("/file/sample/oa/forward/john.xml?mediaType=text/plain")
@@ -39,7 +38,7 @@ public class StandoffEndpointTest {
 	}
 
 	@Test
-	public void testJohnForwardBaseRepresentationAsJsonLD() {
+	public void testConNegJsonLD() {
 		byte[] graph = given().multiPart("annotations", ANNOT_JOHN, "application/ld+json")
 				.accept("application/ld+json")
 				.when()
@@ -48,11 +47,13 @@ public class StandoffEndpointTest {
 				.statusCode(200)
 				.extract().asByteArray();
 		String body = new String(graph, Charset.defaultCharset());
-		assertTrue(body.startsWith("{\"@graph\":"), "is a JSON-LD graph");
+		assertTrue(body.startsWith("{\""), "is a JSON-LD graph");
+		assertFalse(body.contains("\"@graph\":"), "@graph is omitted for single annotations");
+		assertTrue(body.startsWith("{\"id\":"), "@graph is omitted for single annotations, single id instead");
 	}
 
 	@Test
-	public void testJohnForwardBaseRepresentationAsTurtle() {
+	public void testConNegTurtle() {
 		byte[] graph = given().multiPart("annotations", ANNOT_JOHN, "application/ld+json")
 				.accept("text/turtle")
 				.when()
@@ -61,14 +62,56 @@ public class StandoffEndpointTest {
 				.statusCode(200)
 				.extract().asByteArray();
 		String body = new String(graph, Charset.defaultCharset());
-		assertEquals("", body);
 		assertTrue(body.startsWith("<https://annotations.example.com/samples/p1.1>"), "is a turtle graph");
 	}
 
-	@Disabled
+	static private JsonObject getSelector(JsonObject body) {
+		return body //.get("@graph").asJsonArray().get(0).asJsonObject()
+				.get("target").asJsonObject().get("selector").asJsonObject();
+	}
+
+	static private JsonObject getStartSelector(JsonObject body) {
+		return body //.get("@graph").asJsonArray().get(0).asJsonObject()
+			.get("target").asJsonObject().get("selector").asJsonObject().get("startSelector").asJsonObject();
+	}
+
+	static private JsonObject getEndSelector(JsonObject body) {
+		return body //.get("@graph").asJsonArray().get(0).asJsonObject()
+				.get("target").asJsonObject().get("selector").asJsonObject().get("endSelector").asJsonObject();
+	}
+
+	static private String getType(JsonObject resource) {
+		return resource.getString("type");
+	}
+
+	static private String getXPathComponent(JsonObject selector) {
+		return selector.getString("value");
+	}
+
+	static private String getRFC5147Component(JsonObject selector) {
+		return selector.get("refinedBy").asJsonObject().getString("value");
+	}
+
 	@Test
-	public void testDocumentJohnXmlStatus205() {
-		given().when().get("/file/sample/document/john.xml").then().statusCode(205);
+	public void testForwardToBaseRepresentationWithJohnWhole() {
+		JsonObject body = given().multiPart("annotations", ANNOT_JOHN, "application/ld+json")
+				.accept("application/ld+json")
+				.when()
+				.post("/file/sample/oa/forward/john.xml")
+				.then()
+				.statusCode(200)
+				.extract().body().as(JsonObject.class);
+		assertEquals("RangeSelector", getType(getSelector(body)));
+		// rewritten start selector has namespaces
+		assertEquals("XPathSelector", getType(getStartSelector(body)));
+		assertTrue(getXPathComponent(getStartSelector(body)).startsWith("/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}l[1]/"));
+		assertTrue(getXPathComponent(getStartSelector(body)).endsWith("Q{http://wwu.de/scdh/selection-engine/node-tracing}text[1]"));
+		assertEquals("char=2", getRFC5147Component(getStartSelector(body)));
+		// rewritten end selector was rebased
+		assertEquals("XPathSelector", getType(getEndSelector(body)));
+		assertTrue(getXPathComponent(getEndSelector(body)).startsWith("/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}l[4]/"));
+		assertTrue(getXPathComponent(getEndSelector(body)).endsWith("Q{http://wwu.de/scdh/selection-engine/node-tracing}text[2]"), "second text node!");
+		assertEquals("char=4", getRFC5147Component(getEndSelector(body)), "re-calculated!");
 	}
 
 	@Test
