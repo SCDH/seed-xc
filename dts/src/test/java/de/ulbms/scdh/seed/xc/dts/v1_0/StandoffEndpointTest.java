@@ -76,6 +76,13 @@ public class StandoffEndpointTest {
 				.asJsonObject();
 	}
 
+	private static String getSource(JsonObject body) {
+		return body // .get("@graph").asJsonArray().get(0).asJsonObject()
+				.get("target")
+				.asJsonObject()
+				.getString("source");
+	}
+
 	private static JsonObject getStartSelector(JsonObject body) {
 		return body // .get("@graph").asJsonArray().get(0).asJsonObject()
 				.get("target")
@@ -136,6 +143,7 @@ public class StandoffEndpointTest {
 								"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}l[4]/"));
 		assertTrue(getXPathComponent(getEndSelector(body)).endsWith("text()[2]"), "second text node!");
 		assertEquals("char=4", getRFC5147Component(getEndSelector(body)), "re-calculated!");
+		assertEquals(BASE + "/file/sample/document/john.xml", getSource(body));
 	}
 
 	@Disabled
@@ -178,6 +186,7 @@ public class StandoffEndpointTest {
 				"in dts:wrapper and rewritten from [5] to [2]");
 		assertTrue(getXPathComponent(getEndSelector(body)).endsWith("text()[2]"), "second text node!");
 		assertEquals("char=4", getRFC5147Component(getEndSelector(body)), "re-calculated!");
+		assertEquals(BASE + "/file/sample/document/john.xml?start=John:1:3&end=John:1:5", getSource(body));
 	}
 
 	@Test
@@ -208,6 +217,7 @@ public class StandoffEndpointTest {
 								"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}l[4]/"));
 		assertTrue(getXPathComponent(getEndSelector(body)).endsWith("text()[2]"), "second text node!");
 		assertEquals("char=4", getRFC5147Component(getEndSelector(body)), "re-calculated!");
+		assertEquals(BASE + "/file/sample/document/john.xml", getSource(body));
 	}
 
 	// just for failing!
