@@ -46,6 +46,11 @@ public interface MappingTransformation extends Transformation {
 	RewriterFactory getRewriterFactory(Rewriter.Direction direction);
 
 	/**
+	 * Returns a configured XPath expression that can be used during the rewriting process.
+	 */
+	String getRewriterConfigXPath();
+
+	/**
 	 * Similar to {@link Transformation#transformAsync(RuntimeParameters, Config, String, Uni, ResourceProvider, HttpServerRequest)},
 	 * but returns a {@link MappedDOMResource}.<P/>
 	 *

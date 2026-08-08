@@ -31,12 +31,14 @@ import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import net.sf.saxon.lib.*;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.s9api.ItemType;
 import net.sf.saxon.s9api.Serializer;
 import net.sf.saxon.s9api.XsltExecutable.ParameterDetails;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.str.StringView;
+import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
@@ -67,7 +69,14 @@ public class SaxonXslTransformation extends TransformationBase
 	@ConfigProperty(
 			name = "selene-xpath-library-namespace",
 			defaultValue = "http://wwu.de/scdh/selection-engine/xpaths")
-	protected String getSeleneTracingLibraryNamespace;
+	protected String seleneTracingLibraryNamespace;
+
+	@ConfigProperty(
+			name = "selene-xpath-default",
+			defaultValue = "Q{http://wwu.de/scdh/selection-engine/xpaths}to-element")
+	protected String seleneXPathDefaultClarkName;
+
+	private String seleneXPathDefault;
 
 	/**
 	 * {@inheritDoc}
@@ -267,8 +276,32 @@ public class SaxonXslTransformation extends TransformationBase
 					Source packageSource = compileTimeResourceResolver.resolve(mkXsltRequest(seleneXPathLibrary));
 					XsltPackage functionLibrary = mappingXPathXsltCompiler.compilePackage(packageSource);
 					mappingXPathCompiler.addXsltFunctionLibrary(functionLibrary);
-					mappingXPathCompiler.declareNamespace("sel", getSeleneTracingLibraryNamespace);
+					mappingXPathCompiler.declareNamespace("sel", seleneTracingLibraryNamespace);
+					SymbolicName.F configuredDefault =
+							new SymbolicName.F(StructuredQName.fromClarkName(seleneXPathDefaultClarkName), 1);
+					if (!functionLibrary
+							.getUnderlyingPreparedPackage()
+							.getPublicFunctions()
+							.isAvailable(configuredDefault, 31)) {
+						seleneXPathDefault = "path(.)";
+						LOG.error(
+								"configuration error: selene-default-xpath {} is not available. Using fallback instead: {}",
+								seleneXPathDefaultClarkName,
+								seleneXPathDefault);
+					} else {
+						StructuredQName qName = functionLibrary
+								.getUnderlyingPreparedPackage()
+								.getPublicFunctions()
+								.getFunctionItem(configuredDefault, mappingXPathCompiler.getUnderlyingStaticContext())
+								.getFunctionName();
+						seleneXPathDefault = qName.getDisplayName() + "(.)";
+					}
+					LOG.info(
+							"Selene default XPath for transformation {}: {}",
+							transformationInfo.getIdent(),
+							seleneXPathDefault);
 				} catch (Exception e) {
+					seleneXPathDefault = "path(.)";
 					LOG.error("failed to compile Selene XPath library: {}", e.getMessage());
 				}
 			}
@@ -529,6 +562,11 @@ public class SaxonXslTransformation extends TransformationBase
 		} else {
 			return new BackwardMappingFactory(mappingXPathCompiler);
 		}
+	}
+
+	@Override
+	public String getRewriterConfigXPath() {
+		return seleneXPathDefault;
 	}
 
 	/**
