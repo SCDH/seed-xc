@@ -581,10 +581,7 @@ public class SaxonXslTransformation extends TransformationBase
 	 */
 	@Override
 	public Map<Class<? extends Point>, Class<? extends Point>> getPointClassMap(Rewriter.Direction direction) {
-		SerializationProperties serializationProperties =
-				executable.getUnderlyingCompiledStylesheet().getDeclaredSerializationProperties();
-		String method = serializationProperties.getProperty(OutputKeys.METHOD);
-		return RewriterConfig.getPointClassMapForXslt(method, direction);
+		return RewriterConfig.getPointClassMapForXslt(getSeleneOutputMethod(), direction);
 	}
 
 	/**
