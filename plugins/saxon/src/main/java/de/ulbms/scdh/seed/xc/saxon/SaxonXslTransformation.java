@@ -6,9 +6,14 @@ import de.ulbms.scdh.seed.xc.saxon.harden.ChainingUnparsedTextURIResolver;
 import de.ulbms.scdh.seed.xc.saxon.harden.ServiceConfiguration;
 import de.ulbms.scdh.seed.xc.saxon.harden.ZipFileURIResolver;
 import de.wwu.scdh.annotation.selection.Point;
+import de.wwu.scdh.annotation.selection.Rewriter;
+import de.wwu.scdh.annotation.selection.RewriterConfig;
+import de.wwu.scdh.annotation.selection.RewriterFactory;
 import de.wwu.scdh.annotation.selection.resource.DOMResource;
 import de.wwu.scdh.annotation.selection.resource.MappedDOMResource;
 import de.wwu.scdh.annotation.selection.resource.ResourceBuilder;
+import de.wwu.scdh.annotation.selection.rewriter.BackwardMappingFactory;
+import de.wwu.scdh.annotation.selection.rewriter.ForwardMappingFactory;
 import io.smallrye.mutiny.Uni;
 import io.vertx.core.http.HttpServerRequest;
 import jakarta.enterprise.context.Dependent;
@@ -22,6 +27,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipFile;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import net.sf.saxon.lib.*;
@@ -29,6 +35,7 @@ import net.sf.saxon.s9api.*;
 import net.sf.saxon.s9api.ItemType;
 import net.sf.saxon.s9api.Serializer;
 import net.sf.saxon.s9api.XsltExecutable.ParameterDetails;
+import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
@@ -473,6 +480,29 @@ public class SaxonXslTransformation extends TransformationBase
 	@Override
 	public boolean canMapResource() {
 		return mappingExecutable != null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Map<Class<? extends Point>, Class<? extends Point>> getPointClassMap(Rewriter.Direction direction) {
+		SerializationProperties serializationProperties = executable.getUnderlyingCompiledStylesheet().getDeclaredSerializationProperties();
+		String method = serializationProperties.getProperty(OutputKeys.METHOD);
+		return RewriterConfig.getPointClassMapForXslt(method, direction);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public RewriterFactory getRewriterFactory(Rewriter.Direction direction) {
+		XPathCompiler xPathCompiler = processor.newXPathCompiler();
+		if (direction.equals(Rewriter.Direction.FORWARD)) {
+			return new ForwardMappingFactory(xPathCompiler);
+		} else {
+			return new BackwardMappingFactory(xPathCompiler);
+		}
 	}
 
 	/**

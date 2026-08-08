@@ -1,10 +1,14 @@
 package de.ulbms.scdh.seed.xc.api;
 
+import de.wwu.scdh.annotation.selection.Point;
+import de.wwu.scdh.annotation.selection.Rewriter;
+import de.wwu.scdh.annotation.selection.RewriterFactory;
 import de.wwu.scdh.annotation.selection.resource.MappedDOMResource;
 import io.smallrye.mutiny.Uni;
 import io.vertx.core.http.HttpServerRequest;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.Map;
 
 /**
  * A {@link MappingTransformation} is {@link Transformation} with the additional ability to create
@@ -18,6 +22,28 @@ public interface MappingTransformation extends Transformation {
 	 * This indicates, e.g., that the compilation of the mapping transformation was successful.
 	 */
 	boolean canMapResource();
+
+	/**
+	 * Returns a mapping of {@link Point} classes of input pointers (selectors) to point output pointers (selectors).
+	 * For each key in the {@link Map}, point types in the input are to be replaced by point types in the output.
+	 * This mapping will generally depend on the serializing format of the transformation's output and the direction of
+	 * pointer rewriting (for- or backward). The key always refers to the point classes of the input annotations (not to
+	 * the transformation input, e.g. XML; and the map values refer to the output classes. It may thus flip when
+	 * changing <code>direction</code>.<P/>
+	 *
+	 * For example, a transformation from XML to plaintext, when transforming pointers in forward direction, will
+	 * replace XPath selectors refined by RFC 5147 char schemes with Fragment selectors conforming to the same RFC.
+	 * @return - a mapping of input point classes output point classes
+	 */
+	Map<Class<? extends Point>, Class<? extends Point>> getPointClassMap(Rewriter.Direction direction);
+
+	/**
+	 * Sets up a {@link RewriterFactory} instance for the direction of pointer transformation.
+	 *
+	 * @param direction - direction of pointer transformation, either <code>forward</code> or <code>backward</code>
+	 * @return RewriterFactory
+	 */
+	RewriterFactory getRewriterFactory(Rewriter.Direction direction);
 
 	/**
 	 * Similar to {@link Transformation#transformAsync(RuntimeParameters, Config, String, Uni, ResourceProvider, HttpServerRequest)},

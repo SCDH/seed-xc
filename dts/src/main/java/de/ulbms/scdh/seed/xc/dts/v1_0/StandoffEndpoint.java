@@ -14,10 +14,8 @@ import de.ulbms.scdh.seed.xc.api.inject.TransformTimeProvider;
 import de.ulbms.scdh.seed.xc.dts.CollectionMetadataProcessor;
 import de.ulbms.scdh.seed.xc.dts.endpoints.StandoffApi;
 import de.ulbms.scdh.seed.xc.transformations.TransformationMap;
+import de.wwu.scdh.annotation.selection.Rewriter;
 import de.wwu.scdh.annotation.selection.RewriterConfig;
-import de.wwu.scdh.annotation.selection.RewriterFactory;
-import de.wwu.scdh.annotation.selection.rewriter.BackwardMappingFactory;
-import de.wwu.scdh.annotation.selection.rewriter.ForwardMappingFactory;
 import de.wwu.scdh.annotation.selection.wadm.NormalizeAnnotation;
 import io.smallrye.mutiny.Uni;
 import io.vertx.core.http.HttpHeaders;
@@ -155,8 +153,8 @@ public class StandoffEndpoint implements StandoffApi {
 						mappedResource,
 						imageIri, // backward!
 						preimageIri,
-						getRewriterFactory("backward"),
-						getRewriterConfig(),
+						transformation.getRewriterFactory(Rewriter.Direction.BACKWARD),
+						getRewriterConfig(Rewriter.Direction.BACKWARD, transformation),
 						getAnnotationsGraph(annotations)))
 				.onItem()
 				.transform(model -> serialize(model, frame))
@@ -219,8 +217,8 @@ public class StandoffEndpoint implements StandoffApi {
 						mappedResource,
 						preimageIri, // forward!
 						imageIri,
-						getRewriterFactory("forward"),
-						getRewriterConfig(),
+						transformation.getRewriterFactory(Rewriter.Direction.FORWARD),
+						getRewriterConfig(Rewriter.Direction.FORWARD, transformation),
 						getAnnotationsGraph(annotations)))
 				.onItem()
 				.transform(model -> serialize(model, frame))
@@ -411,16 +409,8 @@ public class StandoffEndpoint implements StandoffApi {
 		return output.toByteArray();
 	}
 
-	private RewriterConfig getRewriterConfig() {
-		return new RewriterConfig(null, false, "path(.)", true); // TODO
-	}
-
-	private RewriterFactory getRewriterFactory(String direction) {
-		if (direction.equals("forward")) {
-			return new ForwardMappingFactory();
-		} else {
-			return new BackwardMappingFactory();
-		}
+	private RewriterConfig getRewriterConfig(Rewriter.Direction direction, MappingTransformation transformation) {
+		return new RewriterConfig(null, false, "path(.)", true, true, transformation.getPointClassMap(direction)); // TODO
 	}
 
 	private Model getAnnotationsGraph(InputStream inputStream) {
