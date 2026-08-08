@@ -333,6 +333,9 @@
 
     <profile>
       <id>dts</id>
+      <properties>
+        <seed-dts.config>${project.build.directory}/dependencies/dts-transformations-testing.yaml</seed-dts.config>
+      </properties>
       <build>
         <plugins>
           <plugin>
