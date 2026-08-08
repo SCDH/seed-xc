@@ -209,9 +209,7 @@ public class DocumentEndpointTest {
 	public void testJohnMediaTypePlaintext() throws IOException {
 		InputStream in = johnMediaTypePlaintext.openStream();
 		String contents = new String(in.readAllBytes(), StandardCharsets.UTF_8);
-		assertTrue(
-				contents.contains(
-						"In the beginning was the Word, and the Word was with God, and the Word"));
+		assertTrue(contents.contains("In the beginning was the Word, and the Word was with God, and the Word"));
 		assertTrue(contents.contains("There was a man sent from God whose name was John."));
 		assertTrue(contents.strip().endsWith("bla"));
 	}
