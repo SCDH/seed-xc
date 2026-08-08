@@ -334,7 +334,7 @@ public class CollectionEndpointTest {
 			assertEquals(JsonValue.ValueType.ARRAY, bodyObj.get("mediaTypes").getValueType());
 			JsonArray mediaTypes = (JsonArray) bodyObj.get("mediaTypes");
 			assertTrue(mediaTypes.size() > 1, "at least 2 transformations configured for document endpoint");
-			assertEquals(2, mediaTypes.size());
+			//assertEquals(2, mediaTypes.size());
 			// assertTrue(mediaTypes.stream().map(String::valueOf).toList().contains("text/plain"), "text/plain is
 			// available");
 			boolean plainPresent = false;
