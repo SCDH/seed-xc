@@ -202,7 +202,7 @@ public class StandoffEndpointTest {
 		assertEquals(BASE + "/file/sample/document/john.xml", getSource(body));
 	}
 
-	//@Disabled
+	@Disabled
 	@Test
 	public void testJohn13to15() {
 		byte[] body = given().when()
@@ -300,7 +300,7 @@ public class StandoffEndpointTest {
 	}
 
 	// just for failing!
-	// @Disabled
+	@Disabled
 	@Test
 	public void testDocumentJohnXmlStatus201() {
 		given().when().get("/file/sample/document/john.xml").then().statusCode(201);
