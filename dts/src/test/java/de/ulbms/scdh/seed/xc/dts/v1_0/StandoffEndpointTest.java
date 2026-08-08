@@ -30,10 +30,13 @@ public class StandoffEndpointTest {
 	}
 
 	@Test
-	public void testForwardNotAllowedWithTransformation() {
+	public void testForwardWithTransformationWithoutSeleneCapability() {
 		given().multiPart("annotations", ANNOT_JOHN_FW, "application/ld+json")
+				.accept("application/ld+json")
 				.when()
-				.post("/file/sample/oa/forward/john.xml?mediaType=text/plain")
+				// the old `dts-transformations-xsl-document` transformations returns text/xml
+				// as opposed to the chained distribution-seed-id with Selene capabilities
+				.post("/file/sample/oa/forward/john.xml?mediaType=text/xml")
 				.then()
 				.statusCode(405)
 				.header("Allow", "");
