@@ -565,8 +565,12 @@ public class SaxonXslTransformation extends TransformationBase
 	}
 
 	@Override
-	public String getRewriterConfigXPath() {
-		return seleneXPathDefault;
+	public String getRewriterConfigXPath(Rewriter.Direction direction) {
+		if (direction.equals(Rewriter.Direction.FORWARD)) {
+			return seleneXPathDefault;
+		} else {
+			return "path(.)";
+		}
 	}
 
 	/**

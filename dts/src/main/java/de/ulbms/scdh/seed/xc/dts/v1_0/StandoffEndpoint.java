@@ -410,13 +410,13 @@ public class StandoffEndpoint implements StandoffApi {
 	}
 
 	private RewriterConfig getRewriterConfig(Rewriter.Direction direction, MappingTransformation transformation) {
-		String xpath;
-		if (direction.equals(Rewriter.Direction.FORWARD)) {
-			xpath = transformation.getRewriterConfigXPath();
-		} else {
-			xpath = "path(.)"; // per default down to the text node
-		}
-		return new RewriterConfig(null, false, xpath, true, true, transformation.getPointClassMap(direction));
+		return new RewriterConfig(
+				null,
+				false,
+				transformation.getRewriterConfigXPath(direction),
+				true,
+				true,
+				transformation.getPointClassMap(direction));
 	}
 
 	private Model getAnnotationsGraph(InputStream inputStream) {

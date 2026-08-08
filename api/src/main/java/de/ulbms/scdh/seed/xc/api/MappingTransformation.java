@@ -48,7 +48,7 @@ public interface MappingTransformation extends Transformation {
 	/**
 	 * Returns a configured XPath expression that can be used during the rewriting process.
 	 */
-	String getRewriterConfigXPath();
+	String getRewriterConfigXPath(Rewriter.Direction direction);
 
 	/**
 	 * Similar to {@link Transformation#transformAsync(RuntimeParameters, Config, String, Uni, ResourceProvider, HttpServerRequest)},
