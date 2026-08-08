@@ -21,6 +21,7 @@ public class StandoffEndpointTest {
 
 	private static final File ANNOT_JOHN_FW = new File(ANNOT_DIR, "John.fw.json");
 	private static final File ANNOT_JOHN_BW = new File(ANNOT_DIR, "John.bw.json");
+	private static final File ANNOT_JOHN_BW_TXT = new File(ANNOT_DIR, "John.bw.txt.json");
 	private static final File ANNOT_P11 = new File(ANNOT_DIR, "p1.1.json");
 
 	@Test
@@ -165,6 +166,37 @@ public class StandoffEndpointTest {
 		assertEquals("FragmentSelector", getType(getEndSelector(body)));
 		assertEquals("char=329", getValue(getEndSelector(body)));
 		assertEquals(BASE + "/file/sample/document/john.xml?mediaType=text/plain", getSource(body));
+	}
+
+	@Test
+	public void testBackwardToTxtWithJohnWhole() {
+		JsonObject body = given().multiPart("annotations", ANNOT_JOHN_BW_TXT, "application/ld+json")
+				.accept("application/ld+json")
+				.when()
+				.post("/file/sample/oa/backward/john.xml?mediaType=text/plain")
+				.then()
+				.statusCode(200)
+				.extract()
+				.body()
+				.as(JsonObject.class);
+		assertEquals("RangeSelector", getType(getSelector(body)));
+		// rewritten start selector has namespaces
+		assertEquals("XPathSelector", getType(getStartSelector(body)));
+		assertTrue(
+				getValue(getStartSelector(body))
+						.startsWith(
+								"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}l[3]/"));
+		assertTrue(getValue(getStartSelector(body)).endsWith("text()[1]"));
+		assertEquals("char=2", getRFC5147Component(getStartSelector(body)));
+		// rewritten end selector was rebased
+		assertEquals("XPathSelector", getType(getEndSelector(body)));
+		assertTrue(
+				getValue(getEndSelector(body))
+						.startsWith(
+								"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}l[4]/"));
+		assertTrue(getValue(getEndSelector(body)).endsWith("text()[2]"), "second text node!");
+		assertEquals("char=4", getRFC5147Component(getEndSelector(body)), "re-calculated!");
+		assertEquals(BASE + "/file/sample/document/john.xml", getSource(body));
 	}
 
 	@Disabled

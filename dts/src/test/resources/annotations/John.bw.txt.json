@@ -1,0 +1,24 @@
+{
+  "id": "https://annotations.example.com/samples/p1.1",
+  "type": "Annotation",
+  "body": {
+    "source": "https://global.scdh.uni-muenster.de/comment/1"
+  },
+  "target": {
+    "selector": {
+      "type": "RangeSelector",
+      "startSelector": {
+        "type": "FragmentSelector",
+        "conformsTo": "http://tools.ietf.org/rfc/rfc5147",
+        "value": "char=182"
+      },
+      "endSelector": {
+        "type": "FragmentSelector",
+        "conformsTo": "http://tools.ietf.org/rfc/rfc5147",
+        "value": "char=329"
+      }
+    },
+    "source": "https://dts.example.com/file/sample/document/john.xml?mediaType=text/plain"
+  },
+  "@context": "https://www.w3.org/ns/anno.jsonld"
+}
