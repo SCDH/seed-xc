@@ -30,6 +30,7 @@ import java.util.zip.ZipFile;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
+import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.*;
@@ -72,11 +73,18 @@ public class SaxonXslTransformation extends TransformationBase
 	protected String seleneTracingLibraryNamespace;
 
 	@ConfigProperty(
-			name = "selene-xpath-default",
+			name = "selene-forward-xpath-default",
 			defaultValue = "Q{http://wwu.de/scdh/selection-engine/xpaths}to-element")
-	protected String seleneXPathDefaultClarkName;
+	protected String seleneForwardXPathDefaultClarkName;
 
-	private String seleneXPathDefault;
+	private String seleneForwardXPathDefault;
+
+	@ConfigProperty(
+			name = "selene-backward-xpath-default",
+			defaultValue = "Q{http://www.w3.org/2005/xpath-functions}path")
+	protected String seleneBackwardXPathDefaultClarkName;
+
+	private String seleneBackwardXPathDefault;
 
 	/**
 	 * {@inheritDoc}
@@ -277,31 +285,62 @@ public class SaxonXslTransformation extends TransformationBase
 					XsltPackage functionLibrary = mappingXPathXsltCompiler.compilePackage(packageSource);
 					mappingXPathCompiler.addXsltFunctionLibrary(functionLibrary);
 					mappingXPathCompiler.declareNamespace("sel", seleneTracingLibraryNamespace);
-					SymbolicName.F configuredDefault =
-							new SymbolicName.F(StructuredQName.fromClarkName(seleneXPathDefaultClarkName), 1);
-					if (!functionLibrary
-							.getUnderlyingPreparedPackage()
-							.getPublicFunctions()
-							.isAvailable(configuredDefault, 31)) {
-						seleneXPathDefault = "path(.)";
+					// forward default XPath
+					FunctionLibrary functions =
+							functionLibrary.getUnderlyingPreparedPackage().getPublicFunctions();
+					SymbolicName.F configuredForwardDefault =
+							new SymbolicName.F(StructuredQName.fromClarkName(seleneForwardXPathDefaultClarkName), 1);
+					if (seleneForwardXPathDefaultClarkName.startsWith("Q{http://www.w3.org/2005/xpath-functions}")) {
+						// functions from fn-namespace cannot be looked up in the library!
+						StructuredQName qName = StructuredQName.fromClarkName(seleneForwardXPathDefaultClarkName);
+						seleneForwardXPathDefault = qName.getLocalPart() + "(.)";
+					} else if (!functions.isAvailable(configuredForwardDefault, 31)) {
+						seleneForwardXPathDefault = "path(.)";
 						LOG.error(
-								"configuration error: selene-default-xpath {} is not available. Using fallback instead: {}",
-								seleneXPathDefaultClarkName,
-								seleneXPathDefault);
+								"configuration error: selene-forward-default-xpath {} is not available. Using fallback instead: {}",
+								seleneForwardXPathDefaultClarkName,
+								seleneForwardXPathDefault);
 					} else {
-						StructuredQName qName = functionLibrary
-								.getUnderlyingPreparedPackage()
-								.getPublicFunctions()
-								.getFunctionItem(configuredDefault, mappingXPathCompiler.getUnderlyingStaticContext())
+						StructuredQName qName = functions
+								.getFunctionItem(
+										configuredForwardDefault, mappingXPathCompiler.getUnderlyingStaticContext())
 								.getFunctionName();
-						seleneXPathDefault = qName.getDisplayName() + "(.)";
+						seleneForwardXPathDefault = qName.getDisplayName() + "(.)";
 					}
 					LOG.info(
 							"Selene default XPath for transformation {}: {}",
 							transformationInfo.getIdent(),
-							seleneXPathDefault);
+							seleneForwardXPathDefault);
+					// backward
+					SymbolicName.F configuredBackwardDefault =
+							new SymbolicName.F(StructuredQName.fromClarkName(seleneBackwardXPathDefaultClarkName), 1);
+					if (seleneBackwardXPathDefaultClarkName.startsWith("Q{http://www.w3.org/2005/xpath-functions}")) {
+						// functions from fn-namespace cannot be looked up in the library!
+						StructuredQName qName = StructuredQName.fromClarkName(seleneBackwardXPathDefaultClarkName);
+						seleneBackwardXPathDefault = qName.getLocalPart() + "(.)";
+					} else if (!functions.isAvailable(configuredBackwardDefault, 31)
+							|| seleneBackwardXPathDefaultClarkName.startsWith(
+									"Q{http://www.w3.org/2005/xpath-functions}")) {
+						seleneBackwardXPathDefault = "path(.)";
+						LOG.error(
+								"configuration error: selene-backward-default-xpath {} is not available. Using fallback instead: {}",
+								seleneBackwardXPathDefaultClarkName,
+								seleneBackwardXPathDefault);
+					} else {
+						StructuredQName qName = functions
+								.getFunctionItem(
+										configuredBackwardDefault, mappingXPathCompiler.getUnderlyingStaticContext())
+								.getFunctionName();
+						seleneBackwardXPathDefault = qName.getDisplayName() + "(.)";
+					}
+					LOG.info(
+							"Selene default XPath for transformation {}: {}",
+							transformationInfo.getIdent(),
+							seleneBackwardXPathDefault);
+
 				} catch (Exception e) {
-					seleneXPathDefault = "path(.)";
+					seleneForwardXPathDefault = "path(.)";
+					seleneBackwardXPathDefault = "path(.)";
 					LOG.error("failed to compile Selene XPath library: {}", e.getMessage());
 				}
 			}
@@ -567,9 +606,9 @@ public class SaxonXslTransformation extends TransformationBase
 	@Override
 	public String getRewriterConfigXPath(Rewriter.Direction direction) {
 		if (direction.equals(Rewriter.Direction.FORWARD)) {
-			return seleneXPathDefault;
+			return seleneForwardXPathDefault;
 		} else {
-			return "path(.)";
+			return seleneBackwardXPathDefault;
 		}
 	}
 
