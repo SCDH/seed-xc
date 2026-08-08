@@ -61,6 +61,14 @@ public class SaxonXslTransformation extends TransformationBase
 	@ConfigProperty(name = "selene-xslt-tracing-library", defaultValue = "libtrace.xsl")
 	protected String seleneTracingLibrary;
 
+	@ConfigProperty(name = "selene-xpath-library", defaultValue = "selene/xpath.xsl")
+	protected String seleneXPathLibrary;
+
+	@ConfigProperty(
+			name = "selene-xpath-library-namespace",
+			defaultValue = "http://wwu.de/scdh/selection-engine/xpaths")
+	protected String getSeleneTracingLibraryNamespace;
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -76,6 +84,8 @@ public class SaxonXslTransformation extends TransformationBase
 	protected ZipFileURIResolver zipResourceResolver;
 
 	private XsltExecutable executable, mappingExecutable = null;
+
+	private XPathCompiler mappingXPathCompiler = null;
 
 	/**
 	 * Make a {@link ResourceRequest} from a URI given as string.
@@ -248,6 +258,18 @@ public class SaxonXslTransformation extends TransformationBase
 							"failed to compile mapping transformation {}: {}",
 							transformationInfo.getIdent(),
 							e.getMessage());
+				}
+				mappingXPathCompiler = processor.newXPathCompiler();
+				// compile and load Selene XPath function library
+				try {
+					XsltCompiler mappingXPathXsltCompiler = processor.newXsltCompiler();
+					mappingXPathXsltCompiler.setResourceResolver(compileTimeResourceResolver);
+					Source packageSource = compileTimeResourceResolver.resolve(mkXsltRequest(seleneXPathLibrary));
+					XsltPackage functionLibrary = mappingXPathXsltCompiler.compilePackage(packageSource);
+					mappingXPathCompiler.addXsltFunctionLibrary(functionLibrary);
+					mappingXPathCompiler.declareNamespace("sel", getSeleneTracingLibraryNamespace);
+				} catch (Exception e) {
+					LOG.error("failed to compile Selene XPath library: {}", e.getMessage());
 				}
 			}
 		} catch (SaxonApiException e) {
@@ -487,7 +509,8 @@ public class SaxonXslTransformation extends TransformationBase
 	 */
 	@Override
 	public Map<Class<? extends Point>, Class<? extends Point>> getPointClassMap(Rewriter.Direction direction) {
-		SerializationProperties serializationProperties = executable.getUnderlyingCompiledStylesheet().getDeclaredSerializationProperties();
+		SerializationProperties serializationProperties =
+				executable.getUnderlyingCompiledStylesheet().getDeclaredSerializationProperties();
 		String method = serializationProperties.getProperty(OutputKeys.METHOD);
 		return RewriterConfig.getPointClassMapForXslt(method, direction);
 	}
@@ -497,11 +520,14 @@ public class SaxonXslTransformation extends TransformationBase
 	 */
 	@Override
 	public RewriterFactory getRewriterFactory(Rewriter.Direction direction) {
-		XPathCompiler xPathCompiler = processor.newXPathCompiler();
+		// This reuses the same XPath compiler for the whole lifetime of the transformation bean. According to the
+		// Saxon documentation, this should be OK, although the compiler is used for compiling path expressions in
+		// every Web Annotation selector etc.
+		// See
 		if (direction.equals(Rewriter.Direction.FORWARD)) {
-			return new ForwardMappingFactory(xPathCompiler);
+			return new ForwardMappingFactory(mappingXPathCompiler);
 		} else {
-			return new BackwardMappingFactory(xPathCompiler);
+			return new BackwardMappingFactory(mappingXPathCompiler);
 		}
 	}
 
