@@ -294,7 +294,9 @@ public class StandoffEndpointTest {
 		// rewritten end selector was rebased
 		assertEquals("FragmentSelector", getType(getEndSelector(body)));
 		assertEquals("char=166", getValue(getEndSelector(body)));
-		assertEquals(BASE + "/file/sample/document/john.xml", getSource(body));
+		assertEquals(
+				BASE + "/file/sample/document/john.xml?mediaType=text/plain&start=John:1:3&end=John:1:5",
+				getSource(body));
 	}
 
 	// just for failing!
