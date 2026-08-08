@@ -199,11 +199,11 @@ public class StandoffEndpointTest {
 		assertEquals(BASE + "/file/sample/document/john.xml", getSource(body));
 	}
 
-	@Disabled
+	//@Disabled
 	@Test
 	public void testJohn13to15() {
 		byte[] body = given().when()
-				.get("/file/sample/document/john.xml?start=John:1:3&end=John:1:5")
+				.get("/file/sample/document/john.xml?start=John:1:3&end=John:1:5&mediaType=text/plain")
 				.asByteArray();
 		assertEquals("", new String(body, Charset.defaultCharset()));
 	}
@@ -273,8 +273,29 @@ public class StandoffEndpointTest {
 		assertEquals(BASE + "/file/sample/document/john.xml", getSource(body));
 	}
 
+	@Test
+	public void testForwardToTxtWithJohn13to15() {
+		JsonObject body = given().multiPart("annotations", ANNOT_JOHN_FW, "application/ld+json")
+				.accept("application/ld+json")
+				.when()
+				.post("/file/sample/oa/forward/john.xml?mediaType=text/plain&start=John:1:3&end=John:1:5")
+				.then()
+				.statusCode(200)
+				.extract()
+				.body()
+				.as(JsonObject.class);
+		assertEquals("RangeSelector", getType(getSelector(body)));
+		// rewritten start selector has namespaces
+		assertEquals("FragmentSelector", getType(getStartSelector(body)));
+		assertEquals("char=3", getValue(getStartSelector(body)));
+		// rewritten end selector was rebased
+		assertEquals("FragmentSelector", getType(getEndSelector(body)));
+		assertEquals("char=166", getValue(getEndSelector(body)));
+		assertEquals(BASE + "/file/sample/document/john.xml", getSource(body));
+	}
+
 	// just for failing!
-	//@Disabled
+	// @Disabled
 	@Test
 	public void testDocumentJohnXmlStatus201() {
 		given().when().get("/file/sample/document/john.xml").then().statusCode(201);
