@@ -107,7 +107,7 @@ public class StandoffEndpointTest {
 		return resource.getString("type");
 	}
 
-	private static String getXPathComponent(JsonObject selector) {
+	private static String getValue(JsonObject selector) {
 		return selector.getString("value");
 	}
 
@@ -130,20 +130,41 @@ public class StandoffEndpointTest {
 		// rewritten start selector has namespaces
 		assertEquals("XPathSelector", getType(getStartSelector(body)));
 		assertTrue(
-				getXPathComponent(getStartSelector(body))
+				getValue(getStartSelector(body))
 						.startsWith(
 								"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}l[3]/"));
-		assertTrue(getXPathComponent(getStartSelector(body)).endsWith("text()[1]"));
+		assertTrue(getValue(getStartSelector(body)).endsWith("text()[1]"));
 		assertEquals("char=2", getRFC5147Component(getStartSelector(body)));
 		// rewritten end selector was rebased
 		assertEquals("XPathSelector", getType(getEndSelector(body)));
 		assertTrue(
-				getXPathComponent(getEndSelector(body))
+				getValue(getEndSelector(body))
 						.startsWith(
 								"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}l[4]/"));
-		assertTrue(getXPathComponent(getEndSelector(body)).endsWith("text()[2]"), "second text node!");
+		assertTrue(getValue(getEndSelector(body)).endsWith("text()[2]"), "second text node!");
 		assertEquals("char=4", getRFC5147Component(getEndSelector(body)), "re-calculated!");
 		assertEquals(BASE + "/file/sample/document/john.xml", getSource(body));
+	}
+
+	@Test
+	public void testForwardToTxtWithJohnWhole() {
+		JsonObject body = given().multiPart("annotations", ANNOT_JOHN_FW, "application/ld+json")
+				.accept("application/ld+json")
+				.when()
+				.post("/file/sample/oa/forward/john.xml?mediaType=text/plain")
+				.then()
+				.statusCode(200)
+				.extract()
+				.body()
+				.as(JsonObject.class);
+		assertEquals("RangeSelector", getType(getSelector(body)));
+		// rewritten start selector has namespaces
+		assertEquals("FragmentSelector", getType(getStartSelector(body)));
+		assertEquals("char=182", getValue(getStartSelector(body)));
+		// rewritten end selector was rebased
+		assertEquals("FragmentSelector", getType(getEndSelector(body)));
+		assertEquals("char=329", getValue(getEndSelector(body)));
+		assertEquals(BASE + "/file/sample/document/john.xml?mediaType=text/plain", getSource(body));
 	}
 
 	@Disabled
@@ -171,20 +192,20 @@ public class StandoffEndpointTest {
 		assertEquals("XPathSelector", getType(getStartSelector(body)));
 		// assertEquals("", getXPathComponent(getStartSelector(body)));
 		assertTrue(
-				getXPathComponent(getStartSelector(body))
+				getValue(getStartSelector(body))
 						.startsWith(
 								"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{https://w3id.org/api/dts#}wrapper[1]/Q{http://www.tei-c.org/ns/1.0}l[1]/"),
 				"in dts:wrapper and rewritten from [3] to [1]!");
-		assertTrue(getXPathComponent(getStartSelector(body)).endsWith("text()[1]"));
+		assertTrue(getValue(getStartSelector(body)).endsWith("text()[1]"));
 		assertEquals("char=2", getRFC5147Component(getStartSelector(body)));
 		// rewritten end selector was rebased
 		assertEquals("XPathSelector", getType(getEndSelector(body)));
 		assertTrue(
-				getXPathComponent(getEndSelector(body))
+				getValue(getEndSelector(body))
 						.startsWith(
 								"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{https://w3id.org/api/dts#}wrapper[1]/Q{http://www.tei-c.org/ns/1.0}l[2]/"),
 				"in dts:wrapper and rewritten from [5] to [2]");
-		assertTrue(getXPathComponent(getEndSelector(body)).endsWith("text()[2]"), "second text node!");
+		assertTrue(getValue(getEndSelector(body)).endsWith("text()[2]"), "second text node!");
 		assertEquals("char=4", getRFC5147Component(getEndSelector(body)), "re-calculated!");
 		assertEquals(BASE + "/file/sample/document/john.xml?start=John:1:3&end=John:1:5", getSource(body));
 	}
@@ -204,24 +225,24 @@ public class StandoffEndpointTest {
 		// rewritten start selector has namespaces
 		assertEquals("XPathSelector", getType(getStartSelector(body)));
 		assertTrue(
-				getXPathComponent(getStartSelector(body))
+				getValue(getStartSelector(body))
 						.startsWith(
 								"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}l[3]/"));
-		assertTrue(getXPathComponent(getStartSelector(body)).endsWith("text()[1]"));
+		assertTrue(getValue(getStartSelector(body)).endsWith("text()[1]"));
 		assertEquals("char=2", getRFC5147Component(getStartSelector(body)));
 		// rewritten end selector was rebased
 		assertEquals("XPathSelector", getType(getEndSelector(body)));
 		assertTrue(
-				getXPathComponent(getEndSelector(body))
+				getValue(getEndSelector(body))
 						.startsWith(
 								"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}l[4]/"));
-		assertTrue(getXPathComponent(getEndSelector(body)).endsWith("text()[2]"), "second text node!");
+		assertTrue(getValue(getEndSelector(body)).endsWith("text()[2]"), "second text node!");
 		assertEquals("char=4", getRFC5147Component(getEndSelector(body)), "re-calculated!");
 		assertEquals(BASE + "/file/sample/document/john.xml", getSource(body));
 	}
 
 	// just for failing!
-	@Disabled
+	//@Disabled
 	@Test
 	public void testDocumentJohnXmlStatus201() {
 		given().when().get("/file/sample/document/john.xml").then().statusCode(201);
