@@ -306,7 +306,7 @@ public class SaxonXslTransformation extends TransformationBase
 						seleneForwardXPathDefault = qName.getDisplayName() + "(.)";
 					}
 					LOG.info(
-							"Selene default XPath for transformation {}: {}",
+							"Selene default forward XPath for transformation {}: {}",
 							transformationInfo.getIdent(),
 							seleneForwardXPathDefault);
 					// backward
@@ -332,7 +332,7 @@ public class SaxonXslTransformation extends TransformationBase
 						seleneBackwardXPathDefault = qName.getDisplayName() + "(.)";
 					}
 					LOG.info(
-							"Selene default XPath for transformation {}: {}",
+							"Selene default backward XPath for transformation {}: {}",
 							transformationInfo.getIdent(),
 							seleneBackwardXPathDefault);
 
