@@ -154,7 +154,7 @@ public class StandoffEndpoint implements StandoffApi {
 						imageIri, // backward!
 						preimageIri,
 						transformation.getRewriterFactory(Rewriter.Direction.BACKWARD),
-						getRewriterConfig(Rewriter.Direction.BACKWARD, transformation),
+						getRewriterConfig(Rewriter.Direction.BACKWARD, transformation, null),
 						getAnnotationsGraph(annotations)))
 				.onItem()
 				.transform(model -> serialize(model, frame))
@@ -191,7 +191,8 @@ public class StandoffEndpoint implements StandoffApi {
 			String end,
 			String tree,
 			String mediaType,
-			InputStream frame) {
+			InputStream frame,
+			String xpath) {
 
 		setIRI(provider, location, resource, "forward");
 		setResourceProvider(provider, location);
@@ -218,7 +219,7 @@ public class StandoffEndpoint implements StandoffApi {
 						preimageIri, // forward!
 						imageIri,
 						transformation.getRewriterFactory(Rewriter.Direction.FORWARD),
-						getRewriterConfig(Rewriter.Direction.FORWARD, transformation),
+						getRewriterConfig(Rewriter.Direction.FORWARD, transformation, xpath),
 						getAnnotationsGraph(annotations)))
 				.onItem()
 				.transform(model -> serialize(model, frame))
@@ -409,14 +410,16 @@ public class StandoffEndpoint implements StandoffApi {
 		return output.toByteArray();
 	}
 
-	private RewriterConfig getRewriterConfig(Rewriter.Direction direction, MappingTransformation transformation) {
-		return new RewriterConfig(
-				null,
-				false,
-				transformation.getRewriterConfigXPath(direction),
-				true,
-				true,
-				transformation.getPointClassMap(direction));
+	private RewriterConfig getRewriterConfig(
+			Rewriter.Direction direction, MappingTransformation transformation, String userXPath) {
+		String xpath;
+		if (userXPath == null || userXPath.isBlank()) {
+			xpath = transformation.getRewriterConfigXPath(direction);
+		} else {
+			xpath = userXPath;
+		}
+		// TODO: set escaped according to content negotiation
+		return new RewriterConfig(null, false, xpath, true, true, transformation.getPointClassMap(direction));
 	}
 
 	private Model getAnnotationsGraph(InputStream inputStream) {

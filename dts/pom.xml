@@ -13,7 +13,7 @@
   <description>Distributed Text Services, level 1 conformance</description>
 
   <properties>
-    <dts-openapi.version>0.5.0</dts-openapi.version>
+    <dts-openapi.version>0.6.0</dts-openapi.version>
     <openapi-specs.dir>${project.build.directory}</openapi-specs.dir>
 
     <!-- service configuration -->
@@ -280,8 +280,8 @@
                 <!-- this has to precede the OA generation which is in generate-sources -->
                 <phase>initialize</phase>
                 <configuration>
-                  <!--url>https://raw.githubusercontent.com/SCDH/dts-openapi/refs/tags/${dts-openapi.version}/standalone/facade-openapi.yaml</url-->
-                  <url>https://raw.githubusercontent.com/SCDH/dts-openapi/refs/heads/standoff/standalone/facade-openapi.yaml</url>
+                  <url>https://raw.githubusercontent.com/SCDH/dts-openapi/refs/tags/${dts-openapi.version}/standalone/facade-openapi.yaml</url>
+                  <!--url>https://raw.githubusercontent.com/SCDH/dts-openapi/refs/heads/standoff/standalone/facade-openapi.yaml</url-->
                   <unpack>false</unpack>
                   <outputDirectory>${openapi-specs.dir}</outputDirectory>
                 </configuration>
