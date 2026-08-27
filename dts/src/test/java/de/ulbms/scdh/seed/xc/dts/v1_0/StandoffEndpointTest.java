@@ -150,11 +150,10 @@ public class StandoffEndpointTest {
 		assertEquals(BASE + "/file/sample/document/john.xml", getSource(body));
 	}
 
-	@Disabled("xpath is not yet propagated")
 	@Test
 	public void testForwardToBaseRepresentationWithJohnWholeWithXPathSelToElement() {
 		JsonObject body = given().multiPart("annotations", ANNOT_JOHN_FW, "application/ld+json")
-				.multiPart("xpath", "sel:to-element(.)")
+				.multiPart("xpath", "path(parent::*)")
 				.accept("application/ld+json")
 				.when()
 				.post("/file/sample/oa/forward/john.xml")
@@ -169,7 +168,7 @@ public class StandoffEndpointTest {
 		assertTrue(
 				getValue(getStartSelector(body))
 						.startsWith(
-								"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}l[3]/"));
+								"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}l[3]"));
 		assertTrue(getValue(getStartSelector(body)).endsWith("l[3]"), "third verse");
 		assertEquals("char=2", getRFC5147Component(getStartSelector(body)));
 		// rewritten end selector was rebased
@@ -177,9 +176,9 @@ public class StandoffEndpointTest {
 		assertTrue(
 				getValue(getEndSelector(body))
 						.startsWith(
-								"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}l[4]/"));
+								"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}l[4]"));
 		assertTrue(getValue(getEndSelector(body)).endsWith("l[4]"), "fourth verse");
-		assertEquals("char=4", getRFC5147Component(getEndSelector(body)), "re-calculated!");
+		assertEquals("char=48", getRFC5147Component(getEndSelector(body)), "re-calculated!");
 		assertEquals(BASE + "/file/sample/document/john.xml", getSource(body));
 	}
 
