@@ -282,7 +282,6 @@ public class SaxonXslTransformation extends TransformationBase
 					Source packageSource = compileTimeResourceResolver.resolve(mkXsltRequest(seleneXPathLibrary));
 					XsltPackage functionLibrary = mappingXPathXsltCompiler.compilePackage(packageSource);
 					mappingXPathCompiler.addXsltFunctionLibrary(functionLibrary);
-					mappingXPathCompiler.declareNamespace("sel", seleneTracingLibraryNamespace);
 					// forward default XPath
 					FunctionLibrary functions =
 							functionLibrary.getUnderlyingPreparedPackage().getPublicFunctions();
@@ -304,6 +303,7 @@ public class SaxonXslTransformation extends TransformationBase
 										configuredForwardDefault, mappingXPathCompiler.getUnderlyingStaticContext())
 								.getFunctionName();
 						seleneForwardXPathDefault = qName.getDisplayName() + "(.)";
+						mappingXPathCompiler.declareNamespace(qName.getPrefix(), qName.getURI());
 					}
 					LOG.info(
 							"Selene default forward XPath for transformation {}: {}",
@@ -330,6 +330,7 @@ public class SaxonXslTransformation extends TransformationBase
 										configuredBackwardDefault, mappingXPathCompiler.getUnderlyingStaticContext())
 								.getFunctionName();
 						seleneBackwardXPathDefault = qName.getDisplayName() + "(.)";
+						mappingXPathCompiler.declareNamespace(qName.getPrefix(), qName.getURI());
 					}
 					LOG.info(
 							"Selene default backward XPath for transformation {}: {}",
@@ -337,6 +338,7 @@ public class SaxonXslTransformation extends TransformationBase
 							seleneBackwardXPathDefault);
 
 				} catch (Exception e) {
+					// even if the library does not compile, default XPaths qre required
 					seleneForwardXPathDefault = "path(parent::*)";
 					seleneBackwardXPathDefault = "path(.)";
 					LOG.error("failed to compile Selene XPath library: {}", e.getMessage());
