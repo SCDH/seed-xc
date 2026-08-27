@@ -122,6 +122,71 @@ public class StandoffEndpointTest {
 	@Test
 	public void testForwardToBaseRepresentationWithJohnWhole() {
 		JsonObject body = given().multiPart("annotations", ANNOT_JOHN_FW, "application/ld+json")
+				// .multiPart("xpath", "sel:to-parent(.)") // default
+				.accept("application/ld+json")
+				.when()
+				.post("/file/sample/oa/forward/john.xml")
+				.then()
+				.statusCode(200)
+				.extract()
+				.body()
+				.as(JsonObject.class);
+		assertEquals("RangeSelector", getType(getSelector(body)));
+		// rewritten start selector has namespaces
+		assertEquals("XPathSelector", getType(getStartSelector(body)));
+		assertTrue(
+				getValue(getStartSelector(body))
+						.startsWith(
+								"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}l[3]"));
+		assertTrue(getValue(getStartSelector(body)).endsWith("l[3]"), "third verse");
+		assertEquals("char=2", getRFC5147Component(getStartSelector(body)));
+		// rewritten end selector was rebased
+		assertEquals("XPathSelector", getType(getEndSelector(body)));
+		assertTrue(
+				getValue(getEndSelector(body))
+						.startsWith(
+								"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}l[4]"));
+		assertTrue(getValue(getEndSelector(body)).endsWith("l[4]"), "fourth verse");
+		assertEquals("char=48", getRFC5147Component(getEndSelector(body)), "re-calculated!");
+		assertEquals(BASE + "/file/sample/document/john.xml", getSource(body));
+	}
+
+	@Test
+	public void testForwardToBaseRepresentationWithJohnWholeWithXPathSelToParent() {
+		JsonObject body = given().multiPart("annotations", ANNOT_JOHN_FW, "application/ld+json")
+				.multiPart("xpath", "sel:to-element(.)") // same as default, but asserts it is available
+				.accept("application/ld+json")
+				.when()
+				.post("/file/sample/oa/forward/john.xml")
+				.then()
+				.statusCode(200)
+				.extract()
+				.body()
+				.as(JsonObject.class);
+		assertEquals("RangeSelector", getType(getSelector(body)));
+		// rewritten start selector has namespaces
+		assertEquals("XPathSelector", getType(getStartSelector(body)));
+		assertTrue(
+				getValue(getStartSelector(body))
+						.startsWith(
+								"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}l[3]"));
+		assertTrue(getValue(getStartSelector(body)).endsWith("l[3]"), "third verse");
+		assertEquals("char=2", getRFC5147Component(getStartSelector(body)));
+		// rewritten end selector was rebased
+		assertEquals("XPathSelector", getType(getEndSelector(body)));
+		assertTrue(
+				getValue(getEndSelector(body))
+						.startsWith(
+								"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}l[4]"));
+		assertTrue(getValue(getEndSelector(body)).endsWith("l[4]"), "fourth verse");
+		assertEquals("char=48", getRFC5147Component(getEndSelector(body)), "re-calculated!");
+		assertEquals(BASE + "/file/sample/document/john.xml", getSource(body));
+	}
+
+	@Test
+	public void testForwardToBaseRepresentationWithJohnWholeToLeaf() {
+		JsonObject body = given().multiPart("annotations", ANNOT_JOHN_FW, "application/ld+json")
+				.multiPart("xpath", "path(.)")
 				.accept("application/ld+json")
 				.when()
 				.post("/file/sample/oa/forward/john.xml")
@@ -151,7 +216,7 @@ public class StandoffEndpointTest {
 	}
 
 	@Test
-	public void testForwardToBaseRepresentationWithJohnWholeWithXPathSelToElement() {
+	public void testForwardToBaseRepresentationWithJohnWholeWithXPathToParent() {
 		JsonObject body = given().multiPart("annotations", ANNOT_JOHN_FW, "application/ld+json")
 				.multiPart("xpath", "path(parent::*)")
 				.accept("application/ld+json")
@@ -244,8 +309,9 @@ public class StandoffEndpointTest {
 	}
 
 	@Test
-	public void testForwardToBaseRepresentationWithJohn13to15() {
+	public void testForwardToBaseRepresentationWithJohn13to15ToLeaf() {
 		JsonObject body = given().multiPart("annotations", ANNOT_JOHN_FW, "application/ld+json")
+				.multiPart("xpath", "path(.)")
 				.accept("application/ld+json")
 				.when()
 				.post("/file/sample/oa/forward/john.xml?start=John:1:3&end=John:1:5")
