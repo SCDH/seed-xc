@@ -5,6 +5,9 @@
   "https://www.w3.org/ns/anno.jsonld": {
     "path": "context/anno.jsonld"
   },
+  "http://www.w3.org/ns/anno.jsonld": {
+    "path": "context/anno.jsonld"
+  },
   "https://www.w3.org/ns/anno-frame.jsonld": {
     "path": "context/anno-frame.json"
   },
