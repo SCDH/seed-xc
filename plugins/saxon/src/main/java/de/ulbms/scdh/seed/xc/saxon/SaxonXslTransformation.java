@@ -337,7 +337,7 @@ public class SaxonXslTransformation extends TransformationBase
 							seleneBackwardXPathDefault);
 
 				} catch (Exception e) {
-					seleneForwardXPathDefault = "path(.)";
+					seleneForwardXPathDefault = "path(parent::*)";
 					seleneBackwardXPathDefault = "path(.)";
 					LOG.error("failed to compile Selene XPath library: {}", e.getMessage());
 				}
