@@ -1,5 +1,12 @@
 # Changes
 
+## 0.0.16
+
+- integrates Selene Selection Engine and adds endpoints
+  `.../{resource}/oa/forward{?...}` and
+  `.../{resource}/oa/backward{?...}`
+
+
 ## 0.0.15
 
 - makes entry endpoint work by fixing #63
