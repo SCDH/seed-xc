@@ -419,7 +419,7 @@ public class StandoffEndpoint implements StandoffApi {
 			xpath = userXPath;
 		}
 		// TODO: set escaped according to content negotiation
-		return new RewriterConfig(null, false, xpath, true, true, transformation.getPointClassMap(direction));
+		return new RewriterConfig(null, false, xpath, true, true, transformation.getPointClassMap(direction), true);
 	}
 
 	private Model getAnnotationsGraph(InputStream inputStream) {
