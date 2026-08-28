@@ -81,6 +81,8 @@
     <assertj.version>3.27.7</assertj.version>
 
     <!-- service specific -->
+    <icu.version>78.3</icu.version>
+    <nu-validator.version>1.4.16</nu-validator.version>
     <xmlresolver.version>4.5.1</xmlresolver.version>
     <slf4j.version>2.0.6</slf4j.version>
     <saxon.version>12.9</saxon.version>
@@ -132,6 +134,10 @@
       -->
       <id>scdh</id>
       <url>https://maven.pkg.github.com/scdh/*</url>
+    </repository>
+    <repository>
+      <id>nu.validators-desaster</id>
+      <url>https://maven.disasterarea.co.uk/</url>
     </repository>
   </repositories>
 

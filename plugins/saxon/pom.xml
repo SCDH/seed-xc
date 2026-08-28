@@ -58,8 +58,29 @@
     <dependency>
       <groupId>nu.validator</groupId>
       <artifactId>htmlparser</artifactId>
-      <version>1.4.16</version>
-      <scope>test</scope>
+      <version>${nu-validator.version}</version>
+    </dependency>
+    <!-- ICU is a dependency of nu.validator -->
+    <dependency>
+      <groupId>com.ibm.icu</groupId>
+      <artifactId>icu4j</artifactId>
+      <version>${icu.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.ibm.icu</groupId>
+      <artifactId>icu4j-charset</artifactId>
+      <version>${icu.version}</version>
+    </dependency>
+    <!--dependency>
+      <groupId>com.ibm.icu</groupId>
+      <artifactId>icu4j-localespi</artifactId>
+      <version>${icu.version}</version>
+    </dependency-->
+    <dependency>
+      <groupId>org.mozilla.intl</groupId>
+      <artifactId>chardet</artifactId>
+      <version>1.0</version>
+      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.ccil.cowan.tagsoup</groupId>
