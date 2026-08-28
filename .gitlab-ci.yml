@@ -45,7 +45,7 @@ verify:
   stage: test
   script:
     - ./mvnw $MAVEN_CLI_OPTS -Pdownload-openapi generate-sources
-    - ./mvnw $MAVEN_CLI_OPTS verify
+    - ./mvnw $MAVEN_CLI_OPTS verify -s .gitlab/settings.xml
 
 
 formatting:
@@ -59,7 +59,7 @@ push_packages:
     - !reference [ .release_tag, rules ]
   script:
     - ./mvnw -Drevision=$CI_COMMIT_REF_NAME -Dchangelist="" $MAVEN_CLI_OPTS clean
-    - ./mvnw -Drevision=$CI_COMMIT_REF_NAME -Dchangelist="" $MAVEN_CLI_OPTS -Pdownload-openapi generate-sources
+    - ./mvnw -Drevision=$CI_COMMIT_REF_NAME -Dchangelist="" $MAVEN_CLI_OPTS -Pdownload-openapi generate-sources -s .gitlab/settings.xml
     - ./mvnw -Drevision=$CI_COMMIT_REF_NAME -Dchangelist="" $MAVEN_CLI_OPTS -Ddistribution.url=$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/maven -s .gitlab/settings.xml deploy
 
 dts-build-native:
@@ -69,8 +69,8 @@ dts-build-native:
   tags:
     - ram:8gb
   script:
-    - ./mvnw -Drevision=$CI_COMMIT_REF_NAME -Dchangelist="" $MAVEN_CLI_OPTS -Pdownload-openapi generate-sources
-    - ./mvnw -Drevision=$CI_COMMIT_REF_NAME -Dchangelist="" $MAVEN_CLI_OPTS -Ddts-native -Dquarkus.native.container-build=false -DskipITs=true install
+    - ./mvnw -Drevision=$CI_COMMIT_REF_NAME -Dchangelist="" $MAVEN_CLI_OPTS -Pdownload-openapi generate-sources -s .gitlab/settings.xml
+    - ./mvnw -Drevision=$CI_COMMIT_REF_NAME -Dchangelist="" $MAVEN_CLI_OPTS -Ddts-native -Dquarkus.native.container-build=false -DskipITs=true install -s .gitlab/settings.xml
   artifacts:
     paths:
       - dts/target/*-runner
