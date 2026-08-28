@@ -1,5 +1,8 @@
 {
-    "@context": "https://www.w3.org/ns/anno.jsonld",
+    "@context": [
+        "https://www.w3.org/ns/anno.jsonld",
+        "https://raw.githubusercontent.com/SCDH/seed-xc/refs/heads/main/dts/src/main/resources/META-INF/resources/context/selene.jsonld"
+    ],
     "target": { "@embed":  "@always" },
     "body": { "@embed":  "@always", "@omitDefault": true }
 }
