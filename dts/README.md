@@ -35,6 +35,26 @@ XC](../plugins/README.md#transformation-plugins): XSLT,
 XQuery, SPARQL. Thus, it is possible to serve any kind of documents
 with SEED DTS, not only TEI-XML.
 
+## Extensions
+
+The purpose of the two endpoints based on [Selene Selection
+Engine](https://github.com/scdh/selene) is to transform the selectors
+of [web annotations]() to target the different representations
+provided by the `document` endpoint. A selector transformation is done
+using the same transformation as is used for generating the resource
+representation.
+
+| endpoint                 | Verb | URI template                                                           | POST parameters                 |
+|:-------------------------|:-----|:-----------------------------------------------------------------------|:--------------------------------|
+| forward web annotations  | POST | `BASE_URL/FRONT/oa/forward/{resource}{?tree,ref,start,end,mediaType}`  | `annotations`, `frame`, `xpath` |
+| backward web annotations | POST | `BASE_URL/FRONT/oa/backward/{resource}{?tree,ref,start,end,mediaType}` | `annotations`, `frame`          |
+
+**forward**: Rewrites web `annotations` on `resource` to annotations
+on representation provided by document endpoint. **backward**:
+Rewrites web `annotations` on representation provided by document
+endpoint to annotations on original `resource`. See also [OpenAPI
+specs](#openapi-specs).
+
 
 ## Getting started
 
@@ -106,6 +126,14 @@ in the example). `FRONT` is a constant for every project. So do not
 take it as an extension of DTS URI templates!
 
 For more details see [docs](../doc/dts.md#front).
+
+### OpenAPI Specs
+
+The OpenAPI
+[spec](https://github.com/SCDH/dts-openapi/blob/main/facade-openapi.yaml)
+is in an extra repo. The spec can best be explored via
+[petstore.swagger.io](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/SCDH/dts-openapi/refs/tags/0.6.0/standalone/facade-openapi.yaml).
+
 
 
 ### Preparing your own Edition
