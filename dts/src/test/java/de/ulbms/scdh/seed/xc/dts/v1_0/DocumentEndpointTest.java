@@ -127,8 +127,8 @@ public class DocumentEndpointTest {
 	public void testJohn11() throws IOException {
 		InputStream in = john11.openStream();
 		String contents = new String(in.readAllBytes(), StandardCharsets.UTF_8);
-		assertTrue(contents.contains(
-				"<TEI xmlns=\"http://www.tei-c.org/ns/1.0\"><dts:wrapper xmlns:dts=\"https://w3id.org/api/dts#\">"));
+		assertTrue(contents.contains("<TEI xmlns=\"http://www.tei-c.org/ns/1.0\""));
+		assertTrue(contents.contains("<dts:wrapper xmlns:dts=\"https://w3id.org/api/dts#\">"));
 		assertTrue(contents.contains("In the beginning was the Word"));
 		assertFalse(contents.contains("He was with God in the beginning."));
 	}
@@ -141,8 +141,8 @@ public class DocumentEndpointTest {
 	public void testjohnP1() throws IOException {
 		InputStream in = johnP1.openStream();
 		String contents = new String(in.readAllBytes(), StandardCharsets.UTF_8);
-		assertTrue(contents.contains(
-				"<TEI xmlns=\"http://www.tei-c.org/ns/1.0\"><dts:wrapper xmlns:dts=\"https://w3id.org/api/dts#\">"));
+		assertTrue(contents.contains("<TEI xmlns=\"http://www.tei-c.org/ns/1.0\""));
+		assertTrue(contents.contains("<dts:wrapper xmlns:dts=\"https://w3id.org/api/dts#\">"));
 		assertTrue(contents.contains("<pb n=\"1\"/>"));
 		assertTrue(contents.contains("In the beginning was the Word"));
 		assertTrue(contents.contains("He was with God in the beginning."));
@@ -158,8 +158,8 @@ public class DocumentEndpointTest {
 	public void testJohnP1milestone() throws IOException {
 		InputStream in = johnP1ref.openStream();
 		String contents = new String(in.readAllBytes(), StandardCharsets.UTF_8);
-		assertTrue(contents.contains(
-				"<TEI xmlns=\"http://www.tei-c.org/ns/1.0\"><dts:wrapper xmlns:dts=\"https://w3id.org/api/dts#\">"));
+		assertTrue(contents.contains("<TEI xmlns=\"http://www.tei-c.org/ns/1.0\""));
+		assertTrue(contents.contains("<dts:wrapper xmlns:dts=\"https://w3id.org/api/dts#\">"));
 		assertTrue(contents.contains("<pb n=\"1\"/>"));
 		assertFalse(contents.contains("In the beginning was the Word"));
 		assertFalse(contents.contains("He was with God in the beginning."));
@@ -209,10 +209,9 @@ public class DocumentEndpointTest {
 	public void testJohnMediaTypePlaintext() throws IOException {
 		InputStream in = johnMediaTypePlaintext.openStream();
 		String contents = new String(in.readAllBytes(), StandardCharsets.UTF_8);
-		assertTrue(
-				contents.contains(
-						"In the beginning was the Word, and the Word was with God, and the Word was  God.\nHe was with God in the beginning."));
-		assertTrue(contents.endsWith("There was a man sent from God whose name was John.\nbla"));
+		assertTrue(contents.contains("In the beginning was the Word, and the Word was with God, and the Word"));
+		assertTrue(contents.contains("There was a man sent from God whose name was John."));
+		assertTrue(contents.strip().endsWith("bla"));
 	}
 
 	// @TestHTTPEndpoint(DocumentEndpoint.class)

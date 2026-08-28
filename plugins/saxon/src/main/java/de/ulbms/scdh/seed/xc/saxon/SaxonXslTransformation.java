@@ -5,25 +5,43 @@ import de.ulbms.scdh.seed.xc.saxon.harden.ChainingResourceResolver;
 import de.ulbms.scdh.seed.xc.saxon.harden.ChainingUnparsedTextURIResolver;
 import de.ulbms.scdh.seed.xc.saxon.harden.ServiceConfiguration;
 import de.ulbms.scdh.seed.xc.saxon.harden.ZipFileURIResolver;
+import de.wwu.scdh.annotation.selection.Point;
+import de.wwu.scdh.annotation.selection.Rewriter;
+import de.wwu.scdh.annotation.selection.RewriterConfig;
+import de.wwu.scdh.annotation.selection.RewriterFactory;
+import de.wwu.scdh.annotation.selection.resource.DOMResource;
+import de.wwu.scdh.annotation.selection.resource.MappedDOMResource;
+import de.wwu.scdh.annotation.selection.resource.ResourceBuilder;
+import de.wwu.scdh.annotation.selection.rewriter.BackwardMappingFactory;
+import de.wwu.scdh.annotation.selection.rewriter.ForwardMappingFactory;
+import io.smallrye.mutiny.Uni;
+import io.vertx.core.http.HttpServerRequest;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.InternalServerErrorException;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipFile;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
+import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.lib.*;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.s9api.ItemType;
 import net.sf.saxon.s9api.Serializer;
 import net.sf.saxon.s9api.XsltExecutable.ParameterDetails;
 import net.sf.saxon.str.StringView;
+import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,11 +52,37 @@ import org.slf4j.LoggerFactory;
  * class must be application scoped.
  */
 @Dependent
-public class SaxonXslTransformation extends TransformationBase implements Transformation, ExportingCompiler {
+public class SaxonXslTransformation extends TransformationBase
+		implements Transformation, MappingTransformation, ExportingCompiler {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SaxonXslTransformation.class);
 
 	public static final String TRANSFORMATION_TYPE = "xslt";
+
+	@ConfigProperty(name = "selene-xslt-tracing-library", defaultValue = "libtrace.xsl")
+	protected String seleneTracingLibrary;
+
+	@ConfigProperty(name = "selene-xpath-library", defaultValue = "selene/xpath.xsl")
+	protected String seleneXPathLibrary;
+
+	@ConfigProperty(
+			name = "selene-xpath-library-namespace",
+			defaultValue = "http://wwu.de/scdh/selection-engine/xpaths")
+	protected String seleneTracingLibraryNamespace;
+
+	@ConfigProperty(
+			name = "selene-forward-xpath-default",
+			defaultValue = "Q{http://wwu.de/scdh/selection-engine/xpaths}to-element")
+	protected String seleneForwardXPathDefaultClarkName;
+
+	private String seleneForwardXPathDefault;
+
+	@ConfigProperty(
+			name = "selene-backward-xpath-default",
+			defaultValue = "Q{http://www.w3.org/2005/xpath-functions}path")
+	protected String seleneBackwardXPathDefaultClarkName;
+
+	private String seleneBackwardXPathDefault;
 
 	/**
 	 * {@inheritDoc}
@@ -54,7 +98,9 @@ public class SaxonXslTransformation extends TransformationBase implements Transf
 	@Inject
 	protected ZipFileURIResolver zipResourceResolver;
 
-	private XsltExecutable executable;
+	private XsltExecutable executable, mappingExecutable = null;
+
+	private XPathCompiler mappingXPathCompiler = null;
 
 	/**
 	 * Make a {@link ResourceRequest} from a URI given as string.
@@ -115,6 +161,24 @@ public class SaxonXslTransformation extends TransformationBase implements Transf
 			XsltCompiler compiler = processor.newXsltCompiler();
 			compiler.setJustInTimeCompilation(false);
 			compiler.setResourceResolver(compileTimeResourceResolver);
+			// set up the mapping compiler
+			XsltCompiler mappingCompiler = processor.newXsltCompiler();
+			mappingCompiler.setJustInTimeCompilation(false);
+			mappingCompiler.setResourceResolver(compileTimeResourceResolver);
+			boolean isMappingTransformation = false; // state: set true, when transformation depends on libtrace.xsl
+			boolean mappingCompiled =
+					true; // state: set false when a compilation step of the mapping transformation failed
+			// compile tracing library with appropriate parameters
+			try {
+				XsltPackage tracePkg = ResourceBuilder.compileTracingPackage(mappingCompiler, getSeleneOutputMethod());
+				mappingCompiler.importPackage(tracePkg);
+			} catch (de.wwu.scdh.annotation.selection.ResourceException | SaxonApiException e) {
+				mappingCompiled = false;
+				LOG.warn(
+						"failed to compile the Selene tracing library. No mapping will be available for {}: {}",
+						transformationInfo.getIdent(),
+						e.getMessage());
+			}
 			// set compile time parameters
 			if (transformationInfo.getCompileTimeParameters() != null) {
 				ConversionRules conversionRules =
@@ -128,11 +192,13 @@ public class SaxonXslTransformation extends TransformationBase implements Transf
 					if (compileTimeParam.getType() == null) {
 						// assume xs:string type
 						this.setAtomicParameter(compiler, compileTimeParam, stringToStringConverter);
+						this.setAtomicParameter(mappingCompiler, compileTimeParam, stringToStringConverter);
 					} else {
 						SchemaType schemaType = BuiltInType.getSchemaTypeByLocalName(compileTimeParam.getType());
 						if (schemaType == null) {
 							// try xs:string type
 							this.setAtomicParameter(compiler, compileTimeParam, stringToStringConverter);
+							this.setAtomicParameter(mappingCompiler, compileTimeParam, stringToStringConverter);
 						} else if (schemaType.isAtomicType()) {
 							BuiltInAtomicType atomicType = (BuiltInAtomicType) schemaType;
 							StringConverter converter = atomicType.getStringConverter(conversionRules);
@@ -143,6 +209,7 @@ public class SaxonXslTransformation extends TransformationBase implements Transf
 										compileTimeParam.getType());
 							} else {
 								this.setAtomicParameter(compiler, compileTimeParam, converter);
+								this.setAtomicParameter(mappingCompiler, compileTimeParam, converter);
 							}
 						} else {
 							LOG.error(
@@ -167,6 +234,27 @@ public class SaxonXslTransformation extends TransformationBase implements Transf
 						} else {
 							compiler.importPackage(pkg);
 						}
+						if (mappingCompiled) {
+							if (library.getLocation().endsWith(seleneTracingLibrary)) {
+								isMappingTransformation = true;
+							} else {
+								try {
+									XsltPackage mPkg = mappingCompiler.compilePackage(packageSource);
+									if (library.getAsName() != null && library.getAsVersion() != null) {
+										mappingCompiler.importPackage(
+												mPkg, library.getAsName(), library.getAsVersion());
+									} else {
+										mappingCompiler.importPackage(mPkg);
+									}
+								} catch (SaxonApiException e) {
+									LOG.warn(
+											"failed to compile mapping transformation {}: {}",
+											transformationInfo.getIdent(),
+											e.getMessage());
+									mappingCompiled = false;
+								}
+							}
+						}
 					} catch (SaxonApiException e) {
 						LOG.error("Failed to compile package from '{}': {}", library.getLocation(), e.getMessage());
 						throw new ConfigurationException(
@@ -176,6 +264,86 @@ public class SaxonXslTransformation extends TransformationBase implements Transf
 			}
 			// then compile the stylesheet
 			executable = compiler.compile(stylesheet);
+			if (mappingCompiled && isMappingTransformation) {
+				try {
+					mappingExecutable = mappingCompiler.compile(stylesheet);
+					LOG.info("successfully compiled mapping transformation {}", transformationInfo.getIdent());
+				} catch (SaxonApiException e) {
+					LOG.error(
+							"failed to compile mapping transformation {}: {}",
+							transformationInfo.getIdent(),
+							e.getMessage());
+				}
+				mappingXPathCompiler = processor.newXPathCompiler();
+				// compile and load Selene XPath function library
+				try {
+					XsltCompiler mappingXPathXsltCompiler = processor.newXsltCompiler();
+					mappingXPathXsltCompiler.setResourceResolver(compileTimeResourceResolver);
+					Source packageSource = compileTimeResourceResolver.resolve(mkXsltRequest(seleneXPathLibrary));
+					XsltPackage functionLibrary = mappingXPathXsltCompiler.compilePackage(packageSource);
+					mappingXPathCompiler.addXsltFunctionLibrary(functionLibrary);
+					// forward default XPath
+					FunctionLibrary functions =
+							functionLibrary.getUnderlyingPreparedPackage().getPublicFunctions();
+					SymbolicName.F configuredForwardDefault =
+							new SymbolicName.F(StructuredQName.fromClarkName(seleneForwardXPathDefaultClarkName), 1);
+					if (seleneForwardXPathDefaultClarkName.startsWith("Q{http://www.w3.org/2005/xpath-functions}")) {
+						// functions from fn-namespace cannot be looked up in the library!
+						StructuredQName qName = StructuredQName.fromClarkName(seleneForwardXPathDefaultClarkName);
+						seleneForwardXPathDefault = qName.getLocalPart() + "(.)";
+					} else if (!functions.isAvailable(configuredForwardDefault, 31)) {
+						seleneForwardXPathDefault = "path(.)";
+						LOG.error(
+								"configuration error: selene-forward-default-xpath {} is not available. Using fallback instead: {}",
+								seleneForwardXPathDefaultClarkName,
+								seleneForwardXPathDefault);
+					} else {
+						StructuredQName qName = functions
+								.getFunctionItem(
+										configuredForwardDefault, mappingXPathCompiler.getUnderlyingStaticContext())
+								.getFunctionName();
+						seleneForwardXPathDefault = qName.getDisplayName() + "(.)";
+						mappingXPathCompiler.declareNamespace(qName.getPrefix(), qName.getURI());
+					}
+					LOG.info(
+							"Selene default forward XPath for transformation {}: {}",
+							transformationInfo.getIdent(),
+							seleneForwardXPathDefault);
+					// backward
+					SymbolicName.F configuredBackwardDefault =
+							new SymbolicName.F(StructuredQName.fromClarkName(seleneBackwardXPathDefaultClarkName), 1);
+					if (seleneBackwardXPathDefaultClarkName.startsWith("Q{http://www.w3.org/2005/xpath-functions}")) {
+						// functions from fn-namespace cannot be looked up in the library!
+						StructuredQName qName = StructuredQName.fromClarkName(seleneBackwardXPathDefaultClarkName);
+						seleneBackwardXPathDefault = qName.getLocalPart() + "(.)";
+					} else if (!functions.isAvailable(configuredBackwardDefault, 31)
+							|| seleneBackwardXPathDefaultClarkName.startsWith(
+									"Q{http://www.w3.org/2005/xpath-functions}")) {
+						seleneBackwardXPathDefault = "path(.)";
+						LOG.error(
+								"configuration error: selene-backward-default-xpath {} is not available. Using fallback instead: {}",
+								seleneBackwardXPathDefaultClarkName,
+								seleneBackwardXPathDefault);
+					} else {
+						StructuredQName qName = functions
+								.getFunctionItem(
+										configuredBackwardDefault, mappingXPathCompiler.getUnderlyingStaticContext())
+								.getFunctionName();
+						seleneBackwardXPathDefault = qName.getDisplayName() + "(.)";
+						mappingXPathCompiler.declareNamespace(qName.getPrefix(), qName.getURI());
+					}
+					LOG.info(
+							"Selene default backward XPath for transformation {}: {}",
+							transformationInfo.getIdent(),
+							seleneBackwardXPathDefault);
+
+				} catch (Exception e) {
+					// even if the library does not compile, default XPaths qre required
+					seleneForwardXPathDefault = "path(parent::*)";
+					seleneBackwardXPathDefault = "path(.)";
+					LOG.error("failed to compile Selene XPath library: {}", e.getMessage());
+				}
+			}
 		} catch (SaxonApiException e) {
 			LOG.error("Failed to setup transformation '{}':\n{}", transformationInfo.getIdent(), e.getMessage());
 			throw new ConfigurationException(
@@ -398,5 +566,93 @@ public class SaxonXslTransformation extends TransformationBase implements Transf
 		}
 		LOG.debug("made stylesheet parameters '{}'", stylesheetParameters);
 		return stylesheetParameters;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean canMapResource() {
+		return mappingExecutable != null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Map<Class<? extends Point>, Class<? extends Point>> getPointClassMap(Rewriter.Direction direction) {
+		return RewriterConfig.getPointClassMapForXslt(getSeleneOutputMethod(), direction);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public RewriterFactory getRewriterFactory(Rewriter.Direction direction) {
+		// This reuses the same XPath compiler for the whole lifetime of the transformation bean. According to the
+		// Saxon documentation, this should be OK, although the compiler is used for compiling path expressions in
+		// every Web Annotation selector etc.
+		// See
+		if (direction.equals(Rewriter.Direction.FORWARD)) {
+			return new ForwardMappingFactory(mappingXPathCompiler);
+		} else {
+			return new BackwardMappingFactory(mappingXPathCompiler);
+		}
+	}
+
+	@Override
+	public String getRewriterConfigXPath(Rewriter.Direction direction) {
+		if (direction.equals(Rewriter.Direction.FORWARD)) {
+			return seleneForwardXPathDefault;
+		} else {
+			return seleneBackwardXPathDefault;
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Uni<MappedDOMResource> mapResourceAsync(
+			RuntimeParameters parameters,
+			Config config,
+			String systemId,
+			URI preimageIri,
+			URI imageIri,
+			Uni<? extends InputStream> source,
+			ResourceProvider resourceProvider,
+			HttpServerRequest request) {
+		if (mappingExecutable == null) {
+			throw new BadRequestException("pointer transformation not available" + transformationInfo.getIdent());
+		}
+		return source.onItem()
+				.transform(inputStream -> {
+					ResourceBuilder resourceBuilder = new ResourceBuilder(processor);
+					DOMResource resource;
+					try {
+						de.wwu.scdh.annotation.selection.Resource<?> parsed = resourceBuilder.parseResource(
+								preimageIri, inputStream, systemId, ResourceBuilder.Parser.XML);
+						return (DOMResource) parsed;
+					} catch (de.wwu.scdh.annotation.selection.ResourceException e) {
+						throw new InternalServerErrorException("failed to parse resource " + systemId);
+					}
+				})
+				.onItem()
+				.transform(resource -> {
+					try {
+						Xslt30Transformer transformer = mappingExecutable.load30();
+						transformer.setStylesheetParameters(makeStylesheetParameters(parameters));
+						// setting the global context item is required for global variables
+						transformer.setGlobalContextItem(resource.getContents(), false);
+						Class<? extends Point> pointerClass = ResourceBuilder.pointerClassFromOutputMethod(transformer);
+						return ResourceBuilder.mapWithXslTransformation(imageIri, resource, transformer, pointerClass);
+					} catch (de.wwu.scdh.annotation.selection.ResourceException e) {
+						throw new InternalServerErrorException("failed to map resource " + systemId);
+					} catch (SaxonApiException | TransformationPreparationException | TransformationException e) {
+						LOG.error("failed to set stylesheet parameters to mapping transformation: {}", e.getMessage());
+						throw new BadRequestException(
+								"failed to set up transformation parameters: " + e.getMessage(), e);
+					}
+				});
 	}
 }

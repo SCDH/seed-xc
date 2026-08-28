@@ -1,0 +1,9 @@
+{
+    "@context": {
+        "sel":     "https://scdh.uni-muenster.de/ontology/selene/",
+
+        "error":         "sel:error",
+        "BlankedSelector": "sel:BlankedSelector",
+        "BadSelector":   "sel:BlankedSelector"
+    }
+}

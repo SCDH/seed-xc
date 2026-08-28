@@ -88,7 +88,8 @@
     <jena.version>6.0.0</jena.version>
     <titanium.version>1.7.0</titanium.version>
     <openapitools.version>7.19.0</openapitools.version>
-    <dts-transformations.version>0.6.1</dts-transformations.version>
+    <dts-transformations.version>0.7.1</dts-transformations.version>
+    <selene.version>0.3.3</selene.version>
 
     <quarkus.native.native-image-xmx>8192m</quarkus.native.native-image-xmx>
     <!-- enable docker layers with additional dependencies,
@@ -123,6 +124,14 @@
     <repository>
       <id>seed-xc-maven</id>
       <url>${distribution.url}</url>
+    </repository>
+    <repository>
+      <!--
+        all SCDH's gh package registries, cf.
+        vdocs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry#installing-a-package
+      -->
+      <id>scdh</id>
+      <url>https://maven.pkg.github.com/scdh/*</url>
     </repository>
   </repositories>
 

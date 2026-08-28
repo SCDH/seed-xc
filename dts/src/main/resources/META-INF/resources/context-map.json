@@ -1,5 +1,20 @@
 {
   "https://raw.githubusercontent.com/SCDH/seed-xc/refs/heads/main/dts/src/main/resources/META-INF/resources/context/seed.json": {
     "path": "context/seed.json"
+  },
+  "https://raw.githubusercontent.com/SCDH/seed-xc/refs/heads/main/dts/src/main/resources/META-INF/resources/context/selene.jsonld": {
+    "path": "context/selene.jsonld"
+  },
+  "https://www.w3.org/ns/anno.jsonld": {
+    "path": "context/anno.jsonld"
+  },
+  "http://www.w3.org/ns/anno.jsonld": {
+    "path": "context/anno.jsonld"
+  },
+  "https://www.w3.org/ns/anno-frame.jsonld": {
+    "path": "context/anno-frame.json"
+  },
+  "https://www.w3.org/ns/anno-frame.json": {
+    "path": "context/anno-frame.json"
   }
 }

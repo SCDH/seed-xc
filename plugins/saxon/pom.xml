@@ -25,6 +25,11 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>de.wwu.scdh.annotations.selections</groupId>
+      <artifactId>selection-engine-core</artifactId>
+      <version>${selene.version}</version>
+    </dependency>
+    <dependency>
       <groupId>net.sf.saxon</groupId>
       <artifactId>${saxon.artifactId}</artifactId>
       <version>${saxon.version}</version>
@@ -60,7 +65,6 @@
       <groupId>org.ccil.cowan.tagsoup</groupId>
       <artifactId>tagsoup</artifactId>
       <version>1.2</version>
-      <scope>test</scope>
     </dependency>
   </dependencies>
 

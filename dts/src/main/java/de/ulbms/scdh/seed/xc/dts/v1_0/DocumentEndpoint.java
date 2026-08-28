@@ -40,8 +40,8 @@ public class DocumentEndpoint implements DocumentApi {
 	 * The ID of the transformation using for transforming a resource.
 	 */
 	@ConfigProperty(
-			name = "de.ulbms.scdh.seed.xc.dts.DocumentEndpoint.TRANSFORMATION",
-			defaultValue = "dts-transformations-xsl-document")
+			name = "document-endpoint-transformation",
+			defaultValue = "dts-transformations-xsl-document+dts-transformations-distribution-seed-id")
 	protected String TRANSFORMATION;
 
 	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.DocumentEndpoint.TYPE", defaultValue = "DtsDocumentProcessor")

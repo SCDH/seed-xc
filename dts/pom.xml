@@ -13,7 +13,7 @@
   <description>Distributed Text Services, level 1 conformance</description>
 
   <properties>
-    <dts-openapi.version>0.5.0</dts-openapi.version>
+    <dts-openapi.version>0.6.0</dts-openapi.version>
     <openapi-specs.dir>${project.build.directory}</openapi-specs.dir>
 
     <!-- service configuration -->
@@ -56,7 +56,6 @@
       <groupId>${project.groupId}</groupId>
       <artifactId>seed-xc-sparql</artifactId>
       <version>${revision}${changelist}</version>
-      <scope>${plugins.scope}</scope>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
@@ -74,6 +73,12 @@
       <groupId>com.apicatalog</groupId>
       <artifactId>titanium-json-ld</artifactId>
       <version>${titanium.version}</version>
+    </dependency>
+    <!-- for standoff endpoints -->
+    <dependency>
+      <groupId>de.wwu.scdh.annotations.selections</groupId>
+      <artifactId>selection-engine-core</artifactId>
+      <version>${selene.version}</version>
     </dependency>
 
     <!-- for the annotations in the model and in the api -->
@@ -176,7 +181,12 @@
                 <typeMapping>file=byte[]</typeMapping>
                 <typeMapping>Collection=byte[]</typeMapping>
                 <typeMapping>Navigation=byte[]</typeMapping>
+                <typeMapping>Graph=InputStream</typeMapping>
+                <typeMapping>Frame=InputStream</typeMapping>
               </typeMappings>
+              <importMappings>
+                <importMapping>InputStream=java.io.InputStream</importMapping>
+              </importMappings>
             </configuration>
           </execution>
         </executions>
@@ -271,6 +281,7 @@
                 <phase>initialize</phase>
                 <configuration>
                   <url>https://raw.githubusercontent.com/SCDH/dts-openapi/refs/tags/${dts-openapi.version}/standalone/facade-openapi.yaml</url>
+                  <!--url>https://raw.githubusercontent.com/SCDH/dts-openapi/refs/heads/standoff/standalone/facade-openapi.yaml</url-->
                   <unpack>false</unpack>
                   <outputDirectory>${openapi-specs.dir}</outputDirectory>
                 </configuration>
@@ -301,6 +312,19 @@
                   <outputDirectory>${project.build.directory}/dependencies/</outputDirectory>
                 </configuration>
               </execution>
+              <execution>
+                <!-- download Selene XSLT -->
+                <id>download-selene-xslt</id>
+                <goals>
+                  <goal>wget</goal>
+                </goals>
+                <phase>generate-sources</phase>
+                <configuration>
+                  <url>https://github.com/SCDH/selene/releases/download/${selene.version}/selection-engine-core-${selene.version}-xslt.tar.gz</url>
+                  <unpack>true</unpack>
+                  <outputDirectory>${project.build.directory}/dependencies/</outputDirectory>
+                </configuration>
+              </execution>
             </executions>
           </plugin>
         </plugins>
@@ -309,6 +333,9 @@
 
     <profile>
       <id>dts</id>
+      <properties>
+        <seed-dts.config>${project.build.directory}/dependencies/dts-transformations-testing.yaml</seed-dts.config>
+      </properties>
       <build>
         <plugins>
           <plugin>

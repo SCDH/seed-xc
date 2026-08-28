@@ -1,0 +1,32 @@
+{
+  "id": "https://annotations.example.com/samples/p1.1",
+  "type": "Annotation",
+  "body": {
+    "source": "https://global.scdh.uni-muenster.de/comment/1"
+  },
+  "target": {
+    "selector": {
+      "type": "RangeSelector",
+      "endSelector": {
+        "type": "XPathSelector",
+        "value": "/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{https://w3id.org/api/dts#}wrapper[1]/Q{http://www.tei-c.org/ns/1.0}l[2]/text()[2]",
+        "refinedBy": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://tools.ietf.org/rfc/rfc5147",
+          "value": "char=4"
+        }
+      },
+      "startSelector": {
+        "type": "XPathSelector",
+        "value": "/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{https://w3id.org/api/dts#}wrapper[1]/Q{http://www.tei-c.org/ns/1.0}l[1]/text()[1]",
+        "refinedBy": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://tools.ietf.org/rfc/rfc5147",
+          "value": "char=2"
+        }
+      }
+    },
+    "source": "https://dts.example.com/file/sample/document/john.xml?start=John:1:3&end=John:1:5"
+  },
+  "@context": "https://www.w3.org/ns/anno.jsonld"
+}
