@@ -39,10 +39,12 @@ with SEED DTS, not only TEI-XML.
 
 The purpose of the two endpoints based on [Selene Selection
 Engine](https://github.com/scdh/selene) is to transform the selectors
-of [web annotations]() to target the different representations
-provided by the `document` endpoint. A selector transformation is done
-using the same transformation as is used for generating the resource
-representation.
+of [web annotations](https://www.w3.org/TR/annotation-model/) to
+target the different representations provided by the `document`
+endpoint. A selector transformation is done using the same
+transformation as is used for generating the resource
+representation. Thus, the natural place for rewriting selectors is
+where representations of a resource are generated: a DTS service.
 
 | endpoint                 | Verb | URI template                                                           | POST parameters                 |
 |:-------------------------|:-----|:-----------------------------------------------------------------------|:--------------------------------|
