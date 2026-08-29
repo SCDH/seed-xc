@@ -31,20 +31,32 @@ The *path* and *query* parameters are exactly the same as for the
 | xpath       | N        | string               | [`sel:to-element(.)`](https://github.com/SCDH/selene/blob/main/core/src/main/resources/xslt/xpath.xsl) | An XPath expression for generating XPathSelector values                                                       |
 ## Content Negotiation
 
-Similar to the the content type of the `annotations` POST parameter,
+Similar to the content type of the `annotations` POST parameter,
 the content type of the response is determined by content negotiation
 and can be any RDF serialization supported by Apache Jena.
 
 ## OpenAPI specs
 
-See also [OpenAPI specs](#openapi-specs).
+The OpenAPI
+[spec](https://github.com/SCDH/dts-openapi/blob/main/facade-openapi.yaml)
+is in an extra repo. The spec can best be explored via
+[petstore.swagger.io](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/SCDH/dts-openapi/refs/tags/0.6.0/standalone/facade-openapi.yaml).
 
 
 ## Examples
 
-Provided, that the `document` endpoint gives access to the Book of
-John under `http://localhost:8080/file/bible/document/John` and the
-delivered TEI-XML looks like this:
+Data for the following examples is available at `samples/bible`. Annotations are in the `annotations` subfolder.
+
+Mount the `samples/bible` folder into the docker image like so:
+
+```shell
+docker run --mount type=bind,src=$(realpath samples/bible),dst=/work/projects/bible -i --rm -p 8080:8080 scdh/distributed-test-services
+```
+
+
+The `document` endpoint gives access to the Book of John under
+`http://localhost:8080/file/bible/document/John` and the delivered
+TEI-XML looks like this:
 
 
 ```xml
@@ -300,7 +312,11 @@ annotation targeting the whole document:
 
 
 ```shell
-
+curl -X 'POST' \
+  'http://localhost:8080/file/bible/oa/backward/John?end=John%3A1%3A5&start=John%3A1%3A3' \
+  -H 'accept: application/ld+json' \
+  -H 'Content-Type: multipart/form-data' \
+  -F 'annotations=@John.bw.json;type=application/json'
 ```
 
 ```json
@@ -570,7 +586,11 @@ bla
 With the same `John.fw.json` annotation as above. For
 
 ```shell
-
+curl -X 'POST' \
+  'http://localhost:8080/file/bible/oa/forward/John?mediaType=text%2Fplain' \
+  -H 'accept: application/ld+json' \
+  -H 'Content-Type: multipart/form-data' \
+  -F 'annotations=@John.fw.json;type=application/json'
 ```
 
 we get
@@ -624,8 +644,7 @@ curl -X 'POST' \
   'http://localhost:8080/file/bible/oa/forward/John?end=John%3A1%3A5&mediaType=text%2Fplain&start=John%3A1%3A3' \
   -H 'accept: application/ld+json' \
   -H 'Content-Type: multipart/form-data' \
-  -F 'annotations=@John.fw.json;type=application/json' \
-  -F 'xpath=/TEI/text'
+  -F 'annotations=@John.fw.json;type=application/json'
 ```
 
 ```json
