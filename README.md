@@ -82,8 +82,9 @@ Don't forget to read the [docs](doc).
 
 For the container images, the services are compiled to a native Linux
 executable and are then for [security](doc/security.md) reasons build
-into a RedHat UBI micro image. Images are small, and have a fantastic
-startup time.
+into a [RedHat UBI micro
+image](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html-single/building_running_and_managing_containers/index#con_understanding-the-ubi-micro-images_assembly_types-of-container-images). Images
+are small, and have a fantastic startup time.
 
 You can also run dev services. Instructions are provided under the
 links above. But notice, that you cannot deploy a Quarkus application
