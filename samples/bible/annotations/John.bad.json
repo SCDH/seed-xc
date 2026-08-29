@@ -1,0 +1,32 @@
+{
+  "@context": "http://www.w3.org/ns/anno.jsonld",
+  "id": "https://annotations.example.com/samples/p1.1",
+  "type": "Annotation",
+  "body": {
+    "source": "https://global.scdh.uni-muenster.de/comment/1"
+  },
+  "target": {
+    "source": "http://localhost:8080/file/bible/document/John",
+    "selector": {
+      "type": "RangeSelector",
+      "startSelector": {
+        "type": "XPathSelector",
+        "value": "/world/sun/earth/football",
+        "refinedBy": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://tools.ietf.org/rfc/rfc5147",
+          "value": "char=2"
+        }
+      },
+      "endSelector": {
+        "type": "XPathSelector",
+          "value": "/vfl/s04/bvb",
+        "refinedBy": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://tools.ietf.org/rfc/rfc5147",
+          "value": "char=3"
+        }
+      }
+    }
+  }
+}
