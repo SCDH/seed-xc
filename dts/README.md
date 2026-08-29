@@ -46,16 +46,26 @@ same transformation as is used for generating the resource
 representation. Thus, the natural place for rewriting selectors is
 where representations of a resource are generated: a DTS service.
 
-| endpoint                 | Verb | URI template                                                           | POST parameters                 |
-|:-------------------------|:-----|:-----------------------------------------------------------------------|:--------------------------------|
-| forward web annotations  | POST | `BASE_URL/FRONT/oa/forward/{resource}{?tree,ref,start,end,mediaType}`  | `annotations`, `frame`, `xpath` |
-| backward web annotations | POST | `BASE_URL/FRONT/oa/backward/{resource}{?tree,ref,start,end,mediaType}` | `annotations`, `frame`          |
+| endpoint    | Verb | URI template                                                           | POST parameters                 |
+|:------------|:-----|:-----------------------------------------------------------------------|:--------------------------------|
+| oa/forward  | POST | `BASE_URL/FRONT/oa/forward/{resource}{?tree,ref,start,end,mediaType}`  | `annotations`, `frame`, `xpath` |
+| oa/backward | POST | `BASE_URL/FRONT/oa/backward/{resource}{?tree,ref,start,end,mediaType}` | `annotations`, `frame`          |
+
+| parameter   | required | content type         | default                                                                                                | description                                                                                                   |
+|:------------|:---------|:---------------------|--------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------|
+| annotations | Y        | any RDF content type |                                                                                                        | An RDF graph containing web annotation selectors                                                              |
+| frame       | N        | application/json     | [anno-frame.json](src/main/resources/META-INF/resources/context/anno-frame.json)                       | JSON-LD [Frame](https://www.w3.org/TR/json-ld11-framing/) used when application/ld+json response is requested |
+| xpath       | N        | string               | [`sel:to-element(.)`](https://github.com/SCDH/selene/blob/main/core/src/main/resources/xslt/xpath.xsl) | An XPath expression for generating XPathSelector values                                                       |
+
 
 **forward**: Rewrites web `annotations` on `resource` to annotations
 on representation provided by document endpoint. **backward**:
 Rewrites web `annotations` on representation provided by document
 endpoint to annotations on original `resource`. See also [OpenAPI
-specs](#openapi-specs).
+specs](#openapi-specs). Similar to the the content type of the
+`annotations` POST parameter, the content type of the response is
+determined by content negotiation and can be any RDF serialization
+supported by Apache Jena.
 
 
 ## Getting started
