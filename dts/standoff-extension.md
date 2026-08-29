@@ -24,11 +24,11 @@ document endpoint to annotations on original `resource`.
 The *path* and *query* parameters are exactly the same as for the
 `document` endpoint as they shape the representation of resource.
 
-| parameter   | required | content type         | default                                                                                                | description                                                                                                   |
-|:------------|:---------|:---------------------|--------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------|
-| annotations | Y        | any RDF content type |                                                                                                        | An RDF graph containing web annotation selectors                                                              |
-| frame       | N        | application/json     | [anno-frame.json](src/main/resources/META-INF/resources/context/anno-frame.json)                       | JSON-LD [Frame](https://www.w3.org/TR/json-ld11-framing/) used when application/ld+json response is requested |
-| xpath       | N        | string               | [`sel:to-element(.)`](https://github.com/SCDH/selene/blob/main/core/src/main/resources/xslt/xpath.xsl) | An XPath expression for generating XPathSelector values                                                       |
+| parameter   | required | content type         | default                                                                                                                                              | description                                                                                                   |
+|:------------|:---------|:---------------------|------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------|
+| annotations | Y        | any RDF content type |                                                                                                                                                      | An RDF graph containing web annotation selectors                                                              |
+| frame       | N        | application/json     | [anno-frame.json](src/main/resources/META-INF/resources/context/anno-frame.json)                                                                     | JSON-LD [Frame](https://www.w3.org/TR/json-ld11-framing/) used when application/ld+json response is requested |
+| xpath       | N        | string               | [`sel:to-element(.)`](https://github.com/SCDH/selene/blob/main/core/src/main/resources/xslt/xpath.xsl) for `oa/forward`; `path(.)` for `oa/backward` | An XPath expression for generating XPathSelector values                                                       |
 ## Content Negotiation
 
 Similar to the content type of the `annotations` POST parameter,
