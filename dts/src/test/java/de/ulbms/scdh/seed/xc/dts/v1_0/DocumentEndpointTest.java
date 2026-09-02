@@ -180,7 +180,7 @@ public class DocumentEndpointTest {
 		given().when()
 				.get("/file/sample/document/john.xml?mediaType=text/html&direct=true")
 				.then()
-				.statusCode(400);
+				.statusCode(200);
 	}
 
 	@Test
