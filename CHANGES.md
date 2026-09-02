@@ -1,5 +1,12 @@
 # Changes
 
+## 0.0.17
+
+- pass IRI as parameters `iri` to DTS `document` transformation
+- new version of DTS OpenAPI specs fixes issues with content types
+- new version of DTS Transformations add transformations to HTML in
+  testing package
+
 ## 0.0.16
 
 - integrates Selene Selection Engine and adds endpoints
