@@ -108,6 +108,10 @@ done on a Gitlab runner on Münster's IT infrastructure.
 ## Testing with cURL
 
 ```shell
+docker run --mount type=bind,src=$(realpath sample/bible),dst=/work/projects/bible -i --rm -p 8080:8080 scdh/dts-testing
+```
+
+```shell
 curl -X 'GET' \
   'http://localhost:8080/file/bible/entry' \
   -H 'accept: application/ld+json'
