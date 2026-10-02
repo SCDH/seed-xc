@@ -66,14 +66,12 @@ Ezra, an apocrypha by the prophet Ezra. And there's `collection.json`.
 ```txt
 ├── 4Esra-et-de.tei.xml
 ├── 4Esra-et.tei.xml
-├── 4 Esra.xpr
 ├── 4Ezr-hy-en.tei.xml
 ├── 4Ezr-hy.tei.xml
 ├── 4Ezr-la-de.tei.xml
 ├── 4Ezr-la.tei.xml
 ├── 4Ezr-sy-de.tei.xml
 ├── 4Ezr-sy.tei.xml
-├── alignment.csv
 └── collection.json
 ```
 
@@ -101,7 +99,7 @@ This file is similar to the collection endpoint's responses, but
 
 ```json
 {
-    "@graph": [ ⑩
+    "@graph": [ ①
     {
         "@id": "general", ❷
         "@type": "Collection",
