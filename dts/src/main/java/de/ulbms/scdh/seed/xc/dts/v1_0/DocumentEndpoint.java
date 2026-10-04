@@ -164,6 +164,7 @@ public class DocumentEndpoint implements DocumentApi {
 		if (start != null) map.put("start", pvOf(start));
 		if (end != null) map.put("end", pvOf(end));
 		if (tree != null) map.put("tree", pvOf(tree));
+		map.put("iri", pvOf(thisIri));
 		params.globalParameters(map);
 		LOG.info("parameters: {}", map);
 
