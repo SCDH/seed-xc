@@ -58,7 +58,8 @@ docker run -i --rm -p 8080:8080 scdh/distributed-test-services
 ```
 
 The instance comes with Swagger UI under
-http://localhost:8080/q/swagger-ui .
+http://localhost:8080/q/swagger-ui . Setting CORS headers can be done
+via [environment variables](../docs/configuration.md#cors).
 
 This container image is highly optimized for deployment on cloud
 infrastructure, e.g. a kubernetes cluster. Its startup time is far

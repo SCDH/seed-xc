@@ -35,7 +35,8 @@ docker run --mount type=bind,src=$(realpath samples/bible),dst=/work/projects/ag
 ```
 
 The instance comes with Swagger UI under
-http://localhost:8080/q/swagger-ui .
+http://localhost:8080/q/swagger-ui . Setting CORS headers can be done
+via [environment variables](configuration.md#cors).
 
 For serving the dataset, use the following parameters on the endpoints
 of the DTS instance: `provider` = `file` for using the file resource

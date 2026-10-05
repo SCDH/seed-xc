@@ -72,3 +72,36 @@ Usage examples can be found on other projects:
 - [SEED TEI
   Transformations](https://github.com/scdh/seed-tei-transformations):
   dito
+
+## CORS
+
+CORS headers can be configured by setting environment variables of the
+containerised service using the
+[`--env`](https://docs.docker.com/reference/cli/docker/container/run/#env)
+parameter of `docker run`.
+
+Most important environment variables are:
+
+- `QUARKUS_HTTP_CORS_ENABLED`: say `true` to enable CORS at all
+- `QUARKUS_HTTP_CORS_ORIGINS`: say `/.*/` to open up to all origins
+  (recommended) or use a comma separated list of URLs with regex
+
+A documentation of all parameters can be found in the [Quarkus
+docs](https://quarkus.io/guides/all-config/) (narrow down to `cors`
+using the filter). More detailed information e.g. about the format of
+`QUARKUS_HTTP_CORS_ORIGINS` is also [documented by
+Quarkus](https://quarkus.io/guides/security-cors/). Each of the
+application properties there has its pendant as environment variable.
+
+Example container run allowing access from everywhere:
+
+```shell
+docker run \
+	   --env QUARKUS_HTTP_CORS_ENABLED=true \
+	   --env QUARKUS_HTTP_CORS_ORIGINS=/.*/ \
+	   --mount type=bind,src=$(realpath samples/bible),dst=/work/projects/bible \
+	   -i \
+	   --rm \
+	   -p 8080:8080 \
+	   scdh/distributed-test-services
+```
