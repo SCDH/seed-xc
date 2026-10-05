@@ -19,7 +19,7 @@ the requested URL. Different document storage systems can be [plugged
 in](../plugins/README.md#resource-provider-plugins), e.g. InvenioRDM,
 RDBMS, http file servers, lookup per URN, or simply the local file
 system. The storage is not integrated into the SEED DTS service, which
-is a micro service providing the DTS community API alone. This design
+is a microservice providing the DTS community API alone. This design
 aims at reducing deployment costs on the long run.
 
 The creation of the endpoints' response bodies is done through
@@ -59,7 +59,7 @@ docker run -i --rm -p 8080:8080 scdh/distributed-test-services
 
 The instance comes with Swagger UI under
 http://localhost:8080/q/swagger-ui . Setting CORS headers can be done
-via [environment variables](../docs/configuration.md#cors).
+via [environment variables](../doc/configuration.md#cors).
 
 This container image is highly optimized for deployment on cloud
 infrastructure, e.g. a kubernetes cluster. Its startup time is far
@@ -152,7 +152,7 @@ service and are then used to process all subsequent request.
 
 #### Can I use XQuery instead of XSLT!
 
-Yes. XSLT comes just as a low level plugin amongst other. So you're
+Yes. XSLT comes just as a low level plugin amongst others. So you're
 not forced to it. There are [multiple types of
 transformations](../plugins/).
 
@@ -167,7 +167,7 @@ high-level components of SEED XC (albeit the X in XC).
 
 It's impossible to write generic XQuery for delivering collection data
 directly from TEI. But it's possible from extracted graph data
-following FRBRoo, LRMoo or DCterms. So we recommend extracting RDF
+following FRBRoo, LRMoo or DCTerms. So we recommend extracting RDF
 triples ahead-of-time, e.g. in a CI pipeline, and deposit them at an
 accessible location. At Münster, we're using [XTriples
 Micro](https://github.com/scdh/xtriples-micro) for this extraction.
@@ -189,7 +189,7 @@ interfaces generated from OpenAPI specifications. Have a look into the
 
 An endpoint that recalculates [Web Annotation
 Selectors](https://www.w3.org/TR/annotation-model/#selectors) into
-parts of parts of a documents to selectors into the base document (and
+parts of documents to selectors into the base document (and
 vice versa) and from media type to the base format (and vice
 versa). It will be based on
 [Selene](https://github.com/scdh/selene). That's why we go along with

@@ -6,7 +6,7 @@
 [![pulls](https://img.shields.io/docker/pulls/scdh/distributed-test-services)](https://hub.docker.com/collaborations/chrlueck)
 
 
-This project provides RESTful micro services for XML processing and
+This project provides RESTful microservices for XML processing and
 high-level components for building them. It is based on
 [Quarkus](https://quarkus.io/about/), a stack for writing supersonic
 Java applications, and
@@ -24,7 +24,7 @@ services.
   transforming XML (and even HTML tag soup) with XSLT, XQuery, etc.
 - [SEED XSLT Compiler](compiler): Compiles XSLT to
   [SEF](https://www.saxonica.com/saxonjs/documentation3/index.html)
-  (needs a license for the Saxon entreprise edition)
+  (needs a license for the Saxon enterprise edition)
 
 **Components:**
 
@@ -37,11 +37,11 @@ services.
   processing subsequent transformation request instantly
 - Transformations: Plugins for the SEED XC Transformation Map
   generating output representations from input streams
-  - [XSLT](plugins/saxon): XML Stylsheet Language Transformtions
+  - [XSLT](plugins/saxon): XML Stylesheet Language Transformations
     driven by [Saxon HE](https://www.saxonica.com/)
   - [XQuery](plugins/saxon): same as the XSLT plugin, but for the XMM
     Query language
-  - [SPARQL](plugins/seed-xc-sparql): a [Apache
+  - [SPARQL](plugins/seed-xc-sparql): an [Apache
     Jena](https://jena.apache.org/)-based plugin for running a SPARQL
     query against a serialized RDF graph. For generating JSON-LD
     output, it can run JSON-LD framing based on [Titanium JSON
@@ -56,7 +56,7 @@ services.
   - RDBMS (planned)
 - [transformation-info.xsl](utils): XSLT stylesheet for generating
   configuration files for an XSLT stylesheet or package that is used
-  in an transformation. See [documentation](doc/configuration.md).
+  in a transformation. See [documentation](doc/configuration.md).
 
 
 This project is part of the SEED, which is--choose one--either a
@@ -93,7 +93,7 @@ on Tomcat, TomEE, WildFly etc.
 
 ## Contributing
 
-See [contributing guide](contributing.md)!
+See [contributing guide](CONTRIBUTING.md)!
 
 ## License
 
