@@ -59,6 +59,8 @@ Here's what's required for serving your Edition through SEED DTS:
 1. a `collection.json` metadata file listing your documents as DTS
    resources and describing the collection structure they appear in.
 
+
+
 #### Example
 
 Assume this little edition encompassing 8 versions of forth book of
@@ -95,6 +97,7 @@ This file is similar to the collection endpoint's responses, but
 3. must contain a `seed:location` property for each DTS Resource,
    which points to a location, where the service find it.
 
+There's a [JSON Schema](#json-schema) that helps making `collection.json` formally correct.
 
 #### Example
 
@@ -410,3 +413,17 @@ See [Config](../api/src/main/resources/openapi/seed-xc-openapi.yaml#/schemas/con
 | `config.context.document` | DTS     | collection | `/configuration/frames/(all|collection)/document` | JsonLD Frame         | dito for complex frames                    |
 | `comfig.context.location` | DTS     | navigation | `/configuration/frames/(all|navigation)/location` | string parsed as URI | configure `@context` on a per-record basis |
 | `config.context.document` | DTS     | navigation | `/configuration/frames/(all|navigation)/document` | JsonLD Context       | dito for complex contexts                  |
+
+
+## JSON Schema
+
+There is a JSON Schema in [`utils/dts/schema/record.json`](../utils/dts/schema/record.json) that helps writing a formally correct `collection.json` file.
+
+Here is how to use it with [`check-jsonschema`](https://github.com/python-jsonschema/check-jsonschema):
+
+```shell
+check-jsonschema \
+  --schemafile https://raw.githubusercontent.com/SCDH/seed-xc/refs/heads/main/utils/dts/schema/record.json \
+  --base-uri https://raw.githubusercontent.com/SCDH/seed-xc/refs/heads/main/utils/dts/schema/ \
+  collection.json
+```
