@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/scdh/seed-xc/utils/dts/schema/extensions.json",
+  "title": "DTS Extensions",
+  "description": "JSON Schema for DTS extensions objects.",
+  "type": "object"
+}

@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/scdh/seed-xc/utils/dts/schema/dublinCore.json",
+  "title": "DTS DublinCore",
+  "description": "JSON Schema for DTS dublinCore metadata objects.",
+  "$comment": "This needs some work.",
+  "type": "object"
+}

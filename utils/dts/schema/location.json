@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/scdh/seed-xc/utils/dts/schema/location.json",
+  "title": "SEED DTS Location",
+  "description": "JSON Schema for SEED DTS location objects.",
+  "$comment": "This will be object to change as resource provider plugins evolve.",
+  "type": "object",
+  "properties": {
+    "@type": {
+      "type": "string"
+    },
+    "path": {
+      "description": "A path to a resource: This can be an absolute or relative URI or file path.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "@type",
+    "path"
+  ]
+}

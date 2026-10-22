@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/scdh/seed-xc/utils/dts/schema/collection.json",
+  "title": "DTS Collection",
+  "description": "JSON Schema for DTS Collection and Resource objects as required in the SEED DTS record config",
+  "type": "object",
+  "properties": {
+    "@type": {
+      "description": "The @type of a collection must be 'Collection' or 'Resource'",
+      "enum": [
+        "Collection",
+        "Resource"
+      ]
+    },
+    "@id": {
+      "description": "The collection's identifier as a URI",
+      "type": "string",
+      "format": "uri"
+    },
+    "member": {
+      "description": "An array linking to all members of the collection by their @id",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "@id": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "citationTrees": {
+      "type": "object",
+      "properties": {
+        "identifier": {
+          "type": "string"
+        },
+        "@type": {
+          "enum": [
+            "CitationTree"
+          ]
+        },
+        "citeStructur": {
+          "$ref": "citeStructure.json"
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "@type"
+      ]
+    },
+    "seed:location": {
+      "$ref": "location.json"
+    },
+    "title": {
+      "description": "A label for the collection",
+      "type": "string"
+    },
+    "dublinCore": {
+      "$ref": "dublinCore.json"
+    },
+    "extensions": {
+      "$ref": "extensions.json"
+    }
+  },
+  "if": {
+    "properties": {
+      "@type": {
+        "const": "Collection"
+      }
+    }
+  },
+  "then": {
+    "required": [
+      "@id",
+      "@type",
+      "member",
+      "title",
+      "dublinCore"
+    ],
+    "not": {
+      "required": [
+        "seed:location",
+        "citationTrees"
+      ]
+    }
+  },
+  "else": {
+    "required": [
+      "@id",
+      "@type",
+      "seed:location",
+      "title",
+      "dublinCore"
+    ],
+    "not": {
+      "required": [
+        "member"
+      ]
+    }
+  }
+}

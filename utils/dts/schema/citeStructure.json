@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/scdh/seed-xc/utils/dts/schema/citeStructure.json",
+  "title": "SEED DTS Record Schema",
+  "description": "JSON Schema for DTS cite structure objects",
+  "type": "object",
+  "properties": {
+    "citeStructure": {
+      "description": "An array of CiteStructure objects.",
+      "type": "array",
+      "items": {
+        "$ref": "citeStructure.json"
+      }
+    },
+    "citeType": {
+      "description": "A type of textual unit that appears at a given level in the citation tree. (E.g., “chapter”, “verse”)",
+      "type": "string"
+    }
+  },
+  "required": [
+    "citeType"
+  ]
+}

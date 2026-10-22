@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/scdh/seed-xc/utils/dts/schema/record.json",
+  "title": "SEED DTS Record Schema",
+  "description": "JSON Schema for SEED DTS record configuration in the collection.json file",
+  "type": "object",
+  "properties": {
+    "@context": {
+      "description": "The JSON-LD context",
+      "type": ["array", "object", "string"]
+    },
+    "@graph": {
+      "description": "The structure of the record's collections and resources",
+      "type": "array",
+      "items": {
+        "$ref": "collection.json"
+      }
+    }
+  },
+  "required": [
+    "@context",
+    "@graph"
+  ]
+}
