@@ -11,6 +11,36 @@ import java.io.InputStream;
  */
 public class CollectionChildren implements Transformation {
 
+	public static final XsltParameterDetails COLLECTION_PARAMETERS;
+
+	static {
+		XsltParameterDetails params = new XsltParameterDetails();
+
+		XsltParameterDetailsValue requestedValue = new XsltParameterDetailsValue();
+		requestedValue.setIsRequired(true);
+		requestedValue.setItemType("xs:anyURI");
+		params.put("requested", requestedValue);
+
+		XsltParameterDetailsValue navPValue = new XsltParameterDetailsValue();
+		navPValue.setIsRequired(false);
+		navPValue.setItemType("xs:string");
+		params.put("navP", navPValue);
+
+		XsltParameterDetailsValue pagePValue = new XsltParameterDetailsValue();
+		pagePValue.setIsRequired(false);
+		pagePValue.setItemType("xs:integer");
+		params.put("pageP", pagePValue);
+
+		XsltParameterDetailsValue mediaTypesPValue = new XsltParameterDetailsValue();
+		mediaTypesPValue.setIsRequired(false);
+		mediaTypesPValue.setItemType("xs:string");
+		mediaTypesPValue.setOccurrenceIndicator("*");
+		mediaTypesPValue.setUnderlyingDeclaredType("xs:string*");
+		params.put("mediaTypesP", mediaTypesPValue);
+
+		COLLECTION_PARAMETERS = params;
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -46,7 +76,7 @@ public class CollectionChildren implements Transformation {
 	 */
 	@Override
 	public XsltParameterDetails getTransformationParameters() {
-		return null;
+		return COLLECTION_PARAMETERS;
 	}
 
 	/**
