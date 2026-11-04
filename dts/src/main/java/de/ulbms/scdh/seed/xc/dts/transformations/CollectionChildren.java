@@ -198,12 +198,12 @@ public class CollectionChildren implements Transformation {
 			Model result = ModelFactory.createDefaultModel();
 			Resource resResource = result.createResource(iri);
 			// dts:requested - important for framing
-			resResource.addLiteral(DTS.Requested, true);
+			resResource.addLiteral(DTS.requested, true);
 			// copy @type
 			result.add(graph.listStatements(resource, RDF.type, (RDFNode) null));
 			// dtsVersion
-			resResource.addLiteral(DTS.DtsVersion, DTS.DTS_VERSION);
-			result.add(graph.listStatements(resource, DTS.Title, (Literal) null));
+			resResource.addLiteral(DTS.dtsVersion, DTS.VERSION);
+			result.add(graph.listStatements(resource, DTS.title, (Literal) null));
 
 			LOG.debug("transformation done");
 
