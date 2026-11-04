@@ -10,13 +10,12 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.ulbms.scdh.seed.xc.api.*;
+import de.ulbms.scdh.seed.xc.dts.DTS;
+import de.ulbms.scdh.seed.xc.dts.URITemplateBuilder;
 import de.ulbms.scdh.seed.xc.dts.model.Collection;
 import de.ulbms.scdh.seed.xc.jena.ConfiguredJsonLdLoader;
 import de.ulbms.scdh.seed.xc.jena.ConfiguredJsonLdOptions;
-import jakarta.json.Json;
-import jakarta.json.JsonObject;
-import jakarta.json.JsonReader;
-import jakarta.json.JsonStructure;
+import jakarta.json.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
@@ -31,7 +30,9 @@ public class CollectionChildrenTest {
 	private static final File COLLECTION =
 			Paths.get("src", "test", "resources", "sample", "collection.json").toFile();
 
-	private static final String BASE = "http://example.com/";
+	private static final String BURL = "http://example.com/";
+
+	private static final String BASE = BURL + "collection/";
 
 	private static final File TRANSFORMATIONS_CONTEXT_MAP = Paths.get(
 					"target", "dependencies", "dts-transformations", "context-map.json")
@@ -45,9 +46,9 @@ public class CollectionChildrenTest {
 
 	CollectionChildren transformation;
 
-	private byte[] output;
+	byte[] output;
 
-	private String getOutput() {
+	private String getOutput(byte[] output) {
 		return new String(output, StandardCharsets.UTF_8);
 	}
 
@@ -84,7 +85,6 @@ public class CollectionChildrenTest {
 		transformation.jsonLdOptions = options;
 	}
 
-	@Disabled
 	@Test
 	void testGeneral() throws IOException, TransformationPreparationException, TransformationException {
 		RuntimeParameters params = new RuntimeParameters();
@@ -98,5 +98,73 @@ public class CollectionChildrenTest {
 		JsonObject json = getJson(output);
 		assertTrue(json.containsKey("@id"), "has @id");
 		assertEquals(BASE + "general", json.getString("@id"));
+		assertTrue(json.containsKey("dtsVersion"), "has dtsVersion");
+		assertEquals(DTS.VERSION, json.getString("dtsVersion"));
+		assertTrue(json.containsKey("@type"), "has @type");
+		assertEquals("Collection", json.getString("@type"));
+		assertTrue(json.containsKey("title"), "has title");
+		// assertEquals(JsonValue.ValueType.STRING, json.get("title").getValueType()); // uses dct-nest.json
+		assertFalse(json.containsKey("download"), "does not have download");
+		assertTrue(json.containsKey("collection"), "has collection URI template");
+		assertEquals(BASE + "general" + URITemplateBuilder.THIS_COLLECTION_TEMPLATE, json.getString("collection"));
+		assertFalse(json.containsKey("navigation"), "Collection does have navigation");
+		assertFalse(json.containsKey("document"), "Collection does have document");
+		assertTrue(json.containsKey("totalParents"), "has totalParents");
+		// assertEquals(0, json.getInt("totalParents")); // TODO: not a number!
+		assertTrue(json.containsKey("totalChildren"), "has totalChildren");
+		// assertEquals(4, json.getInt("totalChildren")); // TODO: not a number!
+		assertTrue(json.containsKey("member"), "has member");
+		assertEquals(JsonValue.ValueType.ARRAY, json.get("member").getValueType());
+		assertEquals(4, json.getJsonArray("member").size());
+	}
+
+	@Test
+	void testJohn() throws IOException, TransformationPreparationException, TransformationException {
+		RuntimeParameters params = new RuntimeParameters();
+		Map<String, ParameterValue> map = new HashMap<>();
+		map.put("requested", pvOf(BASE + "john.xml"));
+		params.setGlobalParameters(map);
+		InputStream in = new FileInputStream(COLLECTION);
+		assertDoesNotThrow(() -> {
+			output = transformation.transform(params, config, COLLECTION.toString(), in, null, null);
+		});
+		JsonObject json = getJson(output);
+		assertTrue(json.containsKey("@id"), "has @id");
+		assertEquals(BASE + "john.xml", json.getString("@id"));
+		assertTrue(json.containsKey("dtsVersion"), "has dtsVersion");
+		assertEquals(DTS.VERSION, json.getString("dtsVersion"));
+		assertTrue(json.containsKey("@type"), "has @type");
+		assertEquals("Resource", json.getString("@type"));
+		assertTrue(json.containsKey("title"), "has title");
+		// assertEquals(JsonValue.ValueType.STRING, json.get("title").getValueType()); // uses dct-nest.json
+		assertFalse(json.containsKey("download"), "does not have download");
+		assertTrue(json.containsKey("collection"), "has collection URI template");
+		assertEquals(BASE + "john.xml" + URITemplateBuilder.THIS_COLLECTION_TEMPLATE, json.getString("collection"));
+		assertTrue(json.containsKey("navigation"), "Resource has navigation");
+		assertEquals(
+				BURL + "navigation/john.xml" + URITemplateBuilder.THIS_NAVIGATION_TEMPLATE,
+				json.getString("navigation"));
+		assertTrue(json.containsKey("document"), "Resource has document");
+		assertEquals(
+				BURL + "document/john.xml" + URITemplateBuilder.THIS_DOCUMENT_TEMPLATE, json.getString("document"));
+		assertTrue(json.containsKey("totalParents"), "has totalParents");
+		// assertEquals(0, json.getInt("totalParents")); // TODO: not a number!
+		assertFalse(json.containsKey("totalChildren"), "Resource does not have totalChildren");
+		// assertEquals(4, json.getInt("totalChildren")); // TODO: not a number!
+		assertFalse(json.containsKey("member"), "Resource has no member");
+	}
+
+	@Disabled
+	@Test
+	void testGeneralResult() throws IOException, TransformationPreparationException, TransformationException {
+		RuntimeParameters params = new RuntimeParameters();
+		Map<String, ParameterValue> map = new HashMap<>();
+		map.put("requested", pvOf(BASE + "general"));
+		params.setGlobalParameters(map);
+		InputStream in = new FileInputStream(COLLECTION);
+		assertDoesNotThrow(() -> {
+			output = transformation.transform(params, config, COLLECTION.toString(), in, null, null);
+		});
+		assertEquals("", getOutput(output));
 	}
 }

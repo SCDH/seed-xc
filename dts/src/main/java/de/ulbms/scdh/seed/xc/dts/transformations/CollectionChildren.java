@@ -8,6 +8,7 @@ import com.apicatalog.jsonld.document.Document;
 import com.apicatalog.jsonld.document.JsonDocument;
 import de.ulbms.scdh.seed.xc.api.*;
 import de.ulbms.scdh.seed.xc.dts.DTS;
+import de.ulbms.scdh.seed.xc.dts.URITemplateBuilder;
 import de.ulbms.scdh.seed.xc.jena.JsonLdContext;
 import io.smallrye.mutiny.Uni;
 import io.vertx.core.http.HttpServerRequest;
@@ -24,6 +25,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import org.apache.jena.irix.IRIs;
 import org.apache.jena.irix.IRIxResolver;
 import org.apache.jena.rdf.model.*;
@@ -140,6 +142,78 @@ public class CollectionChildren implements Transformation {
 	}
 
 	/**
+	 * Copies types of resource from source to target.
+	 */
+	protected void copyType(Model source, Model target, Resource resource) {
+		target.add(source.listStatements(resource, RDF.type, (RDFNode) null));
+	}
+
+	protected void addDtsVersion(Resource target) {
+		target.addLiteral(DTS.dtsVersion, DTS.VERSION);
+	}
+
+	/**
+	 * Copies property of resource from source to target model.
+	 */
+	protected void copySimpleProperty(Model source, Model target, Resource resource, Property property) {
+		target.add(source.listStatements(resource, property, (RDFNode) null));
+	}
+
+	protected void copyComplexProperty(Model source, Model target, Resource resource, Property property) {
+		Model stmts = source.listStatements(resource, property, (RDFNode) null).toModel();
+		target.add(stmts);
+		StmtIterator statements = stmts.listStatements();
+		while (statements.hasNext()) {
+			Statement statement = statements.next();
+			if (statement.getObject().isResource()) {
+				copyComplexProperty(source, target, statement.getObject().asResource(), statement.getPredicate());
+			}
+		}
+	}
+
+	protected void addParents(
+			Model source, Model target, Resource sourceResource, Resource targetResource, boolean addMembers) {
+		// totalParents
+		Model parents = source.listStatements((Resource) null, DTS.member, sourceResource)
+				.toModel();
+		targetResource.addProperty(
+				DTS.totalParents, target.createTypedLiteral(new BigInteger(String.valueOf(parents.size()))));
+		// members
+		if (addMembers) {
+			parents.listStatements().forEach(statement -> {
+				targetResource.addProperty(DTS.member, statement.getSubject());
+			});
+		}
+	}
+
+	protected void addChildren(
+			Model source, Model target, Resource sourceResource, Resource targetResource, boolean addMembers) {
+		// totalChildren
+		Model children = source.listStatements(sourceResource, DTS.member, (Resource) null)
+				.toModel();
+		if (sourceResource.hasProperty(RDF.type, DTS.Collection) || !children.isEmpty()) {
+			targetResource.addProperty(
+					DTS.totalChildren, target.createTypedLiteral(new BigInteger(String.valueOf(children.size()))));
+		}
+		// members
+		if (addMembers) {
+			target.add(children);
+		}
+	}
+
+	protected void addUriTemplates(Resource source, Resource target, String iri) {
+		target.addLiteral(DTS.collection, iri + URITemplateBuilder.THIS_COLLECTION_TEMPLATE);
+		if (source.hasProperty(RDF.type, DTS.Resource)) {
+			target.addLiteral(
+					DTS.navigation,
+					iri.replace("/collection/", "/navigation/") + URITemplateBuilder.THIS_NAVIGATION_TEMPLATE);
+			target.addLiteral(
+					DTS.document,
+					iri.replace("/collection/", "/document/") + URITemplateBuilder.THIS_DOCUMENT_TEMPLATE);
+		}
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	@Override
@@ -152,6 +226,21 @@ public class CollectionChildren implements Transformation {
 			HttpServerRequest request)
 			throws TransformationPreparationException, TransformationException {
 		try {
+			// get the IRI of the requested collection or resource
+			if (parameters.getGlobalParameters() == null
+					|| !parameters.getGlobalParameters().containsKey("requested")) {
+				LOG.error("missing parameter 'required'");
+				throw new BadRequestException("parameter requested is required");
+			}
+			String iri = parameters.getGlobalParameters().get("requested").getFirst();
+
+			String nav;
+			if (!parameters.getGlobalParameters().containsKey("navP")) {
+				nav = "children";
+			} else {
+				nav = parameters.getGlobalParameters().get("navP").getFirst();
+			}
+
 			// make graph from JSON-LD or other RDF serializations
 			RDFParserBuilder parserBuilder = RDFParser.source(source);
 			Lang lang = RDFLanguages.filenameToLang(systemId, Lang.JSONLD11);
@@ -177,20 +266,13 @@ public class CollectionChildren implements Transformation {
 			}
 			LOG.debug("done parsing model");
 
-			// get the IRI of the requested collection or resource
-			if (parameters.getGlobalParameters() == null
-					&& !parameters.getGlobalParameters().containsKey("requested")) {
-				LOG.error("missing parameter 'required'");
-				throw new BadRequestException("parameter requested is required");
-			}
-			String iri = parameters.getGlobalParameters().get("requested").getFirst();
 			// check if IRI is in graph
-			Resource resource = graph.getResource(iri);
-			if (!graph.containsResource(resource)) {
+			Resource requested = graph.getResource(iri);
+			if (!graph.containsResource(requested)) {
 				throw new NotFoundException("not found: " + iri);
 			}
 			// check if IRI is a Collection or Resource
-			if (!(resource.hasProperty(RDF.type, DTS.Resource) || resource.hasProperty(RDF.type, DTS.Collection))) {
+			if (!(requested.hasProperty(RDF.type, DTS.Resource) || requested.hasProperty(RDF.type, DTS.Collection))) {
 				throw new BadRequestException(iri + " is nor a dts:Collection nor a dts:Resource");
 			}
 
@@ -199,11 +281,17 @@ public class CollectionChildren implements Transformation {
 			Resource resResource = result.createResource(iri);
 			// dts:requested - important for framing
 			resResource.addLiteral(DTS.requested, true);
-			// copy @type
-			result.add(graph.listStatements(resource, RDF.type, (RDFNode) null));
-			// dtsVersion
-			resResource.addLiteral(DTS.dtsVersion, DTS.VERSION);
-			result.add(graph.listStatements(resource, DTS.title, (Literal) null));
+			copyType(graph, result, requested);
+			addDtsVersion(resResource);
+			copySimpleProperty(graph, result, requested, DTS.title);
+			copySimpleProperty(graph, result, requested, DTS.description);
+			copySimpleProperty(graph, result, requested, DTS.download);
+			copyComplexProperty(graph, result, requested, DTS.dublinCore);
+			copyComplexProperty(graph, result, requested, DTS.extensions);
+			copyComplexProperty(graph, result, requested, DTS.citationTrees);
+			addUriTemplates(requested, resResource, iri);
+			addParents(graph, result, requested, resResource, nav.equals("parents"));
+			addChildren(graph, result, requested, resResource, nav.equals("children"));
 
 			LOG.debug("transformation done");
 
