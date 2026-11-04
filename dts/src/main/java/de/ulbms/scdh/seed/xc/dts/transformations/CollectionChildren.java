@@ -18,21 +18,37 @@ public class CollectionChildren implements Transformation {
 	static {
 		XsltParameterDetails params = new XsltParameterDetails();
 
+		// requested is the full IRI of the collection/resource
 		XsltParameterDetailsValue requestedValue = new XsltParameterDetailsValue();
 		requestedValue.setIsRequired(true);
 		requestedValue.setItemType("xs:anyURI");
 		params.put("requested", requestedValue);
 
+		// idP has the identifier of the collection/resource only
+		XsltParameterDetailsValue idPValue = new XsltParameterDetailsValue();
+		idPValue.setIsRequired(true);
+		idPValue.setItemType("xs:string");
+		params.put("idP", idPValue);
+
+		// base is the base URI of the collection/resource, which contains the base URL of the service
+		XsltParameterDetailsValue baseValue = new XsltParameterDetailsValue();
+		baseValue.setIsRequired(true);
+		baseValue.setItemType("xs:anyURI");
+		params.put("base", baseValue);
+
+		// DTS' nav parameter
 		XsltParameterDetailsValue navPValue = new XsltParameterDetailsValue();
 		navPValue.setIsRequired(false);
 		navPValue.setItemType("xs:string");
 		params.put("navP", navPValue);
 
+		// DTS' page parameter
 		XsltParameterDetailsValue pagePValue = new XsltParameterDetailsValue();
 		pagePValue.setIsRequired(false);
 		pagePValue.setItemType("xs:integer");
 		params.put("pageP", pagePValue);
 
+		// the media types (content types) which a resource is available in, populated by the service
 		XsltParameterDetailsValue mediaTypesPValue = new XsltParameterDetailsValue();
 		mediaTypesPValue.setIsRequired(false);
 		mediaTypesPValue.setItemType("xs:string");
