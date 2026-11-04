@@ -137,6 +137,15 @@
       </resource>
     </resources>
 
+    <testResources>
+      <testResource>
+        <directory>src/main/resources</directory>
+        <includes>
+          <include>collection.json</include>
+        </includes>
+      </testResource>
+    </testResources>
+
     <plugins>
 
       <!-- this generates the code for the service -->
