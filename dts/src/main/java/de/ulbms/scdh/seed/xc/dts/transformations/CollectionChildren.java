@@ -3,6 +3,8 @@ package de.ulbms.scdh.seed.xc.dts.transformations;
 import de.ulbms.scdh.seed.xc.api.*;
 import io.smallrye.mutiny.Uni;
 import io.vertx.core.http.HttpServerRequest;
+import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.NotFoundException;
 import java.io.File;
 import java.io.InputStream;
 
@@ -91,7 +93,7 @@ public class CollectionChildren implements Transformation {
 			ResourceProvider resourceProvider,
 			HttpServerRequest request)
 			throws TransformationPreparationException, TransformationException {
-		return new byte[0];
+		throw new TransformationException("not yet implemented"); // TODO
 	}
 
 	/**
@@ -105,7 +107,16 @@ public class CollectionChildren implements Transformation {
 			Uni<? extends InputStream> source,
 			ResourceProvider resourceProvider,
 			HttpServerRequest request) {
-		return null;
+		return source.onItem().transform((sourceStream) -> {
+			try {
+				return transform(parameters, config, systemId, sourceStream, resourceProvider, request);
+			} catch (TransformationPreparationException | TransformationException e) {
+				if (e.getMessage().equals("404")) {
+					throw new NotFoundException("not found");
+				}
+				throw new InternalServerErrorException(e.getMessage());
+			}
+		});
 	}
 
 	/**
@@ -119,7 +130,14 @@ public class CollectionChildren implements Transformation {
 			InputStream source,
 			ResourceProvider resourceProvider,
 			HttpServerRequest request) {
-		return new byte[0];
+		try {
+			return transform(parameters, config, systemId, source, resourceProvider, request);
+		} catch (TransformationPreparationException | TransformationException e) {
+			if (e.getMessage().equals("404")) {
+				throw new NotFoundException("not found");
+			}
+			throw new InternalServerErrorException(e.getMessage());
+		}
 	}
 
 	/**
