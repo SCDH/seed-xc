@@ -19,6 +19,7 @@ import jakarta.json.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,6 +57,7 @@ public class CollectionChildrenTest {
 		String out = new String(output, StandardCharsets.UTF_8);
 		JsonReader reader = Json.createReader(new StringReader(out));
 		JsonStructure json = reader.read();
+		assertEquals(JsonValue.ValueType.OBJECT, json.getValueType(), "object expected");
 		return (JsonObject) json;
 	}
 
@@ -116,6 +118,40 @@ public class CollectionChildrenTest {
 		assertTrue(json.containsKey("member"), "has member");
 		assertEquals(JsonValue.ValueType.ARRAY, json.get("member").getValueType());
 		assertEquals(4, json.getJsonArray("member").size());
+		for (JsonValue memberStructure :
+				json.getJsonArray("member").parallelStream().toList()) {
+			assertEquals(JsonValue.ValueType.OBJECT, memberStructure.getValueType());
+			JsonObject member = memberStructure.asJsonObject();
+			assertTrue(member.containsKey("@id"), "member has @id");
+			assertTrue(member.getString("@id").startsWith(BASE), "member @id starts with BASE");
+			String id =
+					Arrays.stream(member.getString("@id").split("/")).toList().getLast();
+			assertTrue(member.containsKey("@type"), "member has @type");
+			String type = member.getString("@type");
+			assertTrue(member.containsKey("title"), "member has title");
+			assertTrue(member.containsKey("totalParents"), "member has totalParents: " + member.getString("@id"));
+			// URI templates
+			assertTrue(member.containsKey("collection"), "has collection URI template");
+			assertEquals(BASE + id + URITemplateBuilder.THIS_COLLECTION_TEMPLATE, member.getString("collection"));
+			if (type.equals("Resource")) {
+				assertFalse(member.containsKey("totalChildren"), "Collection member does not have totalChildren");
+				assertTrue(member.containsKey("navigation"), "Resource member has navigation");
+				assertEquals(
+						BURL + "navigation/" + id + URITemplateBuilder.THIS_NAVIGATION_TEMPLATE,
+						member.getString("navigation"));
+				assertTrue(member.containsKey("document"), "Resource member has document");
+				assertEquals(
+						BURL + "document/" + id + URITemplateBuilder.THIS_DOCUMENT_TEMPLATE,
+						member.getString("document"));
+			} else {
+				assertTrue(member.containsKey("totalChildren"), "Collection member has totalChildren");
+				assertFalse(member.containsKey("navigation"), "Collection member does not have navigation");
+				assertFalse(member.containsKey("document"), "Collection member does not have document");
+			}
+
+			// assertTrue(member.containsKey("dublinCore"), "member has dublinCore: " + member.getString("@id")); //
+			// TODO
+		}
 	}
 
 	@Test

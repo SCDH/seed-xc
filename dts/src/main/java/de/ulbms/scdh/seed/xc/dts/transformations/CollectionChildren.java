@@ -198,6 +198,25 @@ public class CollectionChildren implements Transformation {
 		// members
 		if (addMembers) {
 			target.add(children);
+			for (Statement statement : children.listStatements().toList()) {
+				Resource member = statement.getObject().asResource();
+				Resource targetMember = target.createResource(member.getURI());
+				StmtIterator sourceStmtOnMember =
+						source.listStatements(source.getResource(member.getURI()), RDF.type, (RDFNode) null);
+				Resource sourceMember = sourceStmtOnMember.next().getSubject();
+				LOG.debug("member {}", sourceMember.toString());
+				copySimpleProperty(source, target, member, RDF.type);
+				copySimpleProperty(source, target, member, DTS.title);
+				copySimpleProperty(source, target, member, DTS.description);
+				copySimpleProperty(source, target, member, DTS.download);
+				copyComplexProperty(source, target, sourceMember, DTS.dublinCore);
+				copyComplexProperty(source, target, sourceMember, DTS.extensions);
+				copyComplexProperty(source, target, sourceMember, DTS.citationTrees);
+				addUriTemplates(sourceMember, targetMember, sourceMember.getURI());
+				addParents(source, target, sourceMember, targetMember, false);
+				addChildren(source, target, sourceMember, targetMember, false);
+				addDtsVersion(member);
+			}
 		}
 	}
 
@@ -281,8 +300,7 @@ public class CollectionChildren implements Transformation {
 			Resource resResource = result.createResource(iri);
 			// dts:requested - important for framing
 			resResource.addLiteral(DTS.requested, true);
-			copyType(graph, result, requested);
-			addDtsVersion(resResource);
+			copySimpleProperty(graph, result, requested, RDF.type);
 			copySimpleProperty(graph, result, requested, DTS.title);
 			copySimpleProperty(graph, result, requested, DTS.description);
 			copySimpleProperty(graph, result, requested, DTS.download);
@@ -292,6 +310,7 @@ public class CollectionChildren implements Transformation {
 			addUriTemplates(requested, resResource, iri);
 			addParents(graph, result, requested, resResource, nav.equals("parents"));
 			addChildren(graph, result, requested, resResource, nav.equals("children"));
+			addDtsVersion(resResource);
 
 			LOG.debug("transformation done");
 
