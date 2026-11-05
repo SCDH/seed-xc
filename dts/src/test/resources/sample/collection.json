@@ -84,7 +84,20 @@
 		"seed:location": {
 			"@type": "Path",
 			"path": "john.xml"
-		}
+		},
+		"citationTrees": [
+			{
+				"@id": "http://beispiele.de/adsf",
+				"identifier": "biblical",
+				"@type": "CitationTree",
+				"description": "Canonical biblical citation",
+				"citeStructure": [
+					{
+						"citeType": "book"
+					}
+				]
+			}
+		]
 	},
 	{
 	    "@id": "4ezr.xml",

@@ -161,12 +161,23 @@ public class CollectionChildren implements Transformation {
 
 	protected void copyComplexProperty(Model source, Model target, Resource resource, Property property) {
 		Model stmts = source.listStatements(resource, property, (RDFNode) null).toModel();
+		// LOG.debug("coping complex {} properties {}", stmts.size(), property.getURI());
 		target.add(stmts);
 		StmtIterator statements = stmts.listStatements();
 		while (statements.hasNext()) {
 			Statement statement = statements.next();
-			if (statement.getObject().isResource()) {
-				copyComplexProperty(source, target, statement.getObject().asResource(), statement.getPredicate());
+			if (statement.getObject().isResource() || statement.getObject().isAnon()) {
+				StmtIterator substatements =
+						source.listStatements(statement.getObject().asResource(), null, (RDFNode) null);
+				while (substatements.hasNext()) {
+					Statement substatement = substatements.next();
+					target.add(substatement);
+					if (substatement.getObject().isResource()
+							|| substatement.getObject().isAnon()) {
+						copyComplexProperty(
+								source, target, substatement.getObject().asResource(), null);
+					}
+				}
 			}
 		}
 	}

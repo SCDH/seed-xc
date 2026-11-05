@@ -155,6 +155,36 @@ public class CollectionChildrenTest {
 	}
 
 	@Test
+	void testCopyComplexProperty() throws IOException, TransformationPreparationException, TransformationException {
+		RuntimeParameters params = new RuntimeParameters();
+		Map<String, ParameterValue> map = new HashMap<>();
+		map.put("requested", pvOf(BASE + "john.xml"));
+		params.setGlobalParameters(map);
+		InputStream in = new FileInputStream(COLLECTION);
+		assertDoesNotThrow(() -> {
+			output = transformation.transform(params, config, COLLECTION.toString(), in, null, null);
+		});
+		JsonObject json = getJson(output);
+		assertTrue(json.containsKey("citationTrees"), "has citationTrees");
+		assertEquals(JsonValue.ValueType.ARRAY, json.get("citationTrees").getValueType());
+		JsonArray trees = json.getJsonArray("citationTrees");
+		assertEquals(1, trees.size());
+		assertEquals(JsonValue.ValueType.OBJECT, trees.getFirst().getValueType());
+		JsonObject tree = trees.getFirst().asJsonObject();
+		assertTrue(tree.containsKey("@type"), "has @type");
+		assertTrue(tree.containsKey("identifier"), "has identifier");
+		assertEquals("biblical", tree.getString("identifier"));
+		assertTrue(tree.containsKey("citeStructure"), "has citeStructure");
+		assertEquals(JsonValue.ValueType.ARRAY, tree.get("citeStructure").getValueType());
+		JsonArray citeStructures = tree.getJsonArray("citeStructure");
+		assertEquals(1, citeStructures.size());
+		assertEquals(JsonValue.ValueType.OBJECT, citeStructures.getFirst().getValueType());
+		JsonObject citeStructure = citeStructures.getJsonObject(0);
+		assertTrue(citeStructure.containsKey("citeType"), "has citeType");
+		assertEquals("book", citeStructure.getString("citeType"));
+	}
+
+	@Test
 	void testJohn() throws IOException, TransformationPreparationException, TransformationException {
 		RuntimeParameters params = new RuntimeParameters();
 		Map<String, ParameterValue> map = new HashMap<>();
@@ -195,7 +225,7 @@ public class CollectionChildrenTest {
 	void testGeneralResult() throws IOException, TransformationPreparationException, TransformationException {
 		RuntimeParameters params = new RuntimeParameters();
 		Map<String, ParameterValue> map = new HashMap<>();
-		map.put("requested", pvOf(BASE + "general"));
+		map.put("requested", pvOf(BASE + "john.xml"));
 		params.setGlobalParameters(map);
 		InputStream in = new FileInputStream(COLLECTION);
 		assertDoesNotThrow(() -> {
