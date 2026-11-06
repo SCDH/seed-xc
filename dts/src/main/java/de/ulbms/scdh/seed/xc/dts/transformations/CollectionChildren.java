@@ -223,23 +223,11 @@ public class CollectionChildren implements Transformation {
 				copyComplexProperty(source, target, sourceMember, DTS.dublinCore);
 				copyComplexProperty(source, target, sourceMember, DTS.extensions);
 				copyComplexProperty(source, target, sourceMember, DTS.citationTrees);
-				addUriTemplates(sourceMember, targetMember, sourceMember.getURI());
+				URITemplateBuilder.addCollectionTemplates(sourceMember, targetMember, sourceMember.getURI());
 				addParents(source, target, sourceMember, targetMember, false);
 				addChildren(source, target, sourceMember, targetMember, false);
 				addDtsVersion(member);
 			}
-		}
-	}
-
-	protected void addUriTemplates(Resource source, Resource target, String iri) {
-		target.addLiteral(DTS.collection, iri + URITemplateBuilder.THIS_COLLECTION_TEMPLATE);
-		if (source.hasProperty(RDF.type, DTS.Resource)) {
-			target.addLiteral(
-					DTS.navigation,
-					iri.replace("/collection/", "/navigation/") + URITemplateBuilder.THIS_NAVIGATION_TEMPLATE);
-			target.addLiteral(
-					DTS.document,
-					iri.replace("/collection/", "/document/") + URITemplateBuilder.THIS_DOCUMENT_TEMPLATE);
 		}
 	}
 
@@ -318,7 +306,7 @@ public class CollectionChildren implements Transformation {
 			copyComplexProperty(graph, result, requested, DTS.dublinCore);
 			copyComplexProperty(graph, result, requested, DTS.extensions);
 			copyComplexProperty(graph, result, requested, DTS.citationTrees);
-			addUriTemplates(requested, resResource, iri);
+			URITemplateBuilder.addCollectionTemplates(requested, resResource, iri);
 			addParents(graph, result, requested, resResource, nav.equals("parents"));
 			addChildren(graph, result, requested, resResource, nav.equals("children"));
 			addDtsVersion(resResource);

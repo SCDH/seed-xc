@@ -6,6 +6,8 @@ import jakarta.ws.rs.InternalServerErrorException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.vocabulary.RDF;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,5 +105,21 @@ public class URITemplateBuilder {
 
 	public String getEntryContext() {
 		return entryContext;
+	}
+
+	/**
+	 * Adds URI templates to the target {@link Resource} as required by the collection endpoint.
+	 * This checks the type of source {@link Resource} and adds the right URI templates accordingly.
+	 *
+	 * @param source - the source {@link Resource}, usually from the <code>collection.json</code> record description
+	 * @param target - the target {@link Resource}
+	 * @param iri - the IRI of requested collection
+	 */
+	public static void addCollectionTemplates(Resource source, Resource target, String iri) {
+		target.addLiteral(DTS.collection, iri + THIS_COLLECTION_TEMPLATE);
+		if (source.hasProperty(RDF.type, DTS.Resource)) {
+			target.addLiteral(DTS.navigation, iri.replace("/collection/", "/navigation/") + THIS_NAVIGATION_TEMPLATE);
+			target.addLiteral(DTS.document, iri.replace("/collection/", "/document/") + THIS_DOCUMENT_TEMPLATE);
+		}
 	}
 }
