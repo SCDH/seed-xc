@@ -150,13 +150,6 @@
           <include>**/*</include>
         </includes>
       </testResource>
-      <testResource>
-        <!-- make plugins available in tests -->
-        <directory>src/main/resources/META-INF/services</directory>
-        <includes>
-          <include>*</include>
-        </includes>
-      </testResource>
     </testResources>
 
     <plugins>
