@@ -145,6 +145,7 @@ public class CollectionRdfTest {
 					Arrays.stream(member.getString("@id").split("/")).toList().getLast();
 			assertTrue(member.containsKey("@type"), "member has @type");
 			String type = member.getString("@type");
+			assertFalse(member.containsKey("member"), "no recursive members");
 			assertTrue(member.containsKey("title"), "member has title");
 			assertTrue(member.containsKey("totalParents"), "member has totalParents: " + member.getString("@id"));
 			// URI templates
@@ -165,9 +166,8 @@ public class CollectionRdfTest {
 				assertFalse(member.containsKey("navigation"), "Collection member does not have navigation");
 				assertFalse(member.containsKey("document"), "Collection member does not have document");
 			}
-
-			// assertTrue(member.containsKey("dublinCore"), "member has dublinCore: " + member.getString("@id")); //
-			// TODO
+			// does not have dublinCore because dtc-nest.json context is used!
+			// assertTrue(member.containsKey("dublinCore"), "member has dublinCore: " + member.getString("@id"));
 		}
 	}
 
@@ -235,6 +235,60 @@ public class CollectionRdfTest {
 		assertFalse(json.containsKey("totalChildren"), "Resource does not have totalChildren");
 		// assertEquals(4, json.getInt("totalChildren")); // TODO: not a number!
 		assertFalse(json.containsKey("member"), "Resource has no member");
+	}
+
+	@Test
+	void testAgraphaParents() throws IOException, TransformationPreparationException, TransformationException {
+		RuntimeParameters params = new RuntimeParameters();
+		Map<String, ParameterValue> map = new HashMap<>();
+		map.put("requested", pvOf(BASE + "agrapha"));
+		map.put("navP", pvOf("parents"));
+		params.setGlobalParameters(map);
+		InputStream in = new FileInputStream(COLLECTION);
+		assertDoesNotThrow(() -> {
+			output = transformation.transform(params, config, COLLECTION.toString(), in, null, null);
+		});
+		JsonObject json = getJson(output);
+		assertTrue(json.containsKey("@id"), "has @id");
+		assertEquals(BASE + "agrapha", json.getString("@id"));
+		assertTrue(json.containsKey("dtsVersion"), "has dtsVersion");
+		assertEquals(DTS.VERSION, json.getString("dtsVersion"));
+		assertTrue(json.containsKey("@type"), "has @type");
+		assertEquals("Collection", json.getString("@type"));
+		assertTrue(json.containsKey("title"), "has title");
+		// assertEquals(JsonValue.ValueType.STRING, json.get("title").getValueType()); // uses dct-nest.json
+		assertFalse(json.containsKey("download"), "does not have download");
+		assertTrue(json.containsKey("collection"), "has collection URI template");
+		assertEquals(BASE + "agrapha" + URITemplateBuilder.THIS_COLLECTION_TEMPLATE, json.getString("collection"));
+		assertFalse(json.containsKey("navigation"), "Collection does have navigation");
+		assertFalse(json.containsKey("document"), "Collection does have document");
+		assertTrue(json.containsKey("totalParents"), "has totalParents");
+		// assertEquals(0, json.getInt("totalParents")); // TODO: not a number!
+		assertTrue(json.containsKey("totalChildren"), "has totalChildren");
+		// assertEquals(4, json.getInt("totalChildren")); // TODO: not a number!
+		assertTrue(json.containsKey("member"), "has member");
+		assertEquals(JsonValue.ValueType.ARRAY, json.get("member").getValueType());
+		assertEquals(2, json.getJsonArray("member").size());
+		for (JsonValue memberStructure :
+				json.getJsonArray("member").parallelStream().toList()) {
+			assertEquals(JsonValue.ValueType.OBJECT, memberStructure.getValueType());
+			JsonObject member = memberStructure.asJsonObject();
+			assertTrue(member.containsKey("@id"), "member has @id");
+			assertTrue(member.getString("@id").startsWith(BASE), "member @id starts with BASE");
+			String id =
+					Arrays.stream(member.getString("@id").split("/")).toList().getLast();
+			assertTrue(member.containsKey("@type"), "member has @type");
+			String type = member.getString("@type");
+			assertFalse(member.containsKey("member"), "no recursive members");
+			assertTrue(member.containsKey("title"), "member has title");
+			assertTrue(member.containsKey("totalParents"), "member has totalParents: " + member.getString("@id"));
+			// URI templates
+			assertTrue(member.containsKey("collection"), "has collection URI template");
+			assertEquals(BASE + id + URITemplateBuilder.THIS_COLLECTION_TEMPLATE, member.getString("collection"));
+			assertTrue(member.containsKey("totalChildren"), "Collection member has totalChildren");
+			assertFalse(member.containsKey("navigation"), "Collection member does not have navigation");
+			assertFalse(member.containsKey("document"), "Collection member does not have document");
+		}
 	}
 
 	@Disabled

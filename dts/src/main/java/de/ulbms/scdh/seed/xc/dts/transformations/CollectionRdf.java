@@ -168,7 +168,25 @@ public class CollectionRdf implements Transformation {
 				DTS.totalParents, target.createTypedLiteral(new BigInteger(String.valueOf(parents.size()))));
 		// members
 		if (addMembers) {
-			parents.listStatements().forEach(s -> targetResource.addProperty(DTS.member, s.getSubject()));
+			for (Statement s : parents.listStatements().toList()) {
+				Resource member = s.getSubject();
+				targetResource.addProperty(DTS.member, member);
+				Resource targetMember = target.createResource(member.getURI());
+				StmtIterator sourceStmtOnMember =
+						source.listStatements(source.getResource(member.getURI()), RDF.type, (RDFNode) null);
+				Resource sourceMember = sourceStmtOnMember.next().getSubject();
+				copySimpleProperty(source, target, member, RDF.type);
+				copySimpleProperty(source, target, member, DTS.title);
+				copySimpleProperty(source, target, member, DTS.description);
+				copySimpleProperty(source, target, member, DTS.download);
+				copyComplexProperty(source, target, sourceMember, DTS.dublinCore);
+				copyComplexProperty(source, target, sourceMember, DTS.extensions);
+				copyComplexProperty(source, target, sourceMember, DTS.citationTrees);
+				URITemplateBuilder.addCollectionTemplates(sourceMember, targetMember, sourceMember.getURI());
+				addParents(source, target, sourceMember, targetMember, false);
+				addChildren(source, target, sourceMember, targetMember, false);
+				addDtsVersion(member);
+			}
 		}
 	}
 
