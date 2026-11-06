@@ -1,5 +1,8 @@
 package de.ulbms.scdh.seed.xc.dts.transformations;
 
+import static de.ulbms.scdh.seed.xc.dts.transformations.RdfUtils.copyComplexProperty;
+import static de.ulbms.scdh.seed.xc.dts.transformations.RdfUtils.copySimpleProperty;
+
 import com.apicatalog.jsonld.JsonLd;
 import com.apicatalog.jsonld.JsonLdError;
 import com.apicatalog.jsonld.JsonLdOptions;
@@ -141,45 +144,8 @@ public class CollectionChildren implements Transformation {
 		return COLLECTION_PARAMETERS;
 	}
 
-	/**
-	 * Copies types of resource from source to target.
-	 */
-	protected void copyType(Model source, Model target, Resource resource) {
-		target.add(source.listStatements(resource, RDF.type, (RDFNode) null));
-	}
-
 	protected void addDtsVersion(Resource target) {
 		target.addLiteral(DTS.dtsVersion, DTS.VERSION);
-	}
-
-	/**
-	 * Copies property of resource from source to target model.
-	 */
-	protected void copySimpleProperty(Model source, Model target, Resource resource, Property property) {
-		target.add(source.listStatements(resource, property, (RDFNode) null));
-	}
-
-	protected void copyComplexProperty(Model source, Model target, Resource resource, Property property) {
-		Model stmts = source.listStatements(resource, property, (RDFNode) null).toModel();
-		// LOG.debug("coping complex {} properties {}", stmts.size(), property.getURI());
-		target.add(stmts);
-		StmtIterator statements = stmts.listStatements();
-		while (statements.hasNext()) {
-			Statement statement = statements.next();
-			if (statement.getObject().isResource() || statement.getObject().isAnon()) {
-				StmtIterator substatements =
-						source.listStatements(statement.getObject().asResource(), null, (RDFNode) null);
-				while (substatements.hasNext()) {
-					Statement substatement = substatements.next();
-					target.add(substatement);
-					if (substatement.getObject().isResource()
-							|| substatement.getObject().isAnon()) {
-						copyComplexProperty(
-								source, target, substatement.getObject().asResource(), null);
-					}
-				}
-			}
-		}
 	}
 
 	protected void addParents(
