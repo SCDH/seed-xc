@@ -42,12 +42,12 @@ public class CollectionEndpoint implements CollectionApi {
 
 	@ConfigProperty(
 			name = "de.ulbms.scdh.seed.xc.dts.CollectionEndpoint.CHILDREN_TRANSFORMATION",
-			defaultValue = "dts-transformations-rq-children")
+			defaultValue = "seed-dts-collection-rdf")
 	protected String CHILDREN_TRANSFORMATION;
 
 	@ConfigProperty(
 			name = "de.ulbms.scdh.seed.xc.dts.CollectionEndpoint.PARENTS_TRANSFORMATION",
-			defaultValue = "dts-transformations-rq-parents")
+			defaultValue = "seed-dts-collection-rdf")
 	protected String PARENTS_TRANSFORMATION;
 
 	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.CollectionEndpoint.GRAPH", defaultValue = "collection.json")
