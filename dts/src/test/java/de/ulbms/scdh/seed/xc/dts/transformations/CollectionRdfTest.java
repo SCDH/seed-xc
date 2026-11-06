@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -132,6 +133,7 @@ public class CollectionRdfTest {
 		// assertEquals(0, json.getInt("totalParents")); // TODO: not a number!
 		assertTrue(json.containsKey("totalChildren"), "has totalChildren");
 		// assertEquals(4, json.getInt("totalChildren")); // TODO: not a number!
+		assertFalse(json.containsKey("mediaTypes"), "no media types provided as transformation parameter");
 		assertTrue(json.containsKey("member"), "has member");
 		assertEquals(JsonValue.ValueType.ARRAY, json.get("member").getValueType());
 		assertEquals(4, json.getJsonArray("member").size());
@@ -166,6 +168,7 @@ public class CollectionRdfTest {
 				assertFalse(member.containsKey("navigation"), "Collection member does not have navigation");
 				assertFalse(member.containsKey("document"), "Collection member does not have document");
 			}
+			assertFalse(member.containsKey("mediaTypes"), "no mediaTypes provided as transformation parameter");
 			// does not have dublinCore because dtc-nest.json context is used!
 			// assertTrue(member.containsKey("dublinCore"), "member has dublinCore: " + member.getString("@id"));
 		}
@@ -288,6 +291,39 @@ public class CollectionRdfTest {
 			assertTrue(member.containsKey("totalChildren"), "Collection member has totalChildren");
 			assertFalse(member.containsKey("navigation"), "Collection member does not have navigation");
 			assertFalse(member.containsKey("document"), "Collection member does not have document");
+		}
+	}
+
+	@Test
+	void testMediaTypes() throws IOException, TransformationPreparationException, TransformationException {
+		RuntimeParameters params = new RuntimeParameters();
+		Map<String, ParameterValue> map = new HashMap<>();
+		map.put("requested", pvOf(BASE + "general"));
+		map.put("mediaTypesP", pvOf(List.of("application/tei+xml", "text/html")));
+		params.setGlobalParameters(map);
+		InputStream in = new FileInputStream(COLLECTION);
+		assertDoesNotThrow(() -> {
+			output = transformation.transform(params, config, COLLECTION.toString(), in, null, null);
+		});
+		JsonObject json = getJson(output);
+		assertTrue(json.containsKey("@id"), "has @id");
+		assertFalse(json.containsKey("mediaTypes"), "a Collection does not have media types");
+		assertTrue(json.containsKey("member"), "has member");
+		assertEquals(JsonValue.ValueType.ARRAY, json.get("member").getValueType());
+		assertEquals(4, json.getJsonArray("member").size());
+		for (JsonValue memberStructure :
+				json.getJsonArray("member").parallelStream().toList()) {
+			assertEquals(JsonValue.ValueType.OBJECT, memberStructure.getValueType());
+			JsonObject member = memberStructure.asJsonObject();
+			if (member.getString("@type").equals("Resource")) {
+				assertTrue(member.containsKey("mediaTypes"), "Resource member has mediaTypes");
+				assertEquals(JsonValue.ValueType.ARRAY, member.get("mediaTypes").getValueType());
+				assertEquals(2, member.getJsonArray("mediaTypes").size());
+				// assertTrue(member.getJsonArray("mediaTypes").contains("application/tei+xml"), "application/tei+xml
+				// offered");
+			} else {
+				assertFalse(member.containsKey("mediaTypes"), "Collection member does not have mediaTypes");
+			}
 		}
 	}
 

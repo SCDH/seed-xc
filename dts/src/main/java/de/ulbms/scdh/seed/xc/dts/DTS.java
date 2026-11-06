@@ -50,4 +50,6 @@ public class DTS {
 	public static final Property navigation = new PropertyImpl(NAMESPACE, "navigation");
 
 	public static final Property document = new PropertyImpl(NAMESPACE, "document");
+
+	public static final Property mediaTypes = new PropertyImpl(NAMESPACE, "mediaTypes");
 }

@@ -160,8 +160,21 @@ public class CollectionRdf implements Transformation {
 		target.addLiteral(DTS.dtsVersion, DTS.VERSION);
 	}
 
+	protected void addMediaTypes(Resource target, ParameterValue mediaTypes) {
+		if (target.hasProperty(RDF.type, DTS.Resource)) {
+			for (String mediaType : mediaTypes) {
+				target.addLiteral(DTS.mediaTypes, mediaType);
+			}
+		}
+	}
+
 	protected void addParents(
-			Model source, Model target, Resource sourceResource, Resource targetResource, boolean addMembers) {
+			Model source,
+			Model target,
+			Resource sourceResource,
+			Resource targetResource,
+			boolean addMembers,
+			ParameterValue mediaTypes) {
 		// totalParents
 		Model parents = source.listStatements(null, DTS.member, sourceResource).toModel();
 		targetResource.addProperty(
@@ -183,15 +196,21 @@ public class CollectionRdf implements Transformation {
 				copyComplexProperty(source, target, sourceMember, DTS.extensions);
 				copyComplexProperty(source, target, sourceMember, DTS.citationTrees);
 				URITemplateBuilder.addCollectionTemplates(sourceMember, targetMember, sourceMember.getURI());
-				addParents(source, target, sourceMember, targetMember, false);
-				addChildren(source, target, sourceMember, targetMember, false);
+				addParents(source, target, sourceMember, targetMember, false, mediaTypes);
+				addChildren(source, target, sourceMember, targetMember, false, mediaTypes);
 				addDtsVersion(member);
+				addMediaTypes(targetMember, mediaTypes);
 			}
 		}
 	}
 
 	protected void addChildren(
-			Model source, Model target, Resource sourceResource, Resource targetResource, boolean addMembers) {
+			Model source,
+			Model target,
+			Resource sourceResource,
+			Resource targetResource,
+			boolean addMembers,
+			ParameterValue mediaTypes) {
 		// totalChildren
 		Model children = source.listStatements(sourceResource, DTS.member, (Resource) null)
 				.toModel();
@@ -217,9 +236,10 @@ public class CollectionRdf implements Transformation {
 				copyComplexProperty(source, target, sourceMember, DTS.extensions);
 				copyComplexProperty(source, target, sourceMember, DTS.citationTrees);
 				URITemplateBuilder.addCollectionTemplates(sourceMember, targetMember, sourceMember.getURI());
-				addParents(source, target, sourceMember, targetMember, false);
-				addChildren(source, target, sourceMember, targetMember, false);
+				addParents(source, target, sourceMember, targetMember, false, mediaTypes);
+				addChildren(source, target, sourceMember, targetMember, false, mediaTypes);
 				addDtsVersion(member);
+				addMediaTypes(targetMember, mediaTypes);
 			}
 		}
 	}
@@ -250,6 +270,13 @@ public class CollectionRdf implements Transformation {
 				nav = "children";
 			} else {
 				nav = parameters.getGlobalParameters().get("navP").getFirst();
+			}
+
+			ParameterValue mediaTypes;
+			if (!parameters.getGlobalParameters().containsKey("mediaTypesP")) {
+				mediaTypes = new ParameterValue();
+			} else {
+				mediaTypes = parameters.getGlobalParameters().get("mediaTypesP");
 			}
 
 			// make graph from JSON-LD or other RDF serializations
@@ -300,9 +327,10 @@ public class CollectionRdf implements Transformation {
 			copyComplexProperty(graph, result, requested, DTS.extensions);
 			copyComplexProperty(graph, result, requested, DTS.citationTrees);
 			URITemplateBuilder.addCollectionTemplates(requested, resResource, iri);
-			addParents(graph, result, requested, resResource, nav.equals("parents"));
-			addChildren(graph, result, requested, resResource, nav.equals("children"));
+			addParents(graph, result, requested, resResource, nav.equals("parents"), mediaTypes);
+			addChildren(graph, result, requested, resResource, nav.equals("children"), mediaTypes);
 			addDtsVersion(resResource);
+			addMediaTypes(resResource, mediaTypes);
 
 			LOG.debug("transformation done");
 
