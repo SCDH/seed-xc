@@ -1,5 +1,14 @@
 # Changes
 
+## 0.0.18
+
+- replaces the SPARQL-based buisness logic of the collection endpoint
+  with a Java implementation, that speeds up multiple orders of
+  magnitude. See #76.
+- resources from
+  `dts/src/main/resources/META-INF/resources/PATH_TO_RESOURCE` are now
+  accessible under the `http://BASE_URL/PATH_TO_RESOURCE`.
+
 ## 0.0.17
 
 - pass IRI as parameters `iri` to DTS `document` transformation
