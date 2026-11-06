@@ -27,7 +27,7 @@ public class CollectionConfiguration {
 	/**
 	 * Location of the collection metadata, same as for Collection endpoint.
 	 */
-	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.CollectionEndpoint.GRAPH", defaultValue = "META-INF/resources/context/collection-frame.json")
+	@ConfigProperty(name = "de.ulbms.scdh.seed.xc.dts.CollectionEndpoint.GRAPH", defaultValue = "collection.json")
 	protected String GRAPH;
 
 	@ConfigProperty(name = "dts-context-location-parameter", defaultValue = "context-url")
