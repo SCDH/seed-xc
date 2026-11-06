@@ -131,14 +131,16 @@ public class CollectionRdf implements Transformation {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void setup(TransformationInfo transformationInfo, File path) throws ConfigurationException {}
+	public void setup(TransformationInfo transformationInfo, File path) {
+		this.transformationInfo = transformationInfo;
+	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public TransformationInfo getTransformationInfo() {
-		return null;
+		return transformationInfo;
 	}
 
 	/**
