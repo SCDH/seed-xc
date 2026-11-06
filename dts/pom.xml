@@ -135,7 +135,33 @@
           <include>application.properties</include>
         </includes>
       </resource>
+      <!-- after using this for filtering, we have to add everything else manually again -->
+      <resource>
+        <targetPath>META-INF</targetPath>
+        <directory>src/main/resources/META-INF</directory>
+        <includes>
+          <include>**/*</include>
+        </includes>
+      </resource>
     </resources>
+
+    <testResources>
+      <!-- merge main resources ... -->
+      <testResource>
+        <targetPath>META-INF</targetPath>
+        <directory>src/main/resources/META-INF</directory>
+        <includes>
+          <include>**/*</include>
+        </includes>
+      </testResource>
+      <!-- ... and test resources -->
+      <testResource>
+        <directory>src/test/resources</directory>
+        <includes>
+          <include>**/*</include>
+        </includes>
+      </testResource>
+    </testResources>
 
     <plugins>
 
