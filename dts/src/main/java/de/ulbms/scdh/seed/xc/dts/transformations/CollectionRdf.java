@@ -42,7 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A special {@link Transformation} for the DTS collection endpoint.
+ * A special {@link Transformation} for the DTS collection endpoint, available as <code>dts-collection-rdf</code>.
  * This transformation processes the <code>collection.json</code> record metadata as RDF, as opposed to simple JSON
  * processing.<P/>
  *
@@ -53,6 +53,11 @@ import org.slf4j.LoggerFactory;
 public class CollectionRdf implements Transformation {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CollectionRdf.class);
+
+	/**
+	 * How this is available through transformation class lookup.
+	 */
+	public static final String CLAZZ = "dts-collection-rdf";
 
 	public static final XsltParameterDetails COLLECTION_PARAMETERS;
 
@@ -116,7 +121,7 @@ public class CollectionRdf implements Transformation {
 	 */
 	@Override
 	public String getClazz() {
-		return CollectionRdf.class.getCanonicalName();
+		return CLAZZ;
 	}
 
 	/**

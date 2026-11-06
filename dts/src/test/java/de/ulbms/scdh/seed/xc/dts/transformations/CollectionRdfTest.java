@@ -88,6 +88,23 @@ public class CollectionRdfTest {
 	}
 
 	@Test
+	void testClassMetadata() {
+		assertEquals("dts-collection-rdf", transformation.getClazz());
+		assertTrue(Arrays.stream(transformation.getType()).toList().contains("DTS"), "is tagged DTS type");
+		assertTrue(
+				Arrays.stream(transformation.getType()).toList().contains("DTSCollection"),
+				"is tagged DTSCollection type");
+	}
+
+	@Test
+	void testSetup() {
+		TransformationInfo setup = new TransformationInfo();
+		assertDoesNotThrow(() -> transformation.setup(setup, null));
+		assertInstanceOf(TransformationInfo.class, transformation.getTransformationInfo());
+		assertSame(setup, transformation.getTransformationInfo());
+	}
+
+	@Test
 	void testGeneral() throws IOException, TransformationPreparationException, TransformationException {
 		RuntimeParameters params = new RuntimeParameters();
 		Map<String, ParameterValue> map = new HashMap<>();
