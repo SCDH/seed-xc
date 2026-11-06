@@ -158,15 +158,12 @@ public class CollectionRdf implements Transformation {
 	protected void addParents(
 			Model source, Model target, Resource sourceResource, Resource targetResource, boolean addMembers) {
 		// totalParents
-		Model parents = source.listStatements((Resource) null, DTS.member, sourceResource)
-				.toModel();
+		Model parents = source.listStatements(null, DTS.member, sourceResource).toModel();
 		targetResource.addProperty(
 				DTS.totalParents, target.createTypedLiteral(new BigInteger(String.valueOf(parents.size()))));
 		// members
 		if (addMembers) {
-			parents.listStatements().forEach(statement -> {
-				targetResource.addProperty(DTS.member, statement.getSubject());
-			});
+			parents.listStatements().forEach(s -> targetResource.addProperty(DTS.member, s.getSubject()));
 		}
 	}
 
