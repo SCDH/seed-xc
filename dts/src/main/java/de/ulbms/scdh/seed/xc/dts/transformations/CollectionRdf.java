@@ -106,7 +106,7 @@ public class CollectionRdf implements Transformation {
 		COLLECTION_PARAMETERS = params;
 	}
 
-	public static final String FRAME_RESOURCE = "/collection.json";
+	public static final String FRAME_RESOURCE = "/META-INF/resources/context/collection-frame.json";
 
 	private TransformationInfo transformationInfo;
 

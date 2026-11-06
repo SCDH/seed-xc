@@ -135,13 +135,21 @@
           <include>application.properties</include>
         </includes>
       </resource>
+      <resource>
+        <directory>src/main/resources/META-INF</directory>
+        <targetPath>META-INF</targetPath>
+        <includes>
+          <include>**/*</include>
+        </includes>
+      </resource>
     </resources>
 
     <testResources>
       <testResource>
-        <directory>src/main/resources</directory>
+        <directory>src/main/resources/META-INF</directory>
+        <targetPath>META-INF</targetPath>
         <includes>
-          <include>collection.json</include>
+          <include>**/*</include>
         </includes>
       </testResource>
       <testResource>
