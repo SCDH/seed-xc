@@ -26,7 +26,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-public class CollectionChildrenTest {
+public class CollectionRdfTest {
 
 	private static final File COLLECTION =
 			Paths.get("src", "test", "resources", "sample", "collection.json").toFile();
@@ -45,7 +45,7 @@ public class CollectionChildrenTest {
 
 	Config config;
 
-	CollectionChildren transformation;
+	CollectionRdf transformation;
 
 	byte[] output;
 
@@ -78,7 +78,7 @@ public class CollectionChildrenTest {
 
 	@BeforeEach
 	public void setup() {
-		transformation = new CollectionChildren();
+		transformation = new CollectionRdf();
 		DocumentLoader loader = ConfiguredJsonLdLoader.createJsonLdLoader(
 				TRANSFORMATIONS_CONTEXT_MAP.toString() + "," + SEED_CONTEXT_MAP.toString(), 100);
 		ConfiguredJsonLdOptions opts = ConfiguredJsonLdOptions.of(loader, "none");

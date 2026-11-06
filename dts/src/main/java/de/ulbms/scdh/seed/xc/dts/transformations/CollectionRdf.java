@@ -43,11 +43,16 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A special {@link Transformation} for the DTS collection endpoint.
+ * This transformation processes the <code>collection.json</code> record metadata as RDF, as opposed to simple JSON
+ * processing.<P/>
+ *
+ * This class processes the <code>nav</code> parameter and is thus capable of generating both,
+ * children members and parent members.
  */
 @ApplicationScoped
-public class CollectionChildren implements Transformation {
+public class CollectionRdf implements Transformation {
 
-	private static final Logger LOG = LoggerFactory.getLogger(CollectionChildren.class);
+	private static final Logger LOG = LoggerFactory.getLogger(CollectionRdf.class);
 
 	public static final XsltParameterDetails COLLECTION_PARAMETERS;
 
@@ -111,7 +116,7 @@ public class CollectionChildren implements Transformation {
 	 */
 	@Override
 	public String getClazz() {
-		return CollectionChildren.class.getCanonicalName();
+		return CollectionRdf.class.getCanonicalName();
 	}
 
 	/**
